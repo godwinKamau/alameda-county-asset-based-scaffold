@@ -1,0 +1,528 @@
+{
+  "_meta": {
+    "title": "Summative ELPAC Performance Level Descriptors",
+    "source": "Educational Testing Service for the California Department of Education",
+    "document_date": "January 10, 2019",
+    "source_url": "https://caaspp-elpac.ets.org/elpac/docs/elpac-reporting-performance-level-descriptors.pdf",
+    "pld_types": {
+      "general": "Applies across all grades and domains. Used as the top-level anchor.",
+      "range": "Domain- and grade-span-specific. Primary input for AI prompt analysis.",
+      "reporting": "Simplified, stakeholder-facing language. Not used in AI prompt."
+    },
+    "levels": {
+      "1": "Minimally Developed — corresponds to Emerging in CA ELD Standards",
+      "2": "Somewhat Developed — corresponds to low-to-mid Expanding in CA ELD Standards",
+      "3": "Moderately Developed — corresponds to upper Expanding through lower Bridging in CA ELD Standards",
+      "4": "Well Developed — corresponds to upper Bridging in CA ELD Standards"
+    },
+    "reclassification_note": "Reclassification consideration threshold is between Level 3 and Level 4.",
+    "score_structure": {
+      "overall": "Single overall proficiency level (1–4)",
+      "oral_language": "Composite of Listening + Speaking (reported as Beginning / Somewhat/Moderately / Well Developed)",
+      "written_language": "Composite of Reading + Writing (reported as Beginning / Somewhat/Moderately / Well Developed)",
+      "domains": ["Listening", "Speaking", "Reading", "Writing"]
+    },
+    "grade_spans": ["K", "1-2", "3-12"],
+    "notes": "Grade spans differ by domain. Writing K is paper-pencil. Listening/Speaking K-2 share a span. Grades 3-12 share a span for all domains in Range PLDs."
+  },
+
+  "general_plds": {
+    "description": "Cross-domain, cross-grade descriptors. Use these to frame overall proficiency language in UI and reports.",
+    "levels": {
+      "1": {
+        "label": "Minimally Developed",
+        "ca_eld_equivalent": "Emerging",
+        "summary": "English learners at this level have minimally developed oral (listening and speaking) and written (reading and writing) English skills. They tend to rely on learned words and phrases to communicate meaning at a basic level.",
+        "support_familiar_contexts": "Substantial-to-moderate linguistic support",
+        "support_unfamiliar_contexts": "Substantial linguistic support"
+      },
+      "2": {
+        "label": "Somewhat Developed",
+        "ca_eld_equivalent": "Low-to-mid Expanding",
+        "summary": "English learners at this level have somewhat developed oral (listening and speaking) and written (reading and writing) skills. They can use English to meet immediate communication needs but often are not able to use English to learn and communicate on topics and content areas.",
+        "support_familiar_contexts": "Moderate-to-light linguistic support",
+        "support_unfamiliar_contexts": "Substantial-to-moderate linguistic support"
+      },
+      "3": {
+        "label": "Moderately Developed",
+        "ca_eld_equivalent": "Upper Expanding through lower Bridging",
+        "summary": "English learners at this level have moderately developed oral (listening and speaking) and written (reading and writing) skills. They can sometimes use English to learn and communicate in meaningful ways in a range of topics and content areas.",
+        "support_familiar_contexts": "Light to minimal linguistic support",
+        "support_unfamiliar_contexts": "Moderate linguistic support"
+      },
+      "4": {
+        "label": "Well Developed",
+        "ca_eld_equivalent": "Upper Bridging",
+        "summary": "English learners at this level have well developed oral (listening and speaking) and written (reading and writing) skills. They can use English to learn and communicate in meaningful ways that are appropriate to different tasks, purposes, and audiences in a variety of social and academic contexts.",
+        "support_familiar_contexts": "Occasional linguistic support",
+        "support_unfamiliar_contexts": "Light linguistic support"
+      }
+    }
+  },
+
+  "range_plds": {
+    "writing": {
+      "_notes": "Writing for K is paper-pencil only. Grades 1-2 and 3-12 are the primary digital artifact grade spans.",
+      "K": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Attempt to participate in joint writing exercises with an adult",
+            "Write a few letters of the Latin alphabet that correspond to English letter names or phonemes, although they may be reversed or inverted",
+            "Write a few grouped letters from left to right representing English words",
+            "Sometimes dictate English words, phrases, and sentences to an adult"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Participate in writing exercises of grade-appropriate literary and informational texts (letters, words, and sentences) collaboratively with an adult",
+            "Sometimes write letters of the Latin alphabet that correspond to English letter names or phonemes, although they may be reversed or inverted",
+            "Sometimes write grouped letters from left to right representing English words",
+            "Usually dictate English words, phrases, and sentences to an adult"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Participate in writing exercises of grade-appropriate literary and informational texts (letters, words, and sentences) collaboratively with an adult and sometimes independently",
+            "Usually write letters of the Latin alphabet that correspond to English letter names or phonemes, although they may be reversed or inverted",
+            "Usually write grouped letters from left to right representing English words and usually represent the initial and final sounds of a word",
+            "Consistently dictate English words, phrases, and sentences to an adult"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Participate in writing exercises of grade-appropriate literary and informational texts (letters, words, and sentences) collaboratively with an adult and often independently",
+            "Consistently write letters of the Latin alphabet that correspond to English letter names or phonemes",
+            "Consistently write grouped letters from left to right representing English words and consistently represent the initial, medial, and final sounds of a word",
+            "Write simple, complete sentences"
+          ]
+        }
+      },
+      "1-2": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Write simple words and phrases in English",
+            "Occasionally write a simple sentence in English",
+            "Rarely attempt to write a short, simple text",
+            "Use very limited vocabulary and grammar when attempting to write",
+            "Produce writing that is largely incomprehensible due to errors in spelling, grammar, and mechanics"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Write simple sentences and short, simple texts in English on familiar topics",
+            "Sometimes write with a sense of topic or main idea",
+            "Use limited vocabulary and grammar that allow for basic communication, though errors interfere with meaning",
+            "Sometimes use grade-appropriate mechanics (capitalization, punctuation, spelling) though inconsistently"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Write short texts with some development of ideas on familiar topics",
+            "Usually write with a clear topic or main idea",
+            "Use grade-appropriate vocabulary and grammar that usually allow for communication, though some errors may occur",
+            "Usually use grade-appropriate mechanics (capitalization, punctuation, spelling) with some inconsistency"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Write developed texts with organized ideas on familiar topics",
+            "Consistently write with a clear topic or main idea supported by details",
+            "Use grade-appropriate vocabulary and grammar effectively; minor errors do not interfere with meaning",
+            "Consistently use grade-appropriate mechanics (capitalization, punctuation, spelling)"
+          ]
+        }
+      },
+      "3-12": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Write simple words, phrases, and sentences on familiar topics",
+            "Rarely convey a clear main idea or topic",
+            "Rarely provide details or reasons to support a main idea or opinion",
+            "Rarely organize ideas in a logical or clear way",
+            "Use very limited vocabulary and grammar; errors severely impede meaning",
+            "Rarely use grade-appropriate text structures or conventions (e.g., introduction, conclusion, transitions)"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Write simple sentences and short paragraphs on familiar topics",
+            "Sometimes convey a main idea or topic",
+            "Occasionally provide details or reasons to support a main idea or opinion, though support may be limited or unclear",
+            "Occasionally organize ideas in a logical way, though organization is often unclear or incomplete",
+            "Use limited vocabulary and grammar that allow for basic communication; errors sometimes impede meaning",
+            "Occasionally use grade-appropriate text structures and conventions (e.g., introduction, transitions, conclusion)"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Write multiparagraph texts on familiar and some unfamiliar topics",
+            "Usually convey a clear main idea or claim",
+            "Sometimes provide relevant details, evidence, or reasons to support a main idea or opinion",
+            "Sometimes organize ideas in a logical and coherent way, though organization may be unclear at times",
+            "Use grade-appropriate vocabulary and grammar that mostly allow for sustained communication; some errors may occur but usually do not impede meaning",
+            "Sometimes use grade-appropriate text structures and conventions (e.g., introduction, transitions, conclusion) effectively"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Write multiparagraph texts on familiar and unfamiliar topics",
+            "Consistently convey a clear and focused main idea or claim",
+            "Usually provide sufficient and relevant details, evidence, or reasons to support a main idea or opinion",
+            "Usually organize ideas in a logical and coherent way",
+            "Use grade-appropriate vocabulary and grammar effectively; minor errors do not interfere with meaning",
+            "Usually use grade-appropriate text structures and conventions (e.g., introduction, transitions, conclusion) effectively",
+            "Sometimes use precise language and domain-specific vocabulary"
+          ]
+        }
+      }
+    },
+
+    "reading": {
+      "_notes": "Reading is assessed digitally across all grade spans.",
+      "K": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Identify letter names",
+            "Identify letter sounds",
+            "Make meaning of a few simple, grade-appropriate words within a jointly read informational and literary text"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Sometimes identify the main idea and key details within a jointly read informational and literary text",
+            "Sometimes make meaning of simple, grade-appropriate words within a jointly read text"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Determine that English texts are read from left to right and top to bottom",
+            "Usually identify the main idea and key details within a jointly read informational and literary text",
+            "Usually make meaning of simple, grade-appropriate words within a jointly read text"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Consistently identify the main idea and key details within a jointly read informational and literary text",
+            "Consistently make meaning of simple, grade-appropriate words within a jointly read text"
+          ]
+        }
+      },
+      "1-2": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Independently read grade-appropriate texts: words, sentences, and informational and literary passages (on familiar topics)",
+            "Read and make meaning of a few simple, grade-appropriate words and sentences",
+            "Rarely identify the main idea and key details in a short text"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Independently read grade-appropriate texts: words, sentences, and informational and literary passages (on familiar topics)",
+            "Sometimes read and make meaning of simple, grade-appropriate words and sentences",
+            "Sometimes identify the main idea and key details in a short text"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Independently read grade-appropriate texts: words, sentences, and informational and literary passages (on familiar topics)",
+            "Usually independently read and make meaning of grade-appropriate words and sentences",
+            "Usually identify the main idea and key details in an expanded text"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Independently read grade-appropriate texts: words, sentences, and informational and literary passages (on familiar topics)",
+            "Consistently independently read and make meaning of grade-appropriate words and sentences",
+            "Consistently identify the main idea and key details in an expanded text"
+          ]
+        }
+      },
+      "3-12": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Comprehend simple, nonacademic words and sentences that depict concrete actions",
+            "Occasionally identify the main idea and key details within a text",
+            "Occasionally determine the meaning of a few unknown words and phrases"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Comprehend sentences and short paragraphs of grade-appropriate academic text, both informational and literary (on familiar topics)",
+            "Sometimes identify the main idea and key details within a text",
+            "Occasionally make inferences that are not explicitly stated within a text",
+            "Sometimes determine the meaning of unknown words and phrases by using context",
+            "Occasionally understand the organization of a text",
+            "Occasionally understand the reason a writer uses specific words or phrases in a text using context"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Comprehend multiparagraph, grade-appropriate texts, both informational and literary (on familiar and some unfamiliar topics)",
+            "Usually identify the main idea and key details within a text",
+            "Sometimes make inferences that are not explicitly stated within a text and identify the language that supports main ideas, details, and inferences",
+            "Sometimes demonstrate understanding of the organization of a text and how the writer connects ideas within a text",
+            "Usually determine the meaning of unknown words and phrases by using context",
+            "Sometimes understand the reason a writer uses specific words or phrases in a text"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Comprehend multiparagraph, grade-appropriate academic texts, both informational and literary (on both familiar and unfamiliar topics)",
+            "Consistently identify the main idea and key details within a text",
+            "Usually make inferences that are not explicitly stated within a text and identify the language that supports main ideas, details, and inferences",
+            "Usually demonstrate understanding of the organization of a text and how the writer connects ideas within a text",
+            "Consistently determine the meaning of unknown words and phrases using context",
+            "Usually understand the reason a writer uses specific words or phrases in a text and how language choices affect the audience"
+          ]
+        }
+      }
+    },
+
+    "speaking": {
+      "_notes": "Speaking is assessed via constructed response. Artifacts for speaking would be audio recordings. Not in v1 scope.",
+      "K-2": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Produce some common words and simple phrases in direct informational exchanges on familiar and routine subjects",
+            "Use some learned vocabulary drawn from academic content areas to convey some academic content",
+            "Speak with pronunciation and intonation that sometimes impede comprehensibility"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Contribute to short conversations with responses that are mostly appropriate and convey relevant meaning",
+            "Express some information and ideas about academic content that convey some content related to the topic but may be partial or incomplete",
+            "Offer an opinion without clear reasons",
+            "Attempt to organize and connect ideas, but organization and connections are generally unclear",
+            "Use limited grammar and vocabulary that allow for communication, but limitations and errors interfere with expression of ideas",
+            "Speak with speech that may be slow, choppy, or hesitant throughout and may include long pauses",
+            "Speak with pronunciation and intonation that may sometimes impede comprehensibility"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Contribute to extended conversations with responses that are appropriate to the task and convey relevant meaning",
+            "Express mostly clear information and ideas about academic content that are appropriate but may not be complete",
+            "Offer an opinion and support it with a reason or reasons that are partly sufficient and relevant",
+            "Sometimes organize and connect ideas, but there may be unclear organization or connections at times",
+            "Use age-appropriate grammar and expanded vocabulary that usually allow for sustained expression of ideas",
+            "Speak in a sustained manner, though some choppiness or hesitation may occur",
+            "Speak with pronunciation and intonation that usually do not impede comprehensibility"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Express information and ideas clearly about academic content that convey sufficient and relevant details",
+            "Offer an opinion and support it with a reason or reasons",
+            "Organize and connect ideas clearly",
+            "Use age-appropriate grammar and make word choices effectively (minor, age-appropriate errors do not interfere with communication)",
+            "Speak fairly smoothly in a sustained manner",
+            "Speak with pronunciation and intonation that do not impede comprehensibility"
+          ]
+        }
+      },
+      "3-12": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Produce some common words and simple phrases in direct informational exchanges on familiar and routine subjects",
+            "Attempt to contribute to conversations and discussions, offer an opinion and support, or provide a presentation or summary, but convey little or no relevant information",
+            "Use grammar and make word choices that are sufficient to provide basic statements about familiar and routine subjects",
+            "Speak with simple or learned phrases and sentences, though attempts at sustained speech may be mostly unintelligible and may consist of isolated words or phrases; pronunciation and intonation sometimes impede comprehensibility"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Contribute to conversations and discussions with responses that are mostly appropriate",
+            "Express somewhat clear ideas in a presentation or summary of a presentation about academic content that is related to the task but may be partial or incomplete",
+            "Offer an opinion without clear reasons",
+            "Attempt to organize and connect ideas, but organization and connections are generally unclear",
+            "Use grammar and make word choices that allow for communication in conversations and discussions, but limitations and errors interfere with sustained expression of ideas",
+            "Attempt to speak in a sustained manner, though speech may be slow, choppy, or hesitant throughout and may include long pauses; pronunciation and intonation may sometimes impede comprehensibility"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Express mostly clear ideas in a presentation or summary of a presentation about academic content that is appropriate but may not be complete",
+            "Offer an opinion with reasons that are partly sufficient and relevant",
+            "Sometimes organize and connect ideas, but there may be unclear organization or connections at times",
+            "Use grammar and make word choices that somewhat restrict sustained expression of ideas",
+            "Speak in a sustained manner, though some choppiness or hesitation may occur; pronunciation and intonation usually do not impede comprehensibility"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Express ideas clearly in a presentation or summary of a presentation about academic content that conveys sufficient and relevant details",
+            "Offer an opinion and support it with sufficient and relevant reasons",
+            "Organize and connect ideas clearly",
+            "Use grammar and make word choices effectively; minor errors do not interfere with communication",
+            "Speak fairly smoothly in a sustained manner; pronunciation and intonation do not impede comprehensibility"
+          ]
+        }
+      }
+    },
+
+    "listening": {
+      "_notes": "Listening artifacts would require audio. Not analyzable from written artifacts in v1.",
+      "K-2": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Comprehend some common words and simple phrases in short exchanges on familiar topics",
+            "Comprehend a few ideas or details that are connected throughout short exchanges on familiar topics",
+            "Comprehend a few main ideas and key details in read-aloud stories and oral presentations"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Comprehend short exchanges on familiar topics, read-aloud stories, and oral presentations on academic topics",
+            "Usually comprehend ideas or details that are connected throughout short exchanges on familiar topics",
+            "Sometimes comprehend main ideas and key details in read-aloud stories and oral presentations",
+            "Sometimes identify details that occur at the beginning, middle, or end of a story"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Comprehend short exchanges on familiar topics, read-aloud stories, and oral presentations on academic topics",
+            "Consistently comprehend ideas or details that are connected throughout short exchanges on familiar topics",
+            "Usually comprehend main ideas and key details in read-aloud stories and oral presentations",
+            "Usually identify details that occur at the beginning, middle, or end of a story"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Comprehend short exchanges on familiar topics, read-aloud stories, and oral presentations on academic topics",
+            "Consistently comprehend ideas or details that are connected throughout short exchanges on familiar topics",
+            "Consistently comprehend main ideas and key details in read-aloud stories and oral presentations",
+            "Consistently identify details that occur at the beginning, middle, or end of a story"
+          ]
+        }
+      },
+      "3-12": {
+        "1": {
+          "label": "Minimally Developed",
+          "frequency_marker": "may be able to",
+          "descriptors": [
+            "Sometimes comprehend common words and phrases in short, simple conversations on familiar, concrete topics",
+            "Sometimes comprehend key details and main ideas in short, simple conversations when those ideas and details are emphasized or reiterated",
+            "Sometimes comprehend explicitly stated opinions in short conversations",
+            "Sometimes follow the logic of simple discussions involving questions and short answers"
+          ]
+        },
+        "2": {
+          "label": "Somewhat Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Comprehend short discussions on familiar topics and parts of oral presentations on familiar, concrete topics",
+            "Sometimes comprehend key details and main ideas in conversations",
+            "Sometimes comprehend opinions in short conversations",
+            "Occasionally comprehend how ideas and events are linked in discussions and oral presentations"
+          ]
+        },
+        "3": {
+          "label": "Moderately Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Comprehend discussions and oral presentations on familiar and some unfamiliar social and academic topics in a range of contexts",
+            "Usually comprehend key details and main ideas and occasionally comprehend inferences",
+            "Usually comprehend opinions (for grades 6–12), how speakers support ideas and arguments, and the language speakers use to persuade",
+            "Usually comprehend how ideas, events, and reasons are linked and how presentations are organized",
+            "Sometimes comprehend figurative language and how similar words with differences in shades of meaning are used to produce different effects on the listener"
+          ]
+        },
+        "4": {
+          "label": "Well Developed",
+          "frequency_marker": "can",
+          "descriptors": [
+            "Comprehend discussions and oral presentations on familiar and unfamiliar social and academic topics in a range of contexts",
+            "Consistently comprehend key details, main ideas, and inferences",
+            "Consistently comprehend opinions (for grades 6–12), how speakers support ideas and arguments, and the language speakers use to persuade",
+            "Consistently comprehend how ideas, events, and reasons are linked and how presentations are organized",
+            "Usually comprehend figurative language and how similar words with differences in shades of meaning are used to produce nuance and different effects on the listener"
+          ]
+        }
+      }
+    }
+  },
+
+  "prompt_usage_guide": {
+    "description": "Instructions for how to inject this JSON into AI prompts",
+    "step_1_select_domain": "Determine the domain being analyzed from the artifact type. For v1 (written text), use 'writing'. For audio, use 'speaking'.",
+    "step_2_select_grade_span": "Map the student's grade to the correct grade span key: K → 'K', grades 1-2 → '1-2', grades 3-12 → '3-12'. Note: Speaking/Listening use 'K-2' and '3-12'.",
+    "step_3_inject_descriptors": "Pull the four level objects for the selected domain + grade_span and inject them into the system prompt as the rubric.",
+    "step_4_include_general_plds": "Always include the general_plds as context for overall framing, even when using range PLDs.",
+    "step_5_known_level": "If the teacher has entered the student's current ELPAC level, pass it as context so the model can reason about progression, not just current placement.",
+    "frequency_marker_note": "Pay attention to the frequency_marker field per level. Level 1 uses 'may be able to' (aspirational floor). Levels 2-4 use 'can' (demonstrated ability). This language distinction is important for asset-based framing.",
+    "asset_based_framing": "Prompt the model to lead with what the artifact DEMONSTRATES the student CAN do (matching descriptors from their level or above), before identifying gaps to the next level."
+  }
+}

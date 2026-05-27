@@ -1,0 +1,191 @@
+import { NextResponse } from "next/server";
+import { analyzeArtifact, ClaudeParseError } from "@/lib/claude/client";
+import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
+import { recordAudit } from "@/lib/audit/log";
+import {
+  insertSessionAndInsight,
+  rosterEntryBelongsToTeacher,
+} from "@/lib/db/queries";
+import {
+  bufferToBase64Image,
+  rasterizePdfFirstPage,
+} from "@/lib/pdf/rasterize";
+import { GradeSpanSchema } from "@/lib/types";
+import {
+  MAX_PAGES_PER_ANALYSIS,
+  MAX_UPLOAD_BYTES,
+} from "@/lib/artifact/constants";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+]);
+
+type ImagePayload = {
+  base64: string;
+  mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+};
+
+async function fileToImagePayload(file: File): Promise<ImagePayload> {
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (file.type === "application/pdf") {
+    return rasterizePdfFirstPage(buffer);
+  }
+
+  if (ALLOWED_IMAGE_TYPES.has(file.type)) {
+    return bufferToBase64Image(buffer, file.type);
+  }
+
+  throw new Error("Unsupported file type");
+}
+
+export async function POST(req: Request) {
+  const teacher = await requireTeacher();
+  if (isTeacherResponse(teacher)) return teacher;
+
+  try {
+    let formData: FormData;
+    try {
+      formData = await req.formData();
+    } catch {
+      return NextResponse.json(
+        {
+          error:
+            "Upload too large or unreadable. The browser should optimize files before upload — try again or use a smaller scan.",
+        },
+        { status: 413 },
+      );
+    }
+
+    const files = formData
+      .getAll("file")
+      .filter((entry): entry is File => entry instanceof File);
+
+    const studentUuid = formData.get("student_uuid");
+    const gradeSpanRaw = formData.get("grade_span");
+    const providedLevelRaw = formData.get("provided_elpac_level");
+
+    if (files.length === 0) {
+      return NextResponse.json({ error: "File is required" }, { status: 400 });
+    }
+
+    if (files.length > MAX_PAGES_PER_ANALYSIS) {
+      return NextResponse.json(
+        { error: `At most ${MAX_PAGES_PER_ANALYSIS} pages may be analyzed.` },
+        { status: 400 },
+      );
+    }
+
+    const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+    if (totalBytes > MAX_UPLOAD_BYTES) {
+      return NextResponse.json(
+        {
+          error:
+            "Optimized upload is still too large. Reload the page and try again, or select fewer pages.",
+        },
+        { status: 413 },
+      );
+    }
+
+    if (typeof studentUuid !== "string" || !studentUuid) {
+      return NextResponse.json(
+        { error: "student_uuid is required" },
+        { status: 400 },
+      );
+    }
+
+    if (typeof gradeSpanRaw !== "string") {
+      return NextResponse.json(
+        { error: "grade_span is required" },
+        { status: 400 },
+      );
+    }
+
+    const gradeSpan = GradeSpanSchema.parse(gradeSpanRaw);
+    const providedLevel =
+      typeof providedLevelRaw === "string" && providedLevelRaw
+        ? Number.parseInt(providedLevelRaw, 10)
+        : null;
+
+    if (
+      providedLevel != null &&
+      (Number.isNaN(providedLevel) || providedLevel < 1 || providedLevel > 4)
+    ) {
+      return NextResponse.json(
+        { error: "provided_elpac_level must be 1-4" },
+        { status: 400 },
+      );
+    }
+
+    const ownsStudent = await rosterEntryBelongsToTeacher(
+      teacher.id,
+      studentUuid,
+    );
+
+    if (!ownsStudent) {
+      return NextResponse.json({ error: "Student not found" }, { status: 404 });
+    }
+
+    const images: ImagePayload[] = [];
+    for (const file of files) {
+      try {
+        images.push(await fileToImagePayload(file));
+      } catch {
+        return NextResponse.json(
+          { error: "File must be JPG, PNG, GIF, WEBP, or PDF" },
+          { status: 400 },
+        );
+      }
+    }
+
+    const insight = await analyzeArtifact({
+      images: images.map((image) => ({
+        imageBase64: image.base64,
+        mediaType: image.mediaType,
+      })),
+      gradeSpan,
+      providedLevel,
+    });
+
+    const { sessionId } = await insertSessionAndInsight({
+      teacherId: teacher.id,
+      studentUuid,
+      gradeSpan,
+      providedElpacLevel: providedLevel,
+      insight,
+    });
+
+    await recordAudit({
+      actorId: teacher.id,
+      action: "analysis.create",
+      resourceType: "analysis_session",
+      resourceId: sessionId,
+      req,
+    });
+
+    return NextResponse.json({ sessionId, insight });
+  } catch (error) {
+    if (error instanceof ClaudeParseError) {
+      console.error("[api/analyze] Claude parse error");
+      return NextResponse.json(
+        {
+          error:
+            "We could not analyze this artifact. Please try again with a clearer image.",
+        },
+        { status: 502 },
+      );
+    }
+
+    console.error("[api/analyze]", error);
+    return NextResponse.json(
+      { error: "Analysis failed. Please try again." },
+      { status: 500 },
+    );
+  }
+}

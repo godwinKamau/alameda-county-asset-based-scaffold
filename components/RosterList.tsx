@@ -1,0 +1,326 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import {
+  getStudentDisplayName,
+  normalizeSubject,
+  sortSubjects,
+} from "@/lib/roster/display";
+import { matchExistingSubject } from "@/lib/roster/subject";
+import type { GradeSpan } from "@/lib/types";
+import { SubjectInput } from "./SubjectInput";
+
+export interface RosterListEntry {
+  id: string;
+  student_uuid: string;
+  label: string;
+  subject: string;
+  grade_span: GradeSpan;
+  known_elpac_level: number | null;
+}
+
+const LABEL_MAPPING_KEY = "student_label_mapping";
+
+function getLabelMapping(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(LABEL_MAPPING_KEY) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+function removeFromLabelMapping(studentUuid: string): void {
+  const mapping = getLabelMapping();
+  if (!(studentUuid in mapping)) return;
+  delete mapping[studentUuid];
+  localStorage.setItem(LABEL_MAPPING_KEY, JSON.stringify(mapping));
+}
+
+function resolveDisplayName(
+  entry: RosterListEntry,
+  mapping: Record<string, string>,
+): string {
+  const fromDb = entry.label.trim();
+  if (fromDb) return fromDb;
+  const fromLocal = mapping[entry.student_uuid]?.trim();
+  if (fromLocal) return fromLocal;
+  return getStudentDisplayName({ label: "", student_uuid: entry.student_uuid });
+}
+
+function groupEntriesBySubject(
+  entries: RosterListEntry[],
+): { subject: string; entries: RosterListEntry[] }[] {
+  const groups = new Map<string, RosterListEntry[]>();
+
+  for (const entry of entries) {
+    const subject = normalizeSubject(entry.subject);
+    const existing = groups.get(subject) ?? [];
+    existing.push(entry);
+    groups.set(subject, existing);
+  }
+
+  return sortSubjects([...groups.keys()]).map((subject) => ({
+    subject,
+    entries: groups.get(subject) ?? [],
+  }));
+}
+
+interface RosterListProps {
+  entries: RosterListEntry[];
+  existingSubjects: string[];
+}
+
+export function RosterList({ entries, existingSubjects }: RosterListProps) {
+  const router = useRouter();
+  const [mapping, setMapping] = useState<Record<string, string>>({});
+  const [deletingUuid, setDeletingUuid] = useState<string | null>(null);
+  const [editingUuid, setEditingUuid] = useState<string | null>(null);
+  const [editSubjectValue, setEditSubjectValue] = useState("");
+  const [savingUuid, setSavingUuid] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [collapsedSubjects, setCollapsedSubjects] = useState<Set<string>>(
+    () => new Set(),
+  );
+
+  const groupedEntries = useMemo(
+    () => groupEntriesBySubject(entries),
+    [entries],
+  );
+
+  useEffect(() => {
+    setMapping(getLabelMapping());
+  }, [entries]);
+
+  function startEditing(entry: RosterListEntry) {
+    setEditingUuid(entry.student_uuid);
+    setEditSubjectValue(entry.subject.trim());
+    setError(null);
+  }
+
+  function cancelEditing() {
+    setEditingUuid(null);
+    setEditSubjectValue("");
+  }
+
+  function toggleGroup(subject: string) {
+    setCollapsedSubjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(subject)) {
+        next.delete(subject);
+      } else {
+        next.add(subject);
+      }
+      return next;
+    });
+  }
+
+  async function handleSaveSubject(entry: RosterListEntry) {
+    setError(null);
+    setSavingUuid(entry.student_uuid);
+
+    try {
+      const canonicalSubject = matchExistingSubject(
+        editSubjectValue,
+        existingSubjects,
+      );
+      const response = await fetch(
+        `/api/roster/${entry.student_uuid}/subject`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subject: canonicalSubject }),
+        },
+      );
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error ?? "Failed to update subject");
+      }
+
+      setEditingUuid(null);
+      setEditSubjectValue("");
+      router.refresh();
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to update subject",
+      );
+    } finally {
+      setSavingUuid(null);
+    }
+  }
+
+  async function handleDelete(entry: RosterListEntry) {
+    const displayName = resolveDisplayName(entry, mapping);
+    const confirmed = window.confirm(
+      `Remove ${displayName} from your roster? Their analysis history will also be deleted. This cannot be undone.`,
+    );
+    if (!confirmed) return;
+
+    setError(null);
+    setDeletingUuid(entry.student_uuid);
+
+    try {
+      const response = await fetch(`/api/roster/${entry.student_uuid}`, {
+        method: "DELETE",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error ?? "Failed to delete student");
+      }
+
+      removeFromLabelMapping(entry.student_uuid);
+      setMapping(getLabelMapping());
+      router.refresh();
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Failed to delete student",
+      );
+    } finally {
+      setDeletingUuid(null);
+    }
+  }
+
+  if (entries.length === 0) {
+    return (
+      <p className="mt-4 text-sm text-slate-600">
+        No students yet. Add a student above or upload a CSV to get started.
+      </p>
+    );
+  }
+
+  return (
+    <>
+      {error && (
+        <p className="mt-4 text-sm text-red-600" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="mt-4 space-y-6">
+        {groupedEntries.map((group) => {
+          const isCollapsed = collapsedSubjects.has(group.subject);
+          const listId = `roster-group-${group.subject.replace(/\s+/g, "-").toLowerCase()}`;
+
+          return (
+          <section key={group.subject}>
+            <button
+              type="button"
+              onClick={() => toggleGroup(group.subject)}
+              aria-expanded={!isCollapsed}
+              aria-controls={listId}
+              className="flex w-full items-center gap-2 text-left text-sm font-semibold text-slate-800 hover:text-slate-900"
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${
+                  isCollapsed ? "" : "rotate-90"
+                }`}
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>
+                {group.subject}{" "}
+                <span className="font-normal text-slate-500">
+                  ({group.entries.length})
+                </span>
+              </span>
+            </button>
+            {!isCollapsed && (
+            <ul
+              id={listId}
+              className="mt-2 divide-y divide-slate-100 rounded-md border border-slate-100"
+            >
+              {group.entries.map((entry) => {
+                const isEditing = editingUuid === entry.student_uuid;
+                const isSaving = savingUuid === entry.student_uuid;
+
+                return (
+                  <li
+                    key={entry.id}
+                    className="flex items-start justify-between gap-4 px-4 py-3 text-sm"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-slate-900">
+                        {resolveDisplayName(entry, mapping)}
+                      </p>
+                      <p className="text-slate-500">
+                        Grade span: {entry.grade_span}
+                        {entry.known_elpac_level != null &&
+                          ` · Known level: ${entry.known_elpac_level}`}
+                      </p>
+                      {isEditing ? (
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <SubjectInput
+                            value={editSubjectValue}
+                            onChange={setEditSubjectValue}
+                            existingSubjects={existingSubjects}
+                            className="relative min-w-0 flex-1"
+                            inputClassName="block w-full rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSaveSubject(entry)}
+                            disabled={isSaving}
+                            className="rounded-md bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            {isSaving ? "Saving…" : "Save"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEditing}
+                            disabled={isSaving}
+                            className="text-xs text-slate-600 hover:text-slate-800 disabled:opacity-50"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => startEditing(entry)}
+                          className="mt-1 text-xs text-slate-500 hover:text-slate-700"
+                        >
+                          Edit subject
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <Link
+                        href={`/student/${entry.student_uuid}`}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        View history
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(entry)}
+                        disabled={deletingUuid === entry.student_uuid}
+                        className="text-red-600 hover:text-red-800 disabled:opacity-50"
+                      >
+                        {deletingUuid === entry.student_uuid
+                          ? "Removing…"
+                          : "Remove"}
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            )}
+          </section>
+          );
+        })}
+      </div>
+    </>
+  );
+}

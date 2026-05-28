@@ -21,6 +21,7 @@
 # misc
 .DS_Store
 *.pem
+!lib/db/rds-ca-bundle.pem
 
 # debug
 npm-debug.log*

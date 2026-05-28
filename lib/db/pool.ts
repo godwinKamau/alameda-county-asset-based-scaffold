@@ -1,6 +1,10 @@
 import "server-only";
 
+import fs from "fs";
+import path from "path";
 import { Pool, type PoolConfig } from "pg";
+
+const RDS_CA_BUNDLE_PATH = path.join(process.cwd(), "lib/db/rds-ca-bundle.pem");
 
 function getPoolConfig(): PoolConfig {
   const connectionString = process.env.DATABASE_URL;
@@ -12,7 +16,12 @@ function getPoolConfig(): PoolConfig {
 
   return {
     connectionString,
-    ssl: sslEnabled ? { rejectUnauthorized: true } : undefined,
+    ssl: sslEnabled
+      ? {
+          rejectUnauthorized: true,
+          ca: fs.readFileSync(RDS_CA_BUNDLE_PATH),
+        }
+      : undefined,
     statement_timeout: 30_000,
     max: 10,
   };

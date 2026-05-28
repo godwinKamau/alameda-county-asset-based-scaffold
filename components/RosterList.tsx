@@ -9,6 +9,7 @@ import {
   sortSubjects,
 } from "@/lib/roster/display";
 import { matchExistingSubject } from "@/lib/roster/subject";
+import { buildAnalyzeUrl } from "@/lib/analyze/url";
 import type { GradeSpan } from "@/lib/types";
 import { SubjectInput } from "./SubjectInput";
 
@@ -294,7 +295,13 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                         </button>
                       )}
                     </div>
-                    <div className="flex shrink-0 items-center gap-3">
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
+                      <Link
+                        href={buildAnalyzeUrl(entry)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        Analyze
+                      </Link>
                       <Link
                         href={`/student/${entry.student_uuid}`}
                         className="text-blue-600 hover:text-blue-800"

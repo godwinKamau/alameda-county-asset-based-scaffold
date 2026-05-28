@@ -92,14 +92,14 @@ export function StudentSelector({
   }, []);
 
   useEffect(() => {
-    if (!value) return;
+    if (!value || loading) return;
     const selected = filteredOptions.find(
       (option) => option.student_uuid === value,
     );
     if (!selected) {
       onChange("");
     }
-  }, [filteredOptions, value, onChange]);
+  }, [filteredOptions, value, onChange, loading]);
 
   return (
     <div>

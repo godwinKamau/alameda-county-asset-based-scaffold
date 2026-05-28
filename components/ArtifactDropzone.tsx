@@ -17,6 +17,7 @@ interface ArtifactDropzoneProps {
   file: File | null;
   selectedPages: number[];
   onSelectedPagesChange: (pages: number[]) => void;
+  onPreviewLoadingChange?: (loading: boolean) => void;
 }
 
 export function ArtifactDropzone({
@@ -24,11 +25,16 @@ export function ArtifactDropzone({
   file,
   selectedPages,
   onSelectedPagesChange,
+  onPreviewLoadingChange,
 }: ArtifactDropzoneProps) {
   const [totalPages, setTotalPages] = useState(0);
   const [thumbnails, setThumbnails] = useState<PdfPageThumbnail[]>([]);
   const [loadingThumbnails, setLoadingThumbnails] = useState(false);
   const [thumbnailError, setThumbnailError] = useState<string | null>(null);
+
+  useEffect(() => {
+    onPreviewLoadingChange?.(loadingThumbnails);
+  }, [loadingThumbnails, onPreviewLoadingChange]);
 
   useEffect(() => {
     if (!file || !isPdfFile(file)) {
@@ -134,7 +140,14 @@ export function ArtifactDropzone({
             </p>
           )}
           {loadingThumbnails ? (
-            <p className="mt-3 text-xs text-slate-500">Loading page previews…</p>
+            <div
+              className="mt-3 flex items-center gap-2 text-xs text-slate-500"
+              role="status"
+              aria-live="polite"
+            >
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600" />
+              Loading page previews…
+            </div>
           ) : (
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
               {thumbnails.map((thumbnail) => {

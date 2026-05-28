@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { ArtifactDropzone } from "@/components/ArtifactDropzone";
 import { ErrorBanner } from "@/components/ErrorBanner";
@@ -17,9 +18,11 @@ import {
   prepareArtifactForUpload,
 } from "@/lib/artifact/prepare-upload";
 import { normalizeSubject, sortSubjects } from "@/lib/roster/display";
+import { parseAnalyzePrefill } from "@/lib/analyze/url";
 import type { GradeSpan, Insight } from "@/lib/types";
 
 export default function AnalyzePage() {
+  const searchParams = useSearchParams();
   const [studentUuid, setStudentUuid] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("All");
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
@@ -28,6 +31,7 @@ export default function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedPages, setSelectedPages] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Analyzing artifact…");
   const [error, setError] = useState<string | null>(null);
   const [insight, setInsight] = useState<Insight | null>(null);
@@ -35,6 +39,16 @@ export default function AnalyzePage() {
   const handleSelectedPagesChange = useCallback((pages: number[]) => {
     setSelectedPages(pages);
   }, []);
+
+  useEffect(() => {
+    const prefill = parseAnalyzePrefill(searchParams);
+    if (!prefill) return;
+
+    setSubjectFilter(prefill.subject);
+    setStudentUuid(prefill.studentUuid);
+    setGradeSpan(prefill.gradeSpan);
+    setProvidedLevel(prefill.providedLevel);
+  }, [searchParams]);
 
   useEffect(() => {
     async function loadSubjects() {
@@ -77,6 +91,10 @@ export default function AnalyzePage() {
     setFile(nextFile);
     setSelectedPages(nextFile && isPdfFile(nextFile) ? [1] : []);
   }
+
+  const handlePreviewLoadingChange = useCallback((isLoading: boolean) => {
+    setPreviewLoading(isLoading);
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -197,6 +215,7 @@ export default function AnalyzePage() {
             onFileSelect={handleFileSelect}
             selectedPages={selectedPages}
             onSelectedPagesChange={handleSelectedPagesChange}
+            onPreviewLoadingChange={handlePreviewLoadingChange}
           />
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -245,10 +264,21 @@ export default function AnalyzePage() {
 
           <button
             type="submit"
-            disabled={loading}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            disabled={loading || previewLoading}
+            aria-busy={loading || previewLoading}
+            className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Analyzing…" : "Analyze Artifact"}
+            {(loading || previewLoading) && (
+              <span
+                className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+                aria-hidden="true"
+              />
+            )}
+            {previewLoading
+              ? "Loading preview…"
+              : loading
+                ? "Analyzing…"
+                : "Analyze Artifact"}
           </button>
         </form>
 

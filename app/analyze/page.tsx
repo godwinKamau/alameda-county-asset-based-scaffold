@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { ArtifactDropzone } from "@/components/ArtifactDropzone";
 import { ErrorBanner } from "@/components/ErrorBanner";
-import { InsightCard } from "@/components/InsightCard";
 import { LoadingArtifact } from "@/components/LoadingArtifact";
 import { StudentSelector } from "@/components/StudentSelector";
 import {
@@ -19,9 +18,10 @@ import {
 } from "@/lib/artifact/prepare-upload";
 import { normalizeSubject, sortSubjects } from "@/lib/roster/display";
 import { parseAnalyzePrefill } from "@/lib/analyze/url";
-import type { GradeSpan, Insight } from "@/lib/types";
+import type { GradeSpan } from "@/lib/types";
 
 export default function AnalyzePage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [studentUuid, setStudentUuid] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("All");
@@ -34,7 +34,6 @@ export default function AnalyzePage() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Analyzing artifact…");
   const [error, setError] = useState<string | null>(null);
-  const [insight, setInsight] = useState<Insight | null>(null);
 
   const handleSelectedPagesChange = useCallback((pages: number[]) => {
     setSelectedPages(pages);
@@ -99,7 +98,6 @@ export default function AnalyzePage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    setInsight(null);
 
     if (!studentUuid) {
       setError("Please select a student.");
@@ -130,6 +128,7 @@ export default function AnalyzePage() {
 
     setLoading(true);
     setLoadingMessage("Preparing artifact…");
+    let succeeded = false;
 
     try {
       const preparedFiles = await prepareArtifactForUpload(
@@ -160,7 +159,12 @@ export default function AnalyzePage() {
         throw new Error(data.error ?? "Analysis failed");
       }
 
-      setInsight(data.insight);
+      if (typeof data.sessionId !== "string" || !data.sessionId) {
+        throw new Error("Analysis completed but no session was created.");
+      }
+
+      succeeded = true;
+      router.push(`/analyze/results/${data.sessionId}`);
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -168,7 +172,9 @@ export default function AnalyzePage() {
           : "Analysis failed. Please try again.",
       );
     } finally {
-      setLoading(false);
+      if (!succeeded) {
+        setLoading(false);
+      }
     }
   }
 
@@ -284,7 +290,6 @@ export default function AnalyzePage() {
 
         {error && <ErrorBanner message={error} />}
         {loading && <LoadingArtifact message={loadingMessage} />}
-        {insight && !loading && <InsightCard insight={insight} />}
       </main>
     </>
   );

@@ -46,6 +46,11 @@ export interface AnalysisSessionWithInsight {
   insight: Insight;
 }
 
+export interface AnalysisSessionDetail extends AnalysisSessionWithInsight {
+  subject: string;
+  student_label: string;
+}
+
 export interface SchoolAccessRow {
   id: string;
   school_id: string;

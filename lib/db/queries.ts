@@ -3,6 +3,7 @@ import "server-only";
 import type { PoolClient } from "pg";
 import { getPool, withTransaction } from "./pool";
 import type {
+  AnalysisSessionDetail,
   AnalysisSessionWithInsight,
   GradeSpan,
   Insight,
@@ -297,6 +298,68 @@ export async function listSessionsForStudent(
     submitted_at: row.submitted_at,
     insight: decryptInsightRow(row),
   }));
+}
+
+export async function getSessionWithInsight(
+  teacherId: string,
+  sessionId: string,
+): Promise<AnalysisSessionDetail | null> {
+  const pool = getPool();
+  const result = await pool.query<
+    AnalysisSessionWithInsight & {
+      subject: string;
+      student_label: string;
+      strengths_encrypted: string;
+      strengths_iv: string;
+      level_reasoning_encrypted: string;
+      level_reasoning_iv: string;
+      gap_to_next_encrypted: string;
+      gap_to_next_iv: string;
+      scaffold_encrypted: string;
+      scaffold_iv: string;
+      estimated_level: number;
+    }
+  >(
+    `SELECT
+       s.id,
+       s.student_uuid,
+       s.domain,
+       s.grade_span,
+       s.provided_elpac_level,
+       s.submitted_at,
+       COALESCE(r.subject, '') AS subject,
+       COALESCE(r.label, '') AS student_label,
+       i.estimated_level,
+       i.strengths_encrypted,
+       i.strengths_iv,
+       i.level_reasoning_encrypted,
+       i.level_reasoning_iv,
+       i.gap_to_next_encrypted,
+       i.gap_to_next_iv,
+       i.scaffold_encrypted,
+       i.scaffold_iv
+     FROM analysis_sessions s
+     JOIN insights i ON i.session_id = s.id
+     LEFT JOIN student_roster_entries r
+       ON r.teacher_id = s.teacher_id AND r.student_uuid = s.student_uuid
+     WHERE s.teacher_id = $1 AND s.id = $2`,
+    [teacherId, sessionId],
+  );
+
+  const row = result.rows[0];
+  if (!row) return null;
+
+  return {
+    id: row.id,
+    student_uuid: row.student_uuid,
+    domain: row.domain,
+    grade_span: row.grade_span as GradeSpan,
+    provided_elpac_level: row.provided_elpac_level,
+    submitted_at: row.submitted_at,
+    subject: row.subject,
+    student_label: row.student_label,
+    insight: decryptInsightRow(row),
+  };
 }
 
 export async function listSchoolAccessForTeacher(

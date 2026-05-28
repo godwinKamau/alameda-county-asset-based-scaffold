@@ -2,15 +2,9 @@
 
 import { useState } from "react";
 import type { Insight } from "@/lib/types";
+import { getCaEldLevelLabel, getElpacPerformanceLevelLabel } from "@/lib/elpac/labels";
 import { Panel } from "./Panel";
 import { ScaffoldContent } from "./ScaffoldContent";
-
-const LEVEL_LABELS: Record<number, string> = {
-  1: "Beginning",
-  2: "Early Intermediate",
-  3: "Intermediate",
-  4: "Early Advanced",
-};
 
 type InsightTab = "scaffold" | "level" | "strengths" | "gap";
 
@@ -126,15 +120,28 @@ export function InsightCard({ insight }: InsightCardProps) {
           }
         >
           <Panel title="Estimated Level" variant="level" showTitle={false}>
-            <div className="flex items-baseline gap-3">
-              <span className="text-5xl font-bold text-slate-900">
-                {insight.estimated_level}
-              </span>
-              <span className="text-lg text-slate-600">
-                {LEVEL_LABELS[insight.estimated_level]}
-              </span>
+            <div className="flex items-start gap-4">
+              <div
+                aria-hidden="true"
+                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-100 ring-1 ring-slate-200"
+              >
+                <span className="text-3xl font-bold tabular-nums text-slate-900">
+                  {insight.estimated_level}
+                </span>
+              </div>
+              <div className="min-w-0 pt-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  ELPAC Level {insight.estimated_level}
+                </p>
+                <p className="mt-1 text-2xl font-semibold leading-tight text-slate-900">
+                  {getCaEldLevelLabel(insight.estimated_level)}
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  {getElpacPerformanceLevelLabel(insight.estimated_level)}
+                </p>
+              </div>
             </div>
-            <p className="mt-3 leading-relaxed text-slate-700">
+            <p className="mt-4 leading-relaxed text-slate-700">
               {insight.level_reasoning}
             </p>
           </Panel>

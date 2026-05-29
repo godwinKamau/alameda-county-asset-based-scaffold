@@ -2,15 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  formatStudentGradeLabel,
   getStudentDisplayName,
   normalizeSubject,
 } from "@/lib/roster/display";
-import type { GradeSpan } from "@/lib/types";
+import type { ExactGrade, GradeSpan } from "@/lib/types";
 import { labelClassName, selectClassName } from "@/lib/ui/styles";
 
 export interface RosterOption {
   student_uuid: string;
   grade_span: GradeSpan;
+  exact_grade: ExactGrade | null;
   known_elpac_level: number | null;
   label: string;
   subject: string;
@@ -78,10 +80,12 @@ export function StudentSelector({
             label?: string;
             subject?: string;
             grade_span: GradeSpan;
+            exact_grade: ExactGrade | null;
             known_elpac_level: number | null;
           }) => ({
             ...entry,
             subject: entry.subject ?? "",
+            exact_grade: entry.exact_grade ?? null,
             label: resolveLabel(entry, mapping),
           }),
         ),
@@ -130,7 +134,7 @@ export function StudentSelector({
         </option>
         {filteredOptions.map((option) => (
           <option key={option.student_uuid} value={option.student_uuid}>
-            {option.label} ({option.grade_span})
+            {option.label} ({formatStudentGradeLabel(option.grade_span, option.exact_grade)})
           </option>
         ))}
       </select>

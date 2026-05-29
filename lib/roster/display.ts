@@ -1,3 +1,5 @@
+import type { ExactGrade, GradeSpan } from "@/lib/types";
+
 export function getStudentDisplayName(entry: {
   label: string;
   student_uuid: string;
@@ -20,4 +22,30 @@ export function sortSubjects(subjects: string[]): string[] {
     if (b === UNCATEGORIZED_SUBJECT) return -1;
     return a.localeCompare(b);
   });
+}
+
+export function formatGradeSpanPldLabel(gradeSpan: GradeSpan): string {
+  switch (gradeSpan) {
+    case "K":
+      return "K PLD";
+    case "1-2":
+      return "Grades 1–2 PLD";
+    case "3-12":
+      return "Grades 3–12 PLD";
+  }
+}
+
+export function formatExactGradeLabel(exactGrade: ExactGrade): string {
+  return exactGrade === "K" ? "Grade K" : `Grade ${exactGrade}`;
+}
+
+export function formatStudentGradeLabel(
+  gradeSpan: GradeSpan,
+  exactGrade: ExactGrade | null,
+): string {
+  const pldLabel = formatGradeSpanPldLabel(gradeSpan);
+  if (exactGrade) {
+    return `${formatExactGradeLabel(exactGrade)} (${pldLabel})`;
+  }
+  return pldLabel;
 }

@@ -2,57 +2,68 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
-import { createRosterEntries } from "@/lib/db/queries";
+import {
+  rosterEntryBelongsToTeacher,
+  updateRosterEntryGrade,
+} from "@/lib/db/queries";
 import { resolveRosterGradeFields } from "@/lib/roster/grade";
 import { ExactGradeSchema, GradeSpanSchema } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const AddStudentSchema = z.object({
-  label: z.string().trim().min(1, "Student name is required"),
-  subject: z.string().trim().max(80).optional(),
+const UpdateGradeSchema = z.object({
   grade_span: GradeSpanSchema.optional(),
   exact_grade: ExactGradeSchema.nullable().optional(),
-  known_elpac_level: z.number().int().min(1).max(4).nullable().optional(),
 });
 
-export async function POST(req: Request) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ uuid: string }> },
+) {
   const teacher = await requireTeacher();
   if (isTeacherResponse(teacher)) return teacher;
 
+  const { uuid } = await params;
+
   try {
-    const body = AddStudentSchema.parse(await req.json());
+    const body = UpdateGradeSchema.parse(await req.json());
+
+    const belongs = await rosterEntryBelongsToTeacher(teacher.id, uuid);
+    if (!belongs) {
+      return NextResponse.json({ error: "Student not found" }, { status: 404 });
+    }
+
     const resolved = resolveRosterGradeFields({
       grade_span: body.grade_span,
       exact_grade: body.exact_grade ?? "",
     });
 
-    const [created] = await createRosterEntries(teacher.id, [
-      {
-        label: body.label,
-        subject: body.subject ?? "",
-        grade_span: resolved.grade_span,
-        exact_grade: resolved.exact_grade,
-        known_elpac_level: body.known_elpac_level ?? null,
-      },
-    ]);
+    const updated = await updateRosterEntryGrade(
+      teacher.id,
+      uuid,
+      resolved.grade_span,
+      resolved.exact_grade,
+    );
+
+    if (!updated) {
+      return NextResponse.json(
+        { error: "Failed to update grade" },
+        { status: 400 },
+      );
+    }
 
     await recordAudit({
       actorId: teacher.id,
-      action: "roster.add",
+      action: "roster.update_grade",
       resourceType: "roster",
-      resourceId: created.student_uuid,
+      resourceId: uuid,
       req,
     });
 
     return NextResponse.json({
-      student_uuid: created.student_uuid,
-      label: body.label,
-      subject: body.subject ?? "",
       grade_span: resolved.grade_span,
       exact_grade: resolved.exact_grade,
-      known_elpac_level: body.known_elpac_level ?? null,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -64,9 +75,9 @@ export async function POST(req: Request) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    console.error("[api/roster/add]", error);
+    console.error("[api/roster/[uuid]/grade]", error);
     return NextResponse.json(
-      { error: "Failed to add student" },
+      { error: "Failed to update grade" },
       { status: 400 },
     );
   }

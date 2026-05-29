@@ -3,8 +3,8 @@ import { analyzeArtifact, ClaudeParseError } from "@/lib/claude/client";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
 import {
+  getRosterGradeInfo,
   insertSessionAndInsight,
-  rosterEntryBelongsToTeacher,
 } from "@/lib/db/queries";
 import {
   bufferToBase64Image,
@@ -123,14 +123,13 @@ export async function POST(req: Request) {
       );
     }
 
-    const ownsStudent = await rosterEntryBelongsToTeacher(
-      teacher.id,
-      studentUuid,
-    );
+    const rosterInfo = await getRosterGradeInfo(teacher.id, studentUuid);
 
-    if (!ownsStudent) {
+    if (!rosterInfo) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
+
+    const exactGrade = rosterInfo.exact_grade;
 
     const images: ImagePayload[] = [];
     for (const file of files) {
@@ -150,6 +149,7 @@ export async function POST(req: Request) {
         mediaType: image.mediaType,
       })),
       gradeSpan,
+      exactGrade,
       providedLevel,
     });
 
@@ -157,6 +157,7 @@ export async function POST(req: Request) {
       teacherId: teacher.id,
       studentUuid,
       gradeSpan,
+      exactGrade,
       providedElpacLevel: providedLevel,
       insight,
     });

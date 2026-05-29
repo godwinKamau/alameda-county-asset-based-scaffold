@@ -9,6 +9,7 @@ import type {
   GradeSpan,
   Insight,
   RosterEntry,
+  RosterEntryWithStats,
   SchoolAccessRow,
   TeacherAccount,
 } from "@/lib/types";
@@ -100,6 +101,57 @@ export async function listRosterEntries(teacherId: string): Promise<RosterEntry[
     [teacherId],
   );
   return result.rows;
+}
+
+export async function listRosterEntriesWithStats(
+  teacherId: string,
+): Promise<RosterEntryWithStats[]> {
+  const pool = getPool();
+  const result = await pool.query<
+    RosterEntryWithStats & { avg_level: string | null }
+  >(
+    `SELECT
+       r.id,
+       r.student_uuid,
+       r.label,
+       r.subject,
+       r.grade_span,
+       r.exact_grade,
+       r.known_elpac_level,
+       r.created_at,
+       r.last_updated_at,
+       COUNT(s.id)::int AS session_count,
+       AVG(i.estimated_level) AS avg_level,
+       MAX(s.submitted_at) AS last_session_at
+     FROM student_roster_entries r
+     LEFT JOIN analysis_sessions s
+       ON s.student_uuid = r.student_uuid AND s.teacher_id = r.teacher_id
+     LEFT JOIN insights i ON i.session_id = s.id
+     WHERE r.teacher_id = $1
+     GROUP BY r.id
+     ORDER BY r.created_at ASC`,
+    [teacherId],
+  );
+
+  return result.rows.map((row) => ({
+    ...row,
+    avg_level: row.avg_level != null ? Number(row.avg_level) : null,
+  }));
+}
+
+export async function getRosterEntryLabel(
+  teacherId: string,
+  studentUuid: string,
+): Promise<string | null> {
+  const pool = getPool();
+  const result = await pool.query<{ label: string }>(
+    `SELECT label
+     FROM student_roster_entries
+     WHERE teacher_id = $1 AND student_uuid = $2`,
+    [teacherId, studentUuid],
+  );
+  const label = result.rows[0]?.label?.trim();
+  return label || null;
 }
 
 export async function updateRosterEntrySubject(

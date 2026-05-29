@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { AddStudentForm } from "@/components/AddStudentForm";
 import { DashboardShell } from "@/components/DashboardShell";
 import { RosterList } from "@/components/RosterList";
-import { RosterUploader } from "@/components/RosterUploader";
 import { StatCard } from "@/components/StatCard";
 import {
   findTeacherByEmailHash,
@@ -38,6 +37,7 @@ export default async function DashboardPage() {
               label="Students in roster"
               value={roster.length}
               accent="brand"
+              href="/students"
               icon={
                 <svg
                   aria-hidden="true"
@@ -69,10 +69,7 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <AddStudentForm existingSubjects={existingSubjects} />
-          <RosterUploader />
-        </div>
+        <AddStudentForm existingSubjects={existingSubjects} />
 
         <section className="ui-card p-6">
           <h2 className="text-lg font-semibold text-brand-dark">Your Roster</h2>

@@ -15,6 +15,7 @@ import {
   selectClassName,
 } from "@/lib/ui/styles";
 import { ErrorBanner } from "./ErrorBanner";
+import { RosterUploaderModal } from "./RosterUploaderModal";
 import { SubjectInput } from "./SubjectInput";
 
 const GRADE_SPANS: GradeSpan[] = ["K", "1-2", "3-12"];
@@ -113,7 +114,11 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         Add a single student to your roster without uploading a CSV.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-4 grid gap-4 sm:grid-cols-2">
+      <form
+        id="add-student-form"
+        onSubmit={handleSubmit}
+        className="mt-4 grid gap-4 sm:grid-cols-2"
+      >
         <div className="sm:col-span-2">
           <label
             htmlFor="add-student-label"
@@ -224,17 +229,19 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
             ))}
           </select>
         </div>
-
-        <div className="sm:col-span-2">
-          <button
-            type="submit"
-            disabled={submitting}
-            className={btnDashboardActionClassName}
-          >
-            {submitting ? "Adding…" : "Add Student"}
-          </button>
-        </div>
       </form>
+
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button
+          type="submit"
+          form="add-student-form"
+          disabled={submitting}
+          className={btnDashboardActionClassName}
+        >
+          {submitting ? "Adding…" : "Add Student"}
+        </button>
+        <RosterUploaderModal />
+      </div>
 
       {error && (
         <div className="mt-4">

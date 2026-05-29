@@ -54,12 +54,10 @@ ANALYSIS RULES:
   analysis on the writing pages only.
 - If the artifact contains a student name, do not repeat it in your output.
 
-RESPONSE FORMAT — return only valid JSON, no preamble, no markdown fences:
-{
-  "strengths": "string — 2-4 sentences, asset-based, PLD-grounded",
-  "estimated_level": 1-4,
-  "level_reasoning": "string — 2-3 sentences citing specific artifact evidence",
-  "gap_to_next": "string — 2-3 sentences naming specific next-level descriptors",
-  "scaffold": "string — 2 numbered lines like '1. **Key move** — detail with **quoted target**'"
-}`;
+RESPONSE FORMAT — call the submit_insight tool with these fields:
+- strengths: 2-4 sentences, asset-based, PLD-grounded
+- estimated_level: integer 1-4
+- level_reasoning: 2-3 sentences citing specific artifact evidence
+- gap_to_next: 2-3 sentences naming specific next-level descriptors
+- scaffold: 2 numbered lines like "1. **Key move** — detail with **quoted target**"`;
 }

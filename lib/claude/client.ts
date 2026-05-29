@@ -5,18 +5,56 @@ import { buildSystemPrompt } from "@/lib/elpac/prompt";
 import { InsightSchema, type ExactGrade, type GradeSpan, type Insight } from "@/lib/types";
 
 const MODEL = "claude-sonnet-4-6";
+const INSIGHT_TOOL_NAME = "submit_insight";
+
+const INSIGHT_TOOL: Anthropic.Tool = {
+  name: INSIGHT_TOOL_NAME,
+  description: "Submit the ELPAC writing analysis insight.",
+  input_schema: {
+    type: "object",
+    properties: {
+      strengths: {
+        type: "string",
+        description:
+          "2-4 sentences, asset-based, PLD-grounded strengths the student demonstrates.",
+      },
+      estimated_level: {
+        type: "integer",
+        minimum: 1,
+        maximum: 4,
+        description: "Estimated ELPAC writing level (1-4).",
+      },
+      level_reasoning: {
+        type: "string",
+        description:
+          "2-3 sentences citing specific artifact evidence for the estimated level.",
+      },
+      gap_to_next: {
+        type: "string",
+        description:
+          "2-3 sentences naming specific next-level descriptors not yet demonstrated.",
+      },
+      scaffold: {
+        type: "string",
+        description:
+          "2 numbered scaffold moves. Start each with a bold key teaching move, then supporting detail.",
+      },
+    },
+    required: [
+      "strengths",
+      "estimated_level",
+      "level_reasoning",
+      "gap_to_next",
+      "scaffold",
+    ],
+  },
+};
 
 export class ClaudeParseError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ClaudeParseError";
   }
-}
-
-function stripJsonFences(text: string): string {
-  const trimmed = text.trim();
-  const fenceMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-  return fenceMatch ? fenceMatch[1].trim() : trimmed;
 }
 
 function getClient(): Anthropic {
@@ -65,6 +103,8 @@ export async function analyzeArtifact(
     max_tokens: 1500,
     temperature: 0.2,
     system: systemPrompt,
+    tools: [INSIGHT_TOOL],
+    tool_choice: { type: "tool", name: INSIGHT_TOOL_NAME },
     messages: [
       {
         role: "user",
@@ -86,21 +126,19 @@ export async function analyzeArtifact(
     ],
   });
 
-  const textBlock = response.content.find((block) => block.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
-    console.error("[claude] No text block in response");
+  const toolBlock = response.content.find((block) => block.type === "tool_use");
+
+  if (!toolBlock || toolBlock.type !== "tool_use") {
+    console.error("[claude] No tool_use block in response");
     throw new ClaudeParseError("Analysis response was empty");
   }
 
-  const rawText = textBlock.text;
-  let parsed: unknown;
-
-  try {
-    parsed = JSON.parse(stripJsonFences(rawText));
-  } catch {
-    console.error("[claude] Failed to parse JSON from response");
-    throw new ClaudeParseError("Analysis response was not valid JSON");
+  if (toolBlock.name !== INSIGHT_TOOL_NAME) {
+    console.error("[claude] Unexpected tool name in response");
+    throw new ClaudeParseError("Analysis response used an unexpected tool");
   }
+
+  const parsed: unknown = toolBlock.input;
 
   const validated = InsightSchema.safeParse(parsed);
   if (!validated.success) {

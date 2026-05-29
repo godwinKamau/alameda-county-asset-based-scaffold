@@ -285,8 +285,42 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                         {entry.known_elpac_level != null &&
                           ` · Known level: ${entry.known_elpac_level}`}
                       </p>
-                      {isEditingGrade ? (
-                        <div className="mt-2 space-y-2">
+                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            isEditingGrade
+                              ? cancelEditingGrade()
+                              : startEditingGrade(entry)
+                          }
+                          aria-expanded={isEditingGrade}
+                          className={`text-xs transition-colors ${
+                            isEditingGrade
+                              ? "font-semibold text-brand"
+                              : "text-muted hover:text-brand-dark"
+                          }`}
+                        >
+                          Edit grade
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            isEditingSubject
+                              ? cancelEditing()
+                              : startEditing(entry)
+                          }
+                          aria-expanded={isEditingSubject}
+                          className={`text-xs transition-colors ${
+                            isEditingSubject
+                              ? "font-semibold text-brand"
+                              : "text-muted hover:text-brand-dark"
+                          }`}
+                        >
+                          Edit subject
+                        </button>
+                      </div>
+                      {isEditingGrade && (
+                        <div className="mt-3 space-y-2 rounded-lg border border-brand-soft bg-brand-soft/30 p-3">
                           <div className="flex flex-wrap items-center gap-2">
                             <label
                               htmlFor={`grade-exact-${entry.student_uuid}`}
@@ -338,7 +372,7 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                               disabled={isSaving}
                               className={`${btnPrimaryClassName} px-2 py-1 text-xs`}
                             >
-                              {isSaving ? "Saving…" : "Save"}
+                              {isSaving ? "Saving…" : "Save grade"}
                             </button>
                             <button
                               type="button"
@@ -350,49 +384,35 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                             </button>
                           </div>
                         </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => startEditingGrade(entry)}
-                          className="mt-1 text-xs text-muted hover:text-brand-dark"
-                        >
-                          Edit grade
-                        </button>
                       )}
-                      {isEditingSubject ? (
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                      {isEditingSubject && (
+                        <div className="mt-3 space-y-2 rounded-lg border border-brand-soft bg-brand-soft/30 p-3">
                           <SubjectInput
                             value={editSubjectValue}
                             onChange={setEditSubjectValue}
                             existingSubjects={existingSubjects}
-                            className="relative min-w-0 flex-1"
+                            className="relative min-w-0"
                             inputClassName={`${inputClassName} !mt-0 px-2 py-1`}
                           />
-                          <button
-                            type="button"
-                            onClick={() => handleSaveSubject(entry)}
-                            disabled={isSaving}
-                            className={`${btnPrimaryClassName} px-2 py-1 text-xs`}
-                          >
-                            {isSaving ? "Saving…" : "Save"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={cancelEditing}
-                            disabled={isSaving}
-                            className="text-xs text-muted hover:text-brand-dark disabled:opacity-50"
-                          >
-                            Cancel
-                          </button>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleSaveSubject(entry)}
+                              disabled={isSaving}
+                              className={`${btnPrimaryClassName} px-2 py-1 text-xs`}
+                            >
+                              {isSaving ? "Saving…" : "Save subject"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEditing}
+                              disabled={isSaving}
+                              className="text-xs text-muted hover:text-brand-dark disabled:opacity-50"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => startEditing(entry)}
-                          className="mt-1 text-xs text-muted hover:text-brand-dark"
-                        >
-                          Edit subject
-                        </button>
                       )}
                     </div>
                     <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
-import { InsightCard } from "@/components/InsightCard";
+import { AnalysisSessionArticle } from "@/components/AnalysisSessionArticle";
 import { StudentLevelChart, computeDomainLevels } from "@/components/StudentLevelChart";
 import { StudentNameHeading } from "@/components/StudentNameHeading";
 import { recordAudit } from "@/lib/audit/log";
@@ -128,22 +128,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
           </p>
         ) : (
           sessions.map((session) => (
-            <article
-              key={session.id}
-              className={`${cardClassName} space-y-4 bg-brand-soft/20`}
-            >
-              <header className="flex flex-wrap items-center gap-4 text-sm text-muted">
-                <time dateTime={session.submitted_at.toISOString()}>
-                  {new Date(session.submitted_at).toLocaleString()}
-                </time>
-                <span>Domain: {session.domain}</span>
-                <span>Grade span: {session.grade_span}</span>
-                {session.provided_elpac_level != null && (
-                  <span>Provided level: {session.provided_elpac_level}</span>
-                )}
-              </header>
-              <InsightCard insight={session.insight} />
-            </article>
+            <AnalysisSessionArticle key={session.id} session={session} />
           ))
         )}
       </div>

@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
 import { ArtifactDropzone } from "@/components/ArtifactDropzone";
 import { ErrorBanner } from "@/components/ErrorBanner";
-import { LoadingArtifact } from "@/components/LoadingArtifact";
 import { StudentSelector } from "@/components/StudentSelector";
 import {
   MAX_PAGES_PER_ANALYSIS,
@@ -281,28 +280,34 @@ export default function AnalyzePage() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading || previewLoading}
-            aria-busy={loading || previewLoading}
-            className={`${btnPrimaryClassName} inline-flex items-center gap-2`}
-          >
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="submit"
+              disabled={loading || previewLoading}
+              aria-busy={loading || previewLoading}
+              className={`${btnPrimaryClassName} inline-flex items-center gap-2`}
+            >
+              {(loading || previewLoading) && (
+                <span
+                  className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+                  aria-hidden="true"
+                />
+              )}
+              Analyze Artifact
+            </button>
             {(loading || previewLoading) && (
-              <span
-                className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
-                aria-hidden="true"
-              />
+              <p
+                className="text-sm font-medium text-muted"
+                role="status"
+                aria-live="polite"
+              >
+                {previewLoading ? "Loading page previews…" : loadingMessage}
+              </p>
             )}
-            {previewLoading
-              ? "Loading preview…"
-              : loading
-                ? "Analyzing…"
-                : "Analyze Artifact"}
-          </button>
+          </div>
         </form>
 
         {error && <ErrorBanner message={error} />}
-        {loading && <LoadingArtifact message={loadingMessage} />}
       </div>
     </DashboardShell>
   );

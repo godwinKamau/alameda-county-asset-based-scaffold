@@ -90,6 +90,18 @@ body {
     background-color: #c8d9eb;
   }
 
+  .ui-btn-upload-csv {
+    @apply inline-flex items-center justify-center rounded-2xl border-2 px-6 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: #fff;
+    border-color: #000;
+    color: #000;
+  }
+
+  .ui-btn-upload-csv:hover:not(:disabled) {
+    background-color: #000;
+    color: #fff;
+  }
+
   .ui-file-input {
     @apply mt-1 block w-full text-sm text-muted;
   }

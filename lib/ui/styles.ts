@@ -15,6 +15,8 @@ export const btnDashboardActionClassName = "ui-btn-dashboard-action";
 
 export const btnSecondaryClassName = "ui-btn-secondary";
 
+export const btnUploadCsvClassName = "ui-btn-upload-csv";
+
 export const fileInputClassName = "ui-file-input";
 
 export const linkClassName = "ui-link text-sm font-medium";

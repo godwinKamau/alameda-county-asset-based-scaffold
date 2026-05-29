@@ -60,6 +60,12 @@ export interface RosterEntry {
   last_updated_at: Date;
 }
 
+export interface RosterEntryWithStats extends RosterEntry {
+  session_count: number;
+  avg_level: number | null;
+  last_session_at: Date | null;
+}
+
 export interface AnalysisSessionWithInsight {
   id: string;
   student_uuid: string;

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { formatStudentGradeLabel } from "@/lib/roster/display";
 import {
-  formatStudentGradeLabel,
-  getStudentDisplayName,
-  normalizeSubject,
-  sortSubjects,
-} from "@/lib/roster/display";
+  getLabelMapping,
+  groupEntriesBySubject,
+  removeFromLabelMapping,
+  resolveDisplayName,
+} from "@/lib/roster/group";
 import { EXACT_GRADES } from "@/lib/roster/grade";
 import { matchExistingSubject } from "@/lib/roster/subject";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
@@ -32,52 +33,6 @@ export interface RosterListEntry {
 }
 
 const GRADE_SPANS: GradeSpan[] = ["K", "1-2", "3-12"];
-
-const LABEL_MAPPING_KEY = "student_label_mapping";
-
-function getLabelMapping(): Record<string, string> {
-  try {
-    return JSON.parse(localStorage.getItem(LABEL_MAPPING_KEY) ?? "{}");
-  } catch {
-    return {};
-  }
-}
-
-function removeFromLabelMapping(studentUuid: string): void {
-  const mapping = getLabelMapping();
-  if (!(studentUuid in mapping)) return;
-  delete mapping[studentUuid];
-  localStorage.setItem(LABEL_MAPPING_KEY, JSON.stringify(mapping));
-}
-
-function resolveDisplayName(
-  entry: RosterListEntry,
-  mapping: Record<string, string>,
-): string {
-  const fromDb = entry.label.trim();
-  if (fromDb) return fromDb;
-  const fromLocal = mapping[entry.student_uuid]?.trim();
-  if (fromLocal) return fromLocal;
-  return getStudentDisplayName({ label: "", student_uuid: entry.student_uuid });
-}
-
-function groupEntriesBySubject(
-  entries: RosterListEntry[],
-): { subject: string; entries: RosterListEntry[] }[] {
-  const groups = new Map<string, RosterListEntry[]>();
-
-  for (const entry of entries) {
-    const subject = normalizeSubject(entry.subject);
-    const existing = groups.get(subject) ?? [];
-    existing.push(entry);
-    groups.set(subject, existing);
-  }
-
-  return sortSubjects([...groups.keys()]).map((subject) => ({
-    subject,
-    entries: groups.get(subject) ?? [],
-  }));
-}
 
 interface RosterListProps {
   entries: RosterListEntry[];

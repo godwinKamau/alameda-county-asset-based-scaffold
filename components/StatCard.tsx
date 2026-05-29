@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 type AccentColor = "brand" | "orange" | "green";
@@ -19,16 +20,17 @@ interface StatCardProps {
   value: string | number;
   icon: ReactNode;
   accent?: AccentColor;
+  href?: string;
 }
 
-export function StatCard({
+function StatCardContent({
   label,
   value,
   icon,
   accent = "brand",
-}: StatCardProps) {
+}: Omit<StatCardProps, "href">) {
   return (
-    <div className="ui-card relative overflow-hidden p-5">
+    <>
       <div
         className={`absolute bottom-0 left-0 right-0 h-1 ${accentBar[accent]}`}
         aria-hidden="true"
@@ -46,6 +48,42 @@ export function StatCard({
           </p>
         </div>
       </div>
+    </>
+  );
+}
+
+export function StatCard({
+  label,
+  value,
+  icon,
+  accent = "brand",
+  href,
+}: StatCardProps) {
+  const className = `ui-card relative overflow-hidden p-5${
+    href ? " transition-shadow hover:shadow-md" : ""
+  }`;
+
+  if (href) {
+    return (
+      <Link href={href} className={`${className} block`}>
+        <StatCardContent
+          label={label}
+          value={value}
+          icon={icon}
+          accent={accent}
+        />
+      </Link>
+    );
+  }
+
+  return (
+    <div className={className}>
+      <StatCardContent
+        label={label}
+        value={value}
+        icon={icon}
+        accent={accent}
+      />
     </div>
   );
 }

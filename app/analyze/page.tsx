@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AppHeader } from "@/components/AppHeader";
+import { DashboardShell } from "@/components/DashboardShell";
 import { ArtifactDropzone } from "@/components/ArtifactDropzone";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { LoadingArtifact } from "@/components/LoadingArtifact";
@@ -19,6 +20,13 @@ import {
 import { normalizeSubject, sortSubjects } from "@/lib/roster/display";
 import { parseAnalyzePrefill } from "@/lib/analyze/url";
 import type { GradeSpan } from "@/lib/types";
+import {
+  btnPrimaryClassName,
+  btnSecondaryClassName,
+  cardClassName,
+  labelClassName,
+  selectClassName,
+} from "@/lib/ui/styles";
 
 export default function AnalyzePage() {
   const router = useRouter();
@@ -179,26 +187,37 @@ export default function AnalyzePage() {
   }
 
   return (
-    <>
-      <AppHeader title="New Analysis" />
-      <main className="mx-auto max-w-5xl space-y-8 px-4 py-8">
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
-        >
+    <DashboardShell title="New Analysis">
+      <div className="mx-auto max-w-5xl space-y-8">
+        <Link href="/dashboard" className={btnSecondaryClassName}>
+          <span className="inline-flex items-center gap-2">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className="h-4 w-4"
+            >
+              <path
+                fillRule="evenodd"
+                d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Back to Dashboard
+          </span>
+        </Link>
+
+        <form onSubmit={handleSubmit} className={`${cardClassName} space-y-6`}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label
-                htmlFor="subject_filter"
-                className="block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="subject_filter" className={labelClassName}>
                 Subject
               </label>
               <select
                 id="subject_filter"
                 value={subjectFilter}
                 onChange={(event) => setSubjectFilter(event.target.value)}
-                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={selectClassName}
               >
                 <option value="All">All subjects</option>
                 {availableSubjects.map((subject) => (
@@ -226,10 +245,7 @@ export default function AnalyzePage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label
-                htmlFor="grade_span"
-                className="block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="grade_span" className={labelClassName}>
                 Grade Span
               </label>
               <select
@@ -238,7 +254,7 @@ export default function AnalyzePage() {
                 onChange={(event) =>
                   setGradeSpan(event.target.value as GradeSpan)
                 }
-                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={selectClassName}
               >
                 <option value="K">K</option>
                 <option value="1-2">1-2</option>
@@ -247,17 +263,14 @@ export default function AnalyzePage() {
             </div>
 
             <div>
-              <label
-                htmlFor="provided_level"
-                className="block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="provided_level" className={labelClassName}>
                 Known ELPAC Level (optional)
               </label>
               <select
                 id="provided_level"
                 value={providedLevel}
                 onChange={(event) => setProvidedLevel(event.target.value)}
-                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={selectClassName}
               >
                 <option value="">Not specified</option>
                 <option value="1">1</option>
@@ -272,7 +285,7 @@ export default function AnalyzePage() {
             type="submit"
             disabled={loading || previewLoading}
             aria-busy={loading || previewLoading}
-            className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`${btnPrimaryClassName} inline-flex items-center gap-2`}
           >
             {(loading || previewLoading) && (
               <span
@@ -290,7 +303,7 @@ export default function AnalyzePage() {
 
         {error && <ErrorBanner message={error} />}
         {loading && <LoadingArtifact message={loadingMessage} />}
-      </main>
-    </>
+      </div>
+    </DashboardShell>
   );
 }

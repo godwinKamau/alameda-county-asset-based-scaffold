@@ -11,6 +11,11 @@ import {
 import { matchExistingSubject } from "@/lib/roster/subject";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
 import type { GradeSpan } from "@/lib/types";
+import {
+  btnPrimaryClassName,
+  inputClassName,
+  linkClassName,
+} from "@/lib/ui/styles";
 import { SubjectInput } from "./SubjectInput";
 
 export interface RosterListEntry {
@@ -188,7 +193,7 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
 
   if (entries.length === 0) {
     return (
-      <p className="mt-4 text-sm text-slate-600">
+      <p className="mt-4 text-sm text-muted">
         No students yet. Add a student above or upload a CSV to get started.
       </p>
     );
@@ -197,7 +202,7 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
   return (
     <>
       {error && (
-        <p className="mt-4 text-sm text-red-600" role="alert">
+        <p className="mt-4 text-sm text-error" role="alert">
           {error}
         </p>
       )}
@@ -213,13 +218,13 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
               onClick={() => toggleGroup(group.subject)}
               aria-expanded={!isCollapsed}
               aria-controls={listId}
-              className="flex w-full items-center gap-2 text-left text-sm font-semibold text-slate-800 hover:text-slate-900"
+              className="flex w-full items-center gap-2 text-left text-sm font-semibold text-brand-dark hover:text-brand"
             >
               <svg
                 aria-hidden="true"
                 viewBox="0 0 20 20"
                 fill="currentColor"
-                className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${
+                className={`h-4 w-4 shrink-0 text-muted transition-transform ${
                   isCollapsed ? "" : "rotate-90"
                 }`}
               >
@@ -231,7 +236,7 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
               </svg>
               <span>
                 {group.subject}{" "}
-                <span className="font-normal text-slate-500">
+                <span className="font-normal text-muted">
                   ({group.entries.length})
                 </span>
               </span>
@@ -239,7 +244,7 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
             {!isCollapsed && (
             <ul
               id={listId}
-              className="mt-2 divide-y divide-slate-100 rounded-md border border-slate-100"
+              className="mt-2 divide-y divide-brand-soft/60 rounded-xl border border-brand-soft/80"
             >
               {group.entries.map((entry) => {
                 const isEditing = editingUuid === entry.student_uuid;
@@ -251,10 +256,10 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                     className="flex items-start justify-between gap-4 px-4 py-3 text-sm"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-slate-900">
+                      <p className="font-medium text-brand-dark">
                         {resolveDisplayName(entry, mapping)}
                       </p>
-                      <p className="text-slate-500">
+                      <p className="text-muted">
                         Grade span: {entry.grade_span}
                         {entry.known_elpac_level != null &&
                           ` · Known level: ${entry.known_elpac_level}`}
@@ -266,13 +271,13 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                             onChange={setEditSubjectValue}
                             existingSubjects={existingSubjects}
                             className="relative min-w-0 flex-1"
-                            inputClassName="block w-full rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            inputClassName={`${inputClassName} !mt-0 px-2 py-1`}
                           />
                           <button
                             type="button"
                             onClick={() => handleSaveSubject(entry)}
                             disabled={isSaving}
-                            className="rounded-md bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                            className={`${btnPrimaryClassName} px-2 py-1 text-xs`}
                           >
                             {isSaving ? "Saving…" : "Save"}
                           </button>
@@ -280,7 +285,7 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                             type="button"
                             onClick={cancelEditing}
                             disabled={isSaving}
-                            className="text-xs text-slate-600 hover:text-slate-800 disabled:opacity-50"
+                            className="text-xs text-muted hover:text-brand-dark disabled:opacity-50"
                           >
                             Cancel
                           </button>
@@ -289,22 +294,19 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                         <button
                           type="button"
                           onClick={() => startEditing(entry)}
-                          className="mt-1 text-xs text-slate-500 hover:text-slate-700"
+                          className="mt-1 text-xs text-muted hover:text-brand-dark"
                         >
                           Edit subject
                         </button>
                       )}
                     </div>
                     <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
-                      <Link
-                        href={buildAnalyzeUrl(entry)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
+                      <Link href={buildAnalyzeUrl(entry)} className={linkClassName}>
                         Analyze
                       </Link>
                       <Link
                         href={`/student/${entry.student_uuid}`}
-                        className="text-blue-600 hover:text-blue-800"
+                        className={linkClassName}
                       >
                         View history
                       </Link>
@@ -312,7 +314,7 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                         type="button"
                         onClick={() => handleDelete(entry)}
                         disabled={deletingUuid === entry.student_uuid}
-                        className="text-red-600 hover:text-red-800 disabled:opacity-50"
+                        className="text-sm text-error hover:text-red-800 disabled:opacity-50"
                       >
                         {deletingUuid === entry.student_uuid
                           ? "Removing…"

@@ -3,10 +3,10 @@
 type PanelVariant = "strengths" | "level" | "gap" | "scaffold";
 
 const variantStyles: Record<PanelVariant, string> = {
-  strengths: "border-l-4 border-emerald-500",
-  level: "border-l-4 border-slate-300",
-  gap: "border-l-4 border-amber-500",
-  scaffold: "border-l-4 border-blue-500",
+  strengths: "border-l-4 border-accent-green",
+  level: "border-l-4 border-brand",
+  gap: "border-l-4 border-accent-orange",
+  scaffold: "border-l-4 border-brand",
 };
 
 interface PanelProps {
@@ -26,14 +26,14 @@ export function Panel({
 }: PanelProps) {
   return (
     <section
-      className={`rounded-lg bg-white p-5 shadow-sm ${variantStyles[variant]} ${className ?? ""}`}
+      className={`ui-card p-5 ${variantStyles[variant]} ${className ?? ""}`}
     >
       {showTitle && (
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
           {title}
         </h3>
       )}
-      <div className="text-slate-800">{children}</div>
+      <div className="text-brand-dark">{children}</div>
     </section>
   );
 }

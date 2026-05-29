@@ -4,6 +4,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { matchExistingSubject } from "@/lib/roster/subject";
 import type { GradeSpan } from "@/lib/types";
+import {
+  btnDashboardActionClassName,
+  cardClassName,
+  labelClassName,
+  mutedTextClassName,
+  sectionTitleClassName,
+  inputClassName,
+  selectClassName,
+} from "@/lib/ui/styles";
 import { ErrorBanner } from "./ErrorBanner";
 import { SubjectInput } from "./SubjectInput";
 
@@ -85,9 +94,9 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-900">Add Student</h2>
-      <p className="mt-1 text-sm text-slate-600">
+    <div className={cardClassName}>
+      <h2 className={sectionTitleClassName}>Add Student</h2>
+      <p className={`mt-1 ${mutedTextClassName}`}>
         Add a single student to your roster without uploading a CSV.
       </p>
 
@@ -95,7 +104,7 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         <div className="sm:col-span-2">
           <label
             htmlFor="add-student-label"
-            className="block text-sm font-medium text-slate-700"
+            className={labelClassName}
           >
             Student name
           </label>
@@ -106,16 +115,16 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
             required
             autoComplete="off"
             placeholder="e.g. Maria G."
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={inputClassName}
           />
         </div>
 
         <div className="sm:col-span-2">
           <label
             htmlFor="add-student-subject"
-            className="block text-sm font-medium text-slate-700"
+            className={labelClassName}
           >
-            Subject <span className="text-slate-400">(optional)</span>
+            Subject <span className="text-muted">(optional)</span>
           </label>
           <SubjectInput
             id="add-student-subject"
@@ -128,7 +137,7 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         <div>
           <label
             htmlFor="add-student-grade-span"
-            className="block text-sm font-medium text-slate-700"
+            className={labelClassName}
           >
             Grade span
           </label>
@@ -137,7 +146,7 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
             name="grade_span"
             required
             defaultValue=""
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={selectClassName}
           >
             <option value="" disabled>
               Select grade span
@@ -153,15 +162,15 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         <div>
           <label
             htmlFor="add-student-known-level"
-            className="block text-sm font-medium text-slate-700"
+            className={labelClassName}
           >
-            Known ELPAC level <span className="text-slate-400">(optional)</span>
+            Known ELPAC level <span className="text-muted">(optional)</span>
           </label>
           <select
             id="add-student-known-level"
             name="known_elpac_level"
             defaultValue=""
-            className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={selectClassName}
           >
             <option value="">Not set</option>
             {[1, 2, 3, 4].map((level) => (
@@ -176,9 +185,9 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className={btnDashboardActionClassName}
           >
-            {submitting ? "Adding…" : "Add student"}
+            {submitting ? "Adding…" : "Add Student"}
           </button>
         </div>
       </form>
@@ -189,7 +198,7 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         </div>
       )}
       {success && (
-        <p className="mt-4 text-sm text-emerald-700">{success}</p>
+        <p className="mt-4 text-sm text-accent-green">{success}</p>
       )}
     </div>
   );

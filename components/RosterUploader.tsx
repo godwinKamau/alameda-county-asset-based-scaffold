@@ -2,6 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {
+  btnDashboardActionClassName,
+  cardClassName,
+  fileInputClassName,
+  mutedTextClassName,
+  sectionTitleClassName,
+} from "@/lib/ui/styles";
 import { ErrorBanner } from "./ErrorBanner";
 
 export function RosterUploader() {
@@ -71,9 +78,9 @@ export function RosterUploader() {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-900">Upload Roster</h2>
-      <p className="mt-1 text-sm text-slate-600">
+    <div className={cardClassName}>
+      <h2 className={sectionTitleClassName}>Upload Roster</h2>
+      <p className={`mt-1 ${mutedTextClassName}`}>
         CSV columns:{" "}
         <code className="text-xs">
           label, grade_span, known_elpac_level, subject (optional)
@@ -85,12 +92,12 @@ export function RosterUploader() {
           type="file"
           name="file"
           accept=".csv,text/csv"
-          className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200"
+          className={fileInputClassName}
         />
         <button
           type="submit"
           disabled={uploading}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          className={btnDashboardActionClassName}
         >
           {uploading ? "Uploading…" : "Upload CSV"}
         </button>
@@ -98,7 +105,7 @@ export function RosterUploader() {
 
       {error && <div className="mt-4"><ErrorBanner message={error} /></div>}
       {success && (
-        <p className="mt-4 text-sm text-emerald-700">{success}</p>
+        <p className="mt-4 text-sm text-accent-green">{success}</p>
       )}
     </div>
   );

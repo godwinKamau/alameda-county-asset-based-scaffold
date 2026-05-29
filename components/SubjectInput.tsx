@@ -5,6 +5,7 @@ import {
   filterSubjectSuggestions,
   matchExistingSubject,
 } from "@/lib/roster/subject";
+import { inputClassName as defaultInputClassName } from "@/lib/ui/styles";
 
 interface SubjectInputProps {
   id?: string;
@@ -136,16 +137,13 @@ export function SubjectInput({
         aria-expanded={showSuggestions}
         aria-controls={showSuggestions ? listboxId : undefined}
         aria-autocomplete="list"
-        className={
-          inputClassName ??
-          "mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        }
+        className={inputClassName ?? defaultInputClassName}
       />
       {showSuggestions ? (
         <ul
           id={listboxId}
           role="listbox"
-          className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+          className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
         >
           {suggestions.map((subject, index) => (
             <li
@@ -157,8 +155,8 @@ export function SubjectInput({
               onMouseEnter={() => setHighlightIndex(index)}
               className={`cursor-pointer px-3 py-2 text-sm ${
                 index === highlightIndex
-                  ? "bg-blue-50 text-blue-900"
-                  : "text-slate-700 hover:bg-slate-50"
+                  ? "bg-brand-soft text-brand-dark"
+                  : "text-brand-dark hover:bg-slate-50"
               }`}
             >
               {subject}

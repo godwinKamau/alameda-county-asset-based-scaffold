@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { LOGOUT_REDIRECT_URL } from "@/lib/auth/constants";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider afterSignOutUrl={LOGOUT_REDIRECT_URL}>
       <html lang="en">
         <body className="min-h-screen antialiased">{children}</body>
       </html>

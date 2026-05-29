@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { AppHeader } from "@/components/AppHeader";
+import { DashboardShell } from "@/components/DashboardShell";
 import { InsightCard } from "@/components/InsightCard";
 import { recordAudit } from "@/lib/audit/log";
 import { hashEmail } from "@/lib/audit/log";
@@ -11,6 +11,7 @@ import {
   rosterEntryBelongsToTeacher,
 } from "@/lib/db/queries";
 import { headers } from "next/headers";
+import { btnPrimaryClassName, cardClassName } from "@/lib/ui/styles";
 
 interface StudentPageProps {
   params: Promise<{ uuid: string }>;
@@ -47,30 +48,26 @@ export default async function StudentPage({ params }: StudentPageProps) {
   });
 
   return (
-    <>
-      <AppHeader title="Student History" />
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
-        <div className="flex items-center justify-between">
-          <p className="font-mono text-sm text-slate-600">{uuid}</p>
-          <Link
-            href="/analyze"
-            className="text-sm text-blue-600 hover:text-blue-800"
-          >
+    <DashboardShell title="Student History">
+      <div className="mx-auto max-w-5xl space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="font-mono text-sm text-muted">{uuid}</p>
+          <Link href="/analyze" className={btnPrimaryClassName}>
             New analysis
           </Link>
         </div>
 
         {sessions.length === 0 ? (
-          <p className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-600">
+          <p className={`${cardClassName} text-sm text-muted`}>
             No analysis sessions yet for this student.
           </p>
         ) : (
           sessions.map((session) => (
             <article
               key={session.id}
-              className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-6"
+              className={`${cardClassName} space-y-4 bg-brand-soft/20`}
             >
-              <header className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+              <header className="flex flex-wrap items-center gap-4 text-sm text-muted">
                 <time dateTime={session.submitted_at.toISOString()}>
                   {new Date(session.submitted_at).toLocaleString()}
                 </time>
@@ -84,7 +81,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
             </article>
           ))
         )}
-      </main>
-    </>
+      </div>
+    </DashboardShell>
   );
 }

@@ -6,6 +6,7 @@ import {
   normalizeSubject,
 } from "@/lib/roster/display";
 import type { GradeSpan } from "@/lib/types";
+import { labelClassName, selectClassName } from "@/lib/ui/styles";
 
 export interface RosterOption {
   student_uuid: string;
@@ -103,7 +104,7 @@ export function StudentSelector({
 
   return (
     <div>
-      <label htmlFor="student" className="block text-sm font-medium text-slate-700">
+      <label htmlFor="student" className={labelClassName}>
         Student
       </label>
       <select
@@ -116,7 +117,7 @@ export function StudentSelector({
           onChange(event.target.value, selected);
         }}
         disabled={loading || filteredOptions.length === 0}
-        className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className={selectClassName}
       >
         <option value="">
           {loading

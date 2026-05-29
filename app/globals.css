@@ -3,8 +3,13 @@
 @import "tailwindcss/utilities";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f1f5f9;
+  --foreground: #1d3557;
+  --brand: #457b9d;
+  --brand-dark: #1d3557;
+  --brand-soft: #dce8f5;
+  --input-fill: #eef4fa;
+  --input-border: #000;
 }
 
 body {
@@ -12,4 +17,93 @@ body {
   background: var(--background);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
+}
+
+@layer components {
+  .ui-card {
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-card;
+  }
+
+  .ui-input {
+    @apply mt-1 block w-full rounded-xl px-3 py-2 text-sm text-brand-dark shadow-sm focus:outline-none;
+    background-color: var(--input-fill);
+    border: 1px solid var(--input-border);
+  }
+
+  .ui-input::placeholder {
+    color: #64748b;
+  }
+
+  .ui-input:focus {
+    background-color: #fff;
+    border-color: var(--input-border);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
+  }
+
+  select.ui-input {
+    @apply cursor-pointer appearance-none bg-no-repeat pr-10;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: var(--input-fill);
+    border: 1px solid var(--input-border);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23000'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-size: 1.25rem;
+    background-position: right 0.75rem center;
+  }
+
+  select.ui-input:focus {
+    background-color: #fff;
+    border-color: var(--input-border);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
+  }
+
+  .ui-btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: var(--brand);
+    color: #fff;
+  }
+
+  .ui-btn-dashboard-action {
+    @apply inline-flex items-center justify-center rounded-2xl border-2 px-6 py-3 text-sm font-semibold no-underline transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+    background-color: var(--brand);
+    border-color: var(--brand-dark);
+    color: #fff;
+  }
+
+  .ui-btn-dashboard-action:hover:not(:disabled) {
+    background-color: var(--brand-dark);
+    border-color: var(--brand-dark);
+  }
+
+  .ui-btn-primary:hover:not(:disabled) {
+    background-color: var(--brand-dark);
+  }
+
+  .ui-btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50;
+    background-color: var(--brand-soft);
+    border: 1px solid var(--brand);
+    color: var(--brand-dark);
+  }
+
+  .ui-btn-secondary:hover:not(:disabled) {
+    background-color: #c8d9eb;
+  }
+
+  .ui-file-input {
+    @apply mt-1 block w-full text-sm text-muted;
+  }
+
+  .ui-file-input::file-selector-button {
+    @apply mr-4 cursor-pointer rounded-xl border-0 px-4 py-2 text-sm font-medium text-white transition-colors;
+    background-color: var(--brand);
+  }
+
+  .ui-file-input::file-selector-button:hover {
+    background-color: var(--brand-dark);
+  }
+
+  .ui-link {
+    @apply text-brand transition-colors hover:text-brand-dark;
+  }
 }

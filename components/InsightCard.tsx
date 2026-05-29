@@ -19,33 +19,33 @@ const TABS: {
     id: "scaffold",
     label: "Asset-Based Scaffold",
     shortLabel: "Scaffold",
-    activeClass: "border-blue-600 bg-blue-50 text-blue-800",
+    activeClass: "border-brand bg-brand-soft text-brand-dark",
     inactiveClass:
-      "border-transparent text-slate-600 hover:border-blue-200 hover:bg-blue-50/60 hover:text-blue-700",
+      "border-transparent text-muted hover:border-brand-soft hover:bg-brand-soft/60 hover:text-brand-dark",
   },
   {
     id: "level",
     label: "Estimated Level",
     shortLabel: "Level",
-    activeClass: "border-slate-500 bg-slate-100 text-slate-900",
+    activeClass: "border-brand bg-brand-soft text-brand-dark",
     inactiveClass:
-      "border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-800",
+      "border-transparent text-muted hover:border-brand-soft hover:bg-slate-50 hover:text-brand-dark",
   },
   {
     id: "strengths",
     label: "Observed Strengths",
     shortLabel: "Strengths",
-    activeClass: "border-emerald-600 bg-emerald-50 text-emerald-900",
+    activeClass: "border-accent-green bg-emerald-50 text-brand-dark",
     inactiveClass:
-      "border-transparent text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/60 hover:text-emerald-800",
+      "border-transparent text-muted hover:border-accent-green/30 hover:bg-emerald-50/60 hover:text-brand-dark",
   },
   {
     id: "gap",
     label: "Gap to Next Level",
     shortLabel: "Gap",
-    activeClass: "border-amber-600 bg-amber-50 text-amber-900",
+    activeClass: "border-accent-orange bg-orange-50 text-brand-dark",
     inactiveClass:
-      "border-transparent text-slate-600 hover:border-amber-200 hover:bg-amber-50/60 hover:text-amber-800",
+      "border-transparent text-muted hover:border-accent-orange/30 hover:bg-orange-50/60 hover:text-brand-dark",
   },
 ];
 
@@ -61,7 +61,7 @@ export function InsightCard({ insight }: InsightCardProps) {
       <div
         role="tablist"
         aria-label="Analysis insights"
-        className="flex flex-wrap gap-2 border-b border-slate-200 pb-3"
+        className="flex flex-wrap gap-2 border-b border-brand-soft pb-3"
       >
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -102,7 +102,7 @@ export function InsightCard({ insight }: InsightCardProps) {
             title="Asset-Based Scaffold"
             variant="scaffold"
             showTitle={false}
-            className="p-6 shadow-md ring-1 ring-blue-100"
+            className="p-6 shadow-md ring-1 ring-brand-soft"
           >
             <ScaffoldContent text={insight.scaffold} />
           </Panel>
@@ -123,25 +123,25 @@ export function InsightCard({ insight }: InsightCardProps) {
             <div className="flex items-start gap-4">
               <div
                 aria-hidden="true"
-                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-100 ring-1 ring-slate-200"
+                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-brand-soft ring-1 ring-brand-soft"
               >
-                <span className="text-3xl font-bold tabular-nums text-slate-900">
+                <span className="text-3xl font-bold tabular-nums text-brand-dark">
                   {insight.estimated_level}
                 </span>
               </div>
               <div className="min-w-0 pt-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted">
                   ELPAC Level {insight.estimated_level}
                 </p>
-                <p className="mt-1 text-2xl font-semibold leading-tight text-slate-900">
+                <p className="mt-1 text-2xl font-semibold leading-tight text-brand-dark">
                   {getCaEldLevelLabel(insight.estimated_level)}
                 </p>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-muted">
                   {getElpacPerformanceLevelLabel(insight.estimated_level)}
                 </p>
               </div>
             </div>
-            <p className="mt-4 leading-relaxed text-slate-700">
+            <p className="mt-4 leading-relaxed text-brand-dark/90">
               {insight.level_reasoning}
             </p>
           </Panel>

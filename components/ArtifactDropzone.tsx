@@ -11,6 +11,7 @@ import {
   isPdfFile,
   type PdfPageThumbnail,
 } from "@/lib/artifact/prepare-upload";
+import { fileInputClassName, labelClassName } from "@/lib/ui/styles";
 
 interface ArtifactDropzoneProps {
   onFileSelect: (file: File | null) => void;
@@ -103,7 +104,7 @@ export function ArtifactDropzone({
 
   return (
     <div>
-      <label htmlFor="artifact" className="block text-sm font-medium text-slate-700">
+      <label htmlFor="artifact" className={labelClassName}>
         Writing Artifact
       </label>
       <input
@@ -111,41 +112,41 @@ export function ArtifactDropzone({
         type="file"
         accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,application/pdf,.heic,.heif"
         onChange={handleFileChange}
-        className="mt-1 block w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200"
+        className={fileInputClassName}
       />
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-xs text-muted">
         JPG, PNG, GIF, WEBP, HEIC, or PDF — up to{" "}
         {formatMegabytes(MAX_SOURCE_ARTIFACT_BYTES)}. Files are optimized
         automatically before upload.
       </p>
       {file && (
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-muted">
           Selected: {file.name} ({Math.round(file.size / 1024)} KB)
         </p>
       )}
 
       {showPagePicker && (
-        <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm font-medium text-slate-800">
+        <div className="mt-4 rounded-2xl border border-brand-soft bg-brand-soft/40 p-4">
+          <p className="text-sm font-medium text-brand-dark">
             Select page(s) with student writing
           </p>
-          <p className="mt-1 text-xs text-slate-600">
+          <p className="mt-1 text-xs text-muted">
             Check every page that contains handwriting. When multiple pages are
             selected, analysis will focus on writing and ignore cover images or
             prompts.
           </p>
           {totalPages > MAX_PAGES_PER_ANALYSIS && (
-            <p className="mt-2 text-xs text-amber-700">
+            <p className="mt-2 text-xs text-accent-orange">
               Showing first {MAX_PAGES_PER_ANALYSIS} of {totalPages} pages.
             </p>
           )}
           {loadingThumbnails ? (
             <div
-              className="mt-3 flex items-center gap-2 text-xs text-slate-500"
+              className="mt-3 flex items-center gap-2 text-xs text-muted"
               role="status"
               aria-live="polite"
             >
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-soft border-t-brand" />
               Loading page previews…
             </div>
           ) : (
@@ -155,9 +156,9 @@ export function ArtifactDropzone({
                 return (
                   <label
                     key={thumbnail.pageNumber}
-                    className={`cursor-pointer rounded-md border p-2 ${
+                    className={`cursor-pointer rounded-xl border p-2 ${
                       checked
-                        ? "border-blue-500 bg-white ring-1 ring-blue-500"
+                        ? "border-brand bg-white ring-1 ring-brand"
                         : "border-slate-200 bg-white"
                     }`}
                   >
@@ -173,7 +174,7 @@ export function ArtifactDropzone({
                       alt={`PDF page ${thumbnail.pageNumber}`}
                       className="h-28 w-full rounded object-contain"
                     />
-                    <p className="mt-2 text-center text-xs font-medium text-slate-700">
+                    <p className="mt-2 text-center text-xs font-medium text-brand-dark">
                       Page {thumbnail.pageNumber}
                     </p>
                   </label>
@@ -182,7 +183,7 @@ export function ArtifactDropzone({
             </div>
           )}
           {selectedPages.length > 0 && !loadingThumbnails && (
-            <p className="mt-3 text-xs text-slate-600">
+            <p className="mt-3 text-xs text-muted">
               Selected: {selectedPages.join(", ")}
             </p>
           )}
@@ -190,7 +191,7 @@ export function ArtifactDropzone({
       )}
 
       {thumbnailError && (
-        <p className="mt-2 text-xs text-red-600">{thumbnailError}</p>
+        <p className="mt-2 text-xs text-error">{thumbnailError}</p>
       )}
     </div>
   );

@@ -5,6 +5,7 @@ import { getPool, withTransaction } from "./pool";
 import type {
   AnalysisSessionDetail,
   AnalysisSessionWithInsight,
+  ExactGrade,
   GradeSpan,
   Insight,
   RosterEntry,
@@ -54,6 +55,7 @@ export interface CreateRosterRowInput {
   label: string;
   subject?: string;
   grade_span: GradeSpan;
+  exact_grade?: ExactGrade | null;
   known_elpac_level?: number | null;
 }
 
@@ -70,14 +72,15 @@ export async function createRosterEntries(
 
   for (const row of rows) {
     const inserted = await pool.query<{ student_uuid: string }>(
-      `INSERT INTO student_roster_entries (teacher_id, label, subject, grade_span, known_elpac_level)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO student_roster_entries (teacher_id, label, subject, grade_span, exact_grade, known_elpac_level)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING student_uuid`,
       [
         teacherId,
         row.label.trim(),
         (row.subject ?? "").trim(),
         row.grade_span,
+        row.exact_grade ?? null,
         row.known_elpac_level ?? null,
       ],
     );
@@ -90,7 +93,7 @@ export async function createRosterEntries(
 export async function listRosterEntries(teacherId: string): Promise<RosterEntry[]> {
   const pool = getPool();
   const result = await pool.query<RosterEntry>(
-    `SELECT id, student_uuid, label, subject, grade_span, known_elpac_level, created_at, last_updated_at
+    `SELECT id, student_uuid, label, subject, grade_span, exact_grade, known_elpac_level, created_at, last_updated_at
      FROM student_roster_entries
      WHERE teacher_id = $1
      ORDER BY created_at ASC`,
@@ -114,6 +117,22 @@ export async function updateRosterEntrySubject(
   return (result.rowCount ?? 0) > 0;
 }
 
+export async function updateRosterEntryGrade(
+  teacherId: string,
+  studentUuid: string,
+  gradeSpan: GradeSpan,
+  exactGrade: ExactGrade | null,
+): Promise<boolean> {
+  const pool = getPool();
+  const result = await pool.query(
+    `UPDATE student_roster_entries
+     SET grade_span = $3, exact_grade = $4, last_updated_at = NOW()
+     WHERE teacher_id = $1 AND student_uuid = $2`,
+    [teacherId, studentUuid, gradeSpan, exactGrade],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
 export async function rosterEntryBelongsToTeacher(
   teacherId: string,
   studentUuid: string,
@@ -125,6 +144,25 @@ export async function rosterEntryBelongsToTeacher(
     [teacherId, studentUuid],
   );
   return (result.rowCount ?? 0) > 0;
+}
+
+export interface RosterGradeInfo {
+  grade_span: GradeSpan;
+  exact_grade: ExactGrade | null;
+}
+
+export async function getRosterGradeInfo(
+  teacherId: string,
+  studentUuid: string,
+): Promise<RosterGradeInfo | null> {
+  const pool = getPool();
+  const result = await pool.query<RosterGradeInfo>(
+    `SELECT grade_span, exact_grade
+     FROM student_roster_entries
+     WHERE teacher_id = $1 AND student_uuid = $2`,
+    [teacherId, studentUuid],
+  );
+  return result.rows[0] ?? null;
 }
 
 export async function deleteRosterEntry(
@@ -161,6 +199,7 @@ export interface InsertSessionInput {
   teacherId: string;
   studentUuid: string;
   gradeSpan: GradeSpan;
+  exactGrade?: ExactGrade | null;
   providedElpacLevel?: number | null;
   insight: Insight;
 }
@@ -176,13 +215,14 @@ export async function insertSessionAndInsight(
   return withTransaction(async (client: PoolClient) => {
     const sessionResult = await client.query<{ id: string }>(
       `INSERT INTO analysis_sessions
-         (teacher_id, student_uuid, domain, grade_span, provided_elpac_level)
-       VALUES ($1, $2, 'writing', $3, $4)
+         (teacher_id, student_uuid, domain, grade_span, exact_grade, provided_elpac_level)
+       VALUES ($1, $2, 'writing', $3, $4, $5)
        RETURNING id`,
       [
         input.teacherId,
         input.studentUuid,
         input.gradeSpan,
+        input.exactGrade ?? null,
         input.providedElpacLevel ?? null,
       ],
     );

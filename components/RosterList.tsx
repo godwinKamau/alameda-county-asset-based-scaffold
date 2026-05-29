@@ -4,17 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
+  formatStudentGradeLabel,
   getStudentDisplayName,
   normalizeSubject,
   sortSubjects,
 } from "@/lib/roster/display";
+import { EXACT_GRADES } from "@/lib/roster/grade";
 import { matchExistingSubject } from "@/lib/roster/subject";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
-import type { GradeSpan } from "@/lib/types";
+import { deriveGradeSpan, type ExactGrade, type GradeSpan } from "@/lib/types";
 import {
   btnPrimaryClassName,
   inputClassName,
   linkClassName,
+  selectClassName,
 } from "@/lib/ui/styles";
 import { SubjectInput } from "./SubjectInput";
 
@@ -24,8 +27,11 @@ export interface RosterListEntry {
   label: string;
   subject: string;
   grade_span: GradeSpan;
+  exact_grade: ExactGrade | null;
   known_elpac_level: number | null;
 }
+
+const GRADE_SPANS: GradeSpan[] = ["K", "1-2", "3-12"];
 
 const LABEL_MAPPING_KEY = "student_label_mapping";
 
@@ -84,6 +90,9 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
   const [deletingUuid, setDeletingUuid] = useState<string | null>(null);
   const [editingUuid, setEditingUuid] = useState<string | null>(null);
   const [editSubjectValue, setEditSubjectValue] = useState("");
+  const [editingGradeUuid, setEditingGradeUuid] = useState<string | null>(null);
+  const [editExactGrade, setEditExactGrade] = useState("");
+  const [editGradeSpan, setEditGradeSpan] = useState<GradeSpan>("3-12");
   const [savingUuid, setSavingUuid] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [collapsedSubjects, setCollapsedSubjects] = useState<Set<string>>(
@@ -102,12 +111,34 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
   function startEditing(entry: RosterListEntry) {
     setEditingUuid(entry.student_uuid);
     setEditSubjectValue(entry.subject.trim());
+    setEditingGradeUuid(null);
+    setError(null);
+  }
+
+  function startEditingGrade(entry: RosterListEntry) {
+    setEditingGradeUuid(entry.student_uuid);
+    setEditExactGrade(entry.exact_grade ?? "");
+    setEditGradeSpan(entry.grade_span);
+    setEditingUuid(null);
     setError(null);
   }
 
   function cancelEditing() {
     setEditingUuid(null);
     setEditSubjectValue("");
+  }
+
+  function cancelEditingGrade() {
+    setEditingGradeUuid(null);
+    setEditExactGrade("");
+    setEditGradeSpan("3-12");
+  }
+
+  function handleExactGradeChange(value: string) {
+    setEditExactGrade(value);
+    if (value) {
+      setEditGradeSpan(deriveGradeSpan(value as ExactGrade));
+    }
   }
 
   function toggleGroup(subject: string) {
@@ -120,6 +151,37 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
       }
       return next;
     });
+  }
+
+  async function handleSaveGrade(entry: RosterListEntry) {
+    setError(null);
+    setSavingUuid(entry.student_uuid);
+
+    try {
+      const response = await fetch(`/api/roster/${entry.student_uuid}/grade`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          grade_span: editGradeSpan,
+          exact_grade: editExactGrade || null,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error ?? "Failed to update grade");
+      }
+
+      cancelEditingGrade();
+      router.refresh();
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to update grade",
+      );
+    } finally {
+      setSavingUuid(null);
+    }
   }
 
   async function handleSaveSubject(entry: RosterListEntry) {
@@ -247,7 +309,8 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
               className="mt-2 divide-y divide-brand-soft/60 rounded-xl border border-brand-soft/80"
             >
               {group.entries.map((entry) => {
-                const isEditing = editingUuid === entry.student_uuid;
+                const isEditingSubject = editingUuid === entry.student_uuid;
+                const isEditingGrade = editingGradeUuid === entry.student_uuid;
                 const isSaving = savingUuid === entry.student_uuid;
 
                 return (
@@ -260,11 +323,88 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                         {resolveDisplayName(entry, mapping)}
                       </p>
                       <p className="text-muted">
-                        Grade span: {entry.grade_span}
+                        {formatStudentGradeLabel(
+                          entry.grade_span,
+                          entry.exact_grade,
+                        )}
                         {entry.known_elpac_level != null &&
                           ` · Known level: ${entry.known_elpac_level}`}
                       </p>
-                      {isEditing ? (
+                      {isEditingGrade ? (
+                        <div className="mt-2 space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <label
+                              htmlFor={`grade-exact-${entry.student_uuid}`}
+                              className="sr-only"
+                            >
+                              Exact grade
+                            </label>
+                            <select
+                              id={`grade-exact-${entry.student_uuid}`}
+                              value={editExactGrade}
+                              onChange={(event) =>
+                                handleExactGradeChange(event.target.value)
+                              }
+                              className={`${selectClassName} !mt-0 w-auto min-w-[8rem] px-2 py-1 text-xs`}
+                            >
+                              <option value="">Not set</option>
+                              {EXACT_GRADES.map((grade) => (
+                                <option key={grade} value={grade}>
+                                  {grade === "K" ? "Grade K" : `Grade ${grade}`}
+                                </option>
+                              ))}
+                            </select>
+                            <label
+                              htmlFor={`grade-span-${entry.student_uuid}`}
+                              className="sr-only"
+                            >
+                              Grade span
+                            </label>
+                            <select
+                              id={`grade-span-${entry.student_uuid}`}
+                              value={editGradeSpan}
+                              onChange={(event) =>
+                                setEditGradeSpan(event.target.value as GradeSpan)
+                              }
+                              disabled={Boolean(editExactGrade)}
+                              className={`${selectClassName} !mt-0 w-auto min-w-[6rem] px-2 py-1 text-xs disabled:opacity-60`}
+                            >
+                              {GRADE_SPANS.map((span) => (
+                                <option key={span} value={span}>
+                                  {span} PLD
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleSaveGrade(entry)}
+                              disabled={isSaving}
+                              className={`${btnPrimaryClassName} px-2 py-1 text-xs`}
+                            >
+                              {isSaving ? "Saving…" : "Save"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEditingGrade}
+                              disabled={isSaving}
+                              className="text-xs text-muted hover:text-brand-dark disabled:opacity-50"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => startEditingGrade(entry)}
+                          className="mt-1 text-xs text-muted hover:text-brand-dark"
+                        >
+                          Edit grade
+                        </button>
+                      )}
+                      {isEditingSubject ? (
                         <div className="mt-2 flex flex-wrap items-center gap-2">
                           <SubjectInput
                             value={editSubjectValue}

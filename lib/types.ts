@@ -3,6 +3,29 @@ import { z } from "zod";
 export const GradeSpanSchema = z.enum(["K", "1-2", "3-12"]);
 export type GradeSpan = z.infer<typeof GradeSpanSchema>;
 
+export const ExactGradeSchema = z.enum([
+  "K",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+]);
+export type ExactGrade = z.infer<typeof ExactGradeSchema>;
+
+export function deriveGradeSpan(exactGrade: ExactGrade): GradeSpan {
+  if (exactGrade === "K") return "K";
+  if (exactGrade === "1" || exactGrade === "2") return "1-2";
+  return "3-12";
+}
+
 export const InsightSchema = z.object({
   strengths: z.string().min(1),
   estimated_level: z.number().int().min(1).max(4),
@@ -31,6 +54,7 @@ export interface RosterEntry {
   label: string;
   subject: string;
   grade_span: GradeSpan;
+  exact_grade: ExactGrade | null;
   known_elpac_level: number | null;
   created_at: Date;
   last_updated_at: Date;

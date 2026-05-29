@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getWritingPldsForGradeSpan } from "./loader";
-import type { GradeSpan } from "@/lib/types";
+import type { ExactGrade, GradeSpan } from "@/lib/types";
 
 function formatLevelBlock(
   level: "1" | "2" | "3" | "4",
@@ -11,12 +11,20 @@ function formatLevelBlock(
   return `Level ${level} — ${data.label} (${data.frequency_marker}):\n${bullets}`;
 }
 
-export function buildSystemPrompt(gradeSpan: GradeSpan): string {
+export function buildSystemPrompt(
+  gradeSpan: GradeSpan,
+  exactGrade?: ExactGrade | null,
+): string {
   const plds = getWritingPldsForGradeSpan(gradeSpan);
 
   const injected = (["1", "2", "3", "4"] as const)
     .map((level) => formatLevelBlock(level, plds[level]))
     .join("\n\n");
+
+  const calibrationSentence =
+    exactGrade != null && gradeSpan === "3-12"
+      ? `\nThe student is in grade ${exactGrade}. While the Range PLDs above apply across grades 3–12, calibrate your expectations for 'grade-appropriate' vocabulary, text complexity, sentence structure, and writing conventions specifically to grade ${exactGrade}. A grade 3 student and a grade 11 student share these descriptors but have very different grade-level benchmarks.\n`
+      : "";
 
   return `You are an expert ELD (English Language Development) analyst trained in the
 California ELPAC assessment framework. You analyze student writing artifacts
@@ -25,7 +33,7 @@ Level Descriptors (PLDs).
 
 OFFICIAL ELPAC WRITING RANGE PLDs FOR GRADE SPAN ${gradeSpan}:
 ${injected}
-
+${calibrationSentence}
 ANALYSIS RULES:
 - Lead with what the student CAN do. Frame every observation as an asset
   before naming a gap. Never use deficit language.

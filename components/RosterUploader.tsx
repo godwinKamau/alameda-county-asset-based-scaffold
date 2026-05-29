@@ -83,7 +83,8 @@ export function RosterUploader() {
       <p className={`mt-1 ${mutedTextClassName}`}>
         CSV columns:{" "}
         <code className="text-xs">
-          label, grade_span, known_elpac_level, subject (optional)
+          label, grade_span, exact_grade (optional), known_elpac_level, subject
+          (optional)
         </code>
       </p>
 

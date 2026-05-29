@@ -3,16 +3,26 @@ import { parse } from "csv-parse/sync";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
 import { createRosterEntries } from "@/lib/db/queries";
-import { GradeSpanSchema } from "@/lib/types";
+import {
+  deriveGradeSpan,
+  ExactGradeSchema,
+  GradeSpanSchema,
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 interface CsvRow {
   label: string;
-  grade_span: string;
+  grade_span?: string;
+  exact_grade?: string;
   known_elpac_level?: string;
   subject?: string;
+}
+
+function parseExactGrade(raw: string | undefined): string | null {
+  const trimmed = raw?.trim();
+  return trimmed ? trimmed : null;
 }
 
 export async function POST(req: Request) {
@@ -41,11 +51,46 @@ export async function POST(req: Request) {
     const mappingRows: { label: string; student_uuid: string }[] = [];
 
     const rosterInputs = records.map((row) => {
-      if (!row.label || !row.grade_span) {
-        throw new Error("Each row must include label and grade_span");
+      if (!row.label) {
+        throw new Error("Each row must include label");
       }
 
-      const gradeSpan = GradeSpanSchema.parse(row.grade_span);
+      const exactGradeRaw = parseExactGrade(row.exact_grade);
+      const gradeSpanRaw = row.grade_span?.trim() ?? "";
+
+      if (!exactGradeRaw && !gradeSpanRaw) {
+        throw new Error(
+          `Row "${row.label}": grade_span or exact_grade is required`,
+        );
+      }
+
+      let exactGrade = null;
+      if (exactGradeRaw) {
+        const parsed = ExactGradeSchema.safeParse(exactGradeRaw);
+        if (!parsed.success) {
+          throw new Error(
+            `Row "${row.label}": exact_grade must be one of K, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12`,
+          );
+        }
+        exactGrade = parsed.data;
+      }
+
+      let gradeSpan;
+      if (gradeSpanRaw) {
+        gradeSpan = GradeSpanSchema.parse(gradeSpanRaw);
+      } else {
+        gradeSpan = deriveGradeSpan(exactGrade!);
+      }
+
+      if (exactGrade && gradeSpanRaw) {
+        const derived = deriveGradeSpan(exactGrade);
+        if (derived !== gradeSpan) {
+          throw new Error(
+            `Row "${row.label}": exact_grade '${exactGrade}' conflicts with grade_span '${gradeSpan}'`,
+          );
+        }
+      }
+
       const knownLevel = row.known_elpac_level
         ? Number.parseInt(row.known_elpac_level, 10)
         : null;
@@ -61,18 +106,22 @@ export async function POST(req: Request) {
         label: row.label,
         subject: row.subject?.trim() ?? "",
         grade_span: gradeSpan,
+        exact_grade: exactGrade,
         known_elpac_level: knownLevel,
       };
     });
 
     const created = await createRosterEntries(
       teacher.id,
-      rosterInputs.map(({ label, subject, grade_span, known_elpac_level }) => ({
-        label,
-        subject,
-        grade_span,
-        known_elpac_level,
-      })),
+      rosterInputs.map(
+        ({ label, subject, grade_span, exact_grade, known_elpac_level }) => ({
+          label,
+          subject,
+          grade_span,
+          exact_grade,
+          known_elpac_level,
+        }),
+      ),
     );
 
     created.forEach((entry, index) => {
@@ -96,9 +145,8 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("[api/roster]", error);
-    return NextResponse.json(
-      { error: "Failed to process roster upload" },
-      { status: 400 },
-    );
+    const message =
+      error instanceof Error ? error.message : "Failed to process roster upload";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

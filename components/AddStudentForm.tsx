@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { matchExistingSubject } from "@/lib/roster/subject";
-import type { GradeSpan } from "@/lib/types";
+import { EXACT_GRADES } from "@/lib/roster/grade";
+import { deriveGradeSpan, type ExactGrade, type GradeSpan } from "@/lib/types";
 import {
   btnDashboardActionClassName,
   cardClassName,
@@ -28,6 +29,8 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [subject, setSubject] = useState("");
+  const [exactGrade, setExactGrade] = useState("");
+  const [gradeSpan, setGradeSpan] = useState<GradeSpan | "">("");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,7 +41,9 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
     const formData = new FormData(form);
     const label = String(formData.get("label") ?? "").trim();
     const canonicalSubject = matchExistingSubject(subject, existingSubjects);
-    const gradeSpan = String(formData.get("grade_span") ?? "") as GradeSpan;
+    const resolvedGradeSpan = exactGrade
+      ? deriveGradeSpan(exactGrade as ExactGrade)
+      : gradeSpan;
     const knownLevelRaw = String(formData.get("known_elpac_level") ?? "").trim();
 
     if (!label) {
@@ -46,8 +51,13 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
       return;
     }
 
-    if (!GRADE_SPANS.includes(gradeSpan)) {
-      setError("Please select a grade span.");
+    if (!resolvedGradeSpan || !GRADE_SPANS.includes(resolvedGradeSpan)) {
+      setError("Please select a grade span or exact grade.");
+      return;
+    }
+
+    if (exactGrade && gradeSpan && deriveGradeSpan(exactGrade as ExactGrade) !== gradeSpan) {
+      setError("Exact grade conflicts with the selected grade span.");
       return;
     }
 
@@ -70,7 +80,8 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         body: JSON.stringify({
           label,
           subject: canonicalSubject || undefined,
-          grade_span: gradeSpan,
+          grade_span: resolvedGradeSpan,
+          exact_grade: exactGrade || null,
           known_elpac_level: knownElpacLevel,
         }),
       });
@@ -83,6 +94,8 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
       setSuccess(`Added ${label} to your roster.`);
       form.reset();
       setSubject("");
+      setExactGrade("");
+      setGradeSpan("");
       router.refresh();
     } catch (addError) {
       setError(
@@ -136,6 +149,34 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
 
         <div>
           <label
+            htmlFor="add-student-exact-grade"
+            className={labelClassName}
+          >
+            Exact grade <span className="text-muted">(optional)</span>
+          </label>
+          <select
+            id="add-student-exact-grade"
+            value={exactGrade}
+            onChange={(event) => {
+              const value = event.target.value;
+              setExactGrade(value);
+              if (value) {
+                setGradeSpan(deriveGradeSpan(value as ExactGrade));
+              }
+            }}
+            className={selectClassName}
+          >
+            <option value="">Not set</option>
+            {EXACT_GRADES.map((grade) => (
+              <option key={grade} value={grade}>
+                {grade === "K" ? "Grade K" : `Grade ${grade}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label
             htmlFor="add-student-grade-span"
             className={labelClassName}
           >
@@ -143,10 +184,13 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
           </label>
           <select
             id="add-student-grade-span"
-            name="grade_span"
-            required
-            defaultValue=""
-            className={selectClassName}
+            value={gradeSpan}
+            onChange={(event) =>
+              setGradeSpan(event.target.value as GradeSpan | "")
+            }
+            disabled={Boolean(exactGrade)}
+            required={!exactGrade}
+            className={`${selectClassName} disabled:opacity-60`}
           >
             <option value="" disabled>
               Select grade span

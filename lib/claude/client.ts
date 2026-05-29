@@ -2,7 +2,7 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 import { buildSystemPrompt } from "@/lib/elpac/prompt";
-import { InsightSchema, type GradeSpan, type Insight } from "@/lib/types";
+import { InsightSchema, type ExactGrade, type GradeSpan, type Insight } from "@/lib/types";
 
 const MODEL = "claude-sonnet-4-6";
 
@@ -35,6 +35,7 @@ export interface AnalyzeArtifactImage {
 export interface AnalyzeArtifactInput {
   images: AnalyzeArtifactImage[];
   gradeSpan: GradeSpan;
+  exactGrade?: ExactGrade | null;
   providedLevel?: number | null;
 }
 
@@ -46,7 +47,7 @@ export async function analyzeArtifact(
   }
 
   const client = getClient();
-  const systemPrompt = buildSystemPrompt(input.gradeSpan);
+  const systemPrompt = buildSystemPrompt(input.gradeSpan, input.exactGrade);
 
   const contextParts: string[] = [`Grade span: ${input.gradeSpan}`];
   if (input.providedLevel != null) {

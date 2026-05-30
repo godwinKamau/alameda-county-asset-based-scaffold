@@ -59,7 +59,7 @@ export function StatCard({
   accent = "brand",
   href,
 }: StatCardProps) {
-  const className = `ui-card relative overflow-hidden p-5${
+  const className = `ui-card relative h-full w-full overflow-hidden p-5${
     href ? " transition-shadow hover:shadow-md" : ""
   }`;
 

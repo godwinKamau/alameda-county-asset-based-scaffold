@@ -10,6 +10,7 @@ import {
   findTeacherByEmailHash,
   getSessionWithInsight,
 } from "@/lib/db/queries";
+import { DOMAIN_LABELS } from "@/lib/elpac/domains";
 import { getCaEldLevelLabel } from "@/lib/elpac/labels";
 import { getStudentDisplayName } from "@/lib/roster/display";
 import { btnSecondaryClassName, cardClassName } from "@/lib/ui/styles";
@@ -53,6 +54,7 @@ export default async function AnalysisResultsPage({
     subject: session.subject,
     grade_span: session.grade_span,
     known_elpac_level: session.provided_elpac_level,
+    domain: session.domain,
   });
 
   const studentName = getStudentDisplayName({
@@ -102,6 +104,9 @@ export default async function AnalysisResultsPage({
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-brand-soft px-3 py-1 text-sm font-semibold text-brand-dark ring-1 ring-brand-soft">
                 Level {estimatedLevel} · {eldLevelLabel}
+              </span>
+              <span className="inline-flex items-center rounded-full bg-brand-soft/60 px-3 py-1 text-sm font-medium text-brand-dark ring-1 ring-brand-soft">
+                {DOMAIN_LABELS[session.domain]}
               </span>
               <span className="text-sm text-muted">
                 Grade span: {session.grade_span}

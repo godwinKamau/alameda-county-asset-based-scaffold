@@ -6,8 +6,8 @@ export default function DashboardLoading() {
     <DashboardShell title="Dashboard">
       <div className="mx-auto max-w-6xl space-y-8">
         {/* stat + action row */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="ui-card relative max-w-xs flex-1 overflow-hidden p-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="ui-card relative h-full w-full overflow-hidden p-5">
             <div className="absolute bottom-0 left-0 right-0 h-1 animate-pulse bg-slate-200" />
             <div className="flex items-start gap-4">
               <Skeleton className="h-12 w-12 rounded-2xl" />
@@ -17,7 +17,16 @@ export default function DashboardLoading() {
               </div>
             </div>
           </div>
-          <Skeleton className="h-10 w-36 rounded-xl sm:shrink-0" />
+          <div className="ui-card relative h-full w-full overflow-hidden p-5">
+            <div className="absolute bottom-0 left-0 right-0 h-1 animate-pulse bg-slate-200" />
+            <div className="flex items-start gap-4">
+              <Skeleton className="h-12 w-12 rounded-2xl" />
+              <div className="flex-1 space-y-2 pt-1">
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-8 w-28" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* add student form */}

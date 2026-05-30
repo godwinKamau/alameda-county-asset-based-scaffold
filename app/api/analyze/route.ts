@@ -10,7 +10,11 @@ import {
   bufferToBase64Image,
   rasterizePdfFirstPage,
 } from "@/lib/pdf/rasterize";
-import { GradeSpanSchema } from "@/lib/types";
+import {
+  ElpacDomainSchema,
+  ENABLED_DOMAINS,
+  GradeSpanSchema,
+} from "@/lib/types";
 import {
   MAX_PAGES_PER_ANALYSIS,
   MAX_UPLOAD_BYTES,
@@ -68,6 +72,7 @@ export async function POST(req: Request) {
       .filter((entry): entry is File => entry instanceof File);
 
     const studentUuid = formData.get("student_uuid");
+    const domainRaw = formData.get("domain");
     const gradeSpanRaw = formData.get("grade_span");
     const providedLevelRaw = formData.get("provided_elpac_level");
 
@@ -96,6 +101,29 @@ export async function POST(req: Request) {
     if (typeof studentUuid !== "string" || !studentUuid) {
       return NextResponse.json(
         { error: "student_uuid is required" },
+        { status: 400 },
+      );
+    }
+
+    if (typeof domainRaw !== "string" || !domainRaw) {
+      return NextResponse.json({ error: "domain is required" }, { status: 400 });
+    }
+
+    const domainResult = ElpacDomainSchema.safeParse(domainRaw);
+    if (!domainResult.success) {
+      return NextResponse.json(
+        {
+          error:
+            "domain must be one of: writing, reading, speaking, listening",
+        },
+        { status: 400 },
+      );
+    }
+
+    const domain = domainResult.data;
+    if (!ENABLED_DOMAINS.has(domain)) {
+      return NextResponse.json(
+        { error: `${domain} analysis is not available yet` },
         { status: 400 },
       );
     }
@@ -148,6 +176,7 @@ export async function POST(req: Request) {
         imageBase64: image.base64,
         mediaType: image.mediaType,
       })),
+      domain,
       gradeSpan,
       exactGrade,
       providedLevel,
@@ -156,6 +185,7 @@ export async function POST(req: Request) {
     const { sessionId } = await insertSessionAndInsight({
       teacherId: teacher.id,
       studentUuid,
+      domain,
       gradeSpan,
       exactGrade,
       providedElpacLevel: providedLevel,

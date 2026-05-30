@@ -5,6 +5,7 @@ import { getPool, withTransaction } from "./pool";
 import type {
   AnalysisSessionDetail,
   AnalysisSessionWithInsight,
+  ElpacDomain,
   ExactGrade,
   GradeSpan,
   Insight,
@@ -121,7 +122,9 @@ export async function listRosterEntriesWithStats(
        r.created_at,
        r.last_updated_at,
        COUNT(s.id)::int AS session_count,
-       AVG(i.estimated_level) AS avg_level,
+       AVG(i.estimated_level) FILTER (
+         WHERE s.domain IN ('reading', 'writing')
+       ) AS avg_level,
        MAX(s.submitted_at) AS last_session_at
      FROM student_roster_entries r
      LEFT JOIN analysis_sessions s
@@ -250,6 +253,7 @@ export async function deleteRosterEntry(
 export interface InsertSessionInput {
   teacherId: string;
   studentUuid: string;
+  domain: ElpacDomain;
   gradeSpan: GradeSpan;
   exactGrade?: ExactGrade | null;
   providedElpacLevel?: number | null;
@@ -268,11 +272,12 @@ export async function insertSessionAndInsight(
     const sessionResult = await client.query<{ id: string }>(
       `INSERT INTO analysis_sessions
          (teacher_id, student_uuid, domain, grade_span, exact_grade, provided_elpac_level)
-       VALUES ($1, $2, 'writing', $3, $4, $5)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
       [
         input.teacherId,
         input.studentUuid,
+        input.domain,
         input.gradeSpan,
         input.exactGrade ?? null,
         input.providedElpacLevel ?? null,
@@ -384,7 +389,7 @@ export async function listSessionsForStudent(
   return result.rows.map((row) => ({
     id: row.id,
     student_uuid: row.student_uuid,
-    domain: row.domain,
+    domain: row.domain as ElpacDomain,
     grade_span: row.grade_span as GradeSpan,
     provided_elpac_level: row.provided_elpac_level,
     submitted_at: row.submitted_at,
@@ -444,7 +449,7 @@ export async function getSessionWithInsight(
   return {
     id: row.id,
     student_uuid: row.student_uuid,
-    domain: row.domain,
+    domain: row.domain as ElpacDomain,
     grade_span: row.grade_span as GradeSpan,
     provided_elpac_level: row.provided_elpac_level,
     submitted_at: row.submitted_at,

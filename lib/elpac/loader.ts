@@ -2,7 +2,9 @@ import "server-only";
 
 import fs from "fs";
 import path from "path";
-import { ElPacPldsSchema, type ElPacPlds } from "./types";
+import type { ElpacDomain, GradeSpan } from "@/lib/types";
+import { resolvePldGradeSpan } from "./grade-span";
+import { ElPacPldsSchema, type ElPacPlds, type PldLevelSet } from "./types";
 
 let cachedPlds: ElPacPlds | null = null;
 
@@ -32,9 +34,25 @@ export function loadElPacPlds(): ElPacPlds {
   return cachedPlds;
 }
 
-export function getWritingPldsForGradeSpan(
-  gradeSpan: "K" | "1-2" | "3-12",
-): ElPacPlds["range_plds"]["writing"][typeof gradeSpan] {
+export function getRangePlds(
+  domain: ElpacDomain,
+  gradeSpan: GradeSpan,
+): PldLevelSet {
   const plds = loadElPacPlds();
-  return plds.range_plds.writing[gradeSpan];
+  const key = resolvePldGradeSpan(domain, gradeSpan);
+  const domainPlds = plds.range_plds[domain];
+
+  const levelSet = (domainPlds as unknown as Record<string, PldLevelSet>)[key];
+  if (!levelSet) {
+    throw new Error(
+      `No ${domain} Range PLDs for grade span "${key}" (from roster span "${gradeSpan}").`,
+    );
+  }
+  return levelSet;
+}
+
+export function getWritingPldsForGradeSpan(
+  gradeSpan: GradeSpan,
+): PldLevelSet {
+  return getRangePlds("writing", gradeSpan);
 }

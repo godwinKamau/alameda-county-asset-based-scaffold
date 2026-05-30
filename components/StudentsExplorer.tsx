@@ -84,7 +84,7 @@ function groupEntriesByAvgLevel(
   const groups: { subject: string; entries: StudentExplorerEntry[] }[] = [];
 
   if (withData.length > 0) {
-    groups.push({ subject: "By average level", entries: withData });
+    groups.push({ subject: "By written language level", entries: withData });
   }
   if (withoutData.length > 0) {
     groups.push({ subject: "No analysis yet", entries: withoutData });
@@ -127,7 +127,7 @@ function StudentRow({ entry, displayName }: StudentRowProps) {
         <p className="mt-0.5 text-xs text-muted">
           {entry.session_count === 0
             ? "No analyses yet"
-            : `${entry.session_count} ${entry.session_count === 1 ? "analysis" : "analyses"} · Avg level ${formatAvgLevel(entry.avg_level)}`}
+            : `${entry.session_count} ${entry.session_count === 1 ? "analysis" : "analyses"} · Written language ${formatAvgLevel(entry.avg_level)}`}
         </p>
       </div>
       <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
@@ -301,7 +301,7 @@ export function StudentsExplorer({
             onChange={(event) => setMinLevel(event.target.value)}
             className={selectClassName}
           >
-            <option value="">Min avg level</option>
+            <option value="">Min written level</option>
             {[1, 2, 3, 4].map((level) => (
               <option key={level} value={level}>
                 Level {level}+
@@ -319,7 +319,7 @@ export function StudentsExplorer({
             onChange={(event) => setMaxLevel(event.target.value)}
             className={selectClassName}
           >
-            <option value="">Max avg level</option>
+            <option value="">Max written level</option>
             {[1, 2, 3, 4].map((level) => (
               <option key={level} value={level}>
                 Level {level} or below
@@ -339,7 +339,7 @@ export function StudentsExplorer({
           >
             <option value="subject">Organize by subject</option>
             <option value="grade_span">Organize by grade span</option>
-            <option value="avg_level">Organize by average level</option>
+            <option value="avg_level">Organize by written language level</option>
             <option value="flat">Flat list (A–Z)</option>
           </select>
         </div>

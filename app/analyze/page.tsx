@@ -18,7 +18,13 @@ import {
 } from "@/lib/artifact/prepare-upload";
 import { normalizeSubject, sortSubjects } from "@/lib/roster/display";
 import { parseAnalyzePrefill } from "@/lib/analyze/url";
-import type { GradeSpan } from "@/lib/types";
+import { DOMAIN_LABELS } from "@/lib/elpac/domains";
+import {
+  ELPAC_DOMAINS,
+  ENABLED_DOMAINS,
+  type ElpacDomain,
+  type GradeSpan,
+} from "@/lib/types";
 import {
   btnPrimaryClassName,
   btnSecondaryClassName,
@@ -33,6 +39,7 @@ export default function AnalyzePage() {
   const [studentUuid, setStudentUuid] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("All");
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
+  const [domain, setDomain] = useState<ElpacDomain>("writing");
   const [gradeSpan, setGradeSpan] = useState<GradeSpan>("3-12");
   const [providedLevel, setProvidedLevel] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
@@ -54,6 +61,7 @@ export default function AnalyzePage() {
     setStudentUuid(prefill.studentUuid);
     setGradeSpan(prefill.gradeSpan);
     setProvidedLevel(prefill.providedLevel);
+    setDomain(prefill.domain);
   }, [searchParams]);
 
   useEffect(() => {
@@ -124,7 +132,7 @@ export default function AnalyzePage() {
     }
 
     if (isPdfFile(file) && selectedPages.length === 0) {
-      setError("Select at least one PDF page containing student writing.");
+      setError("Select at least one PDF page containing student work.");
       return;
     }
 
@@ -150,6 +158,7 @@ export default function AnalyzePage() {
       });
       formData.append("page_count", String(preparedFiles.length));
       formData.append("student_uuid", studentUuid);
+      formData.append("domain", domain);
       formData.append("grade_span", gradeSpan);
       if (providedLevel) {
         formData.append("provided_elpac_level", providedLevel);
@@ -232,6 +241,29 @@ export default function AnalyzePage() {
               onChange={handleStudentChange}
               subjectFilter={subjectFilter}
             />
+          </div>
+
+          <div>
+            <label htmlFor="domain" className={labelClassName}>
+              What are you assessing?
+            </label>
+            <select
+              id="domain"
+              value={domain}
+              onChange={(event) => setDomain(event.target.value as ElpacDomain)}
+              className={selectClassName}
+            >
+              {ELPAC_DOMAINS.map((d) => (
+                <option
+                  key={d}
+                  value={d}
+                  disabled={!ENABLED_DOMAINS.has(d)}
+                >
+                  {DOMAIN_LABELS[d]}
+                  {!ENABLED_DOMAINS.has(d) ? " (coming soon)" : ""}
+                </option>
+              ))}
+            </select>
           </div>
 
           <ArtifactDropzone

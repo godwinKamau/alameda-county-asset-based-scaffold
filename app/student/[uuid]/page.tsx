@@ -3,7 +3,12 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
 import { AnalysisSessionArticle } from "@/components/AnalysisSessionArticle";
-import { StudentLevelChart, computeDomainLevels } from "@/components/StudentLevelChart";
+import {
+  CompositeLevelCard,
+  StudentLevelChart,
+  computeCompositeLevels,
+  computeDomainLevels,
+} from "@/components/StudentLevelChart";
 import { StudentNameHeading } from "@/components/StudentNameHeading";
 import { recordAudit } from "@/lib/audit/log";
 import { hashEmail } from "@/lib/audit/log";
@@ -13,10 +18,6 @@ import {
   listSessionsForStudent,
   rosterEntryBelongsToTeacher,
 } from "@/lib/db/queries";
-import {
-  getCaEldLevelLabel,
-  getElpacPerformanceLevelLabel,
-} from "@/lib/elpac/labels";
 import { headers } from "next/headers";
 import { btnPrimaryClassName, cardClassName } from "@/lib/ui/styles";
 
@@ -57,23 +58,13 @@ export default async function StudentPage({ params }: StudentPageProps) {
     req,
   });
 
-  const avgLevel =
-    sessions.length > 0
-      ? sessions.reduce(
-          (sum, session) => sum + session.insight.estimated_level,
-          0,
-        ) / sessions.length
-      : null;
+  const sessionLevels = sessions.map((session) => ({
+    domain: session.domain,
+    estimated_level: session.insight.estimated_level,
+  }));
 
-  const roundedAvgLevel =
-    avgLevel != null ? Math.round(avgLevel * 10) / 10 : null;
-
-  const domainLevels = computeDomainLevels(
-    sessions.map((session) => ({
-      domain: session.domain,
-      estimated_level: session.insight.estimated_level,
-    })),
-  );
+  const compositeLevels = computeCompositeLevels(sessionLevels);
+  const domainLevels = computeDomainLevels(sessionLevels);
 
   return (
     <DashboardShell title="Student History">
@@ -87,35 +78,13 @@ export default async function StudentPage({ params }: StudentPageProps) {
 
         {sessions.length > 0 && (
           <>
-            <div className="ui-card p-6">
-              <p className="text-sm font-medium text-muted">
-                Average estimated level
-              </p>
-              <div className="mt-3 flex items-start gap-4">
-                <div
-                  aria-hidden="true"
-                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-brand-soft ring-1 ring-brand-soft"
-                >
-                  <span className="text-3xl font-bold tabular-nums text-brand-dark">
-                    {roundedAvgLevel}
-                  </span>
-                </div>
-                <div className="min-w-0 pt-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-                    ELPAC Level {Math.round(roundedAvgLevel!)}
-                  </p>
-                  <p className="mt-1 text-2xl font-semibold leading-tight text-brand-dark">
-                    {getCaEldLevelLabel(Math.round(roundedAvgLevel!))}
-                  </p>
-                  <p className="mt-1 text-sm text-muted">
-                    {getElpacPerformanceLevelLabel(Math.round(roundedAvgLevel!))}
-                  </p>
-                  <p className="mt-1 text-xs text-muted">
-                    Based on {sessions.length}{" "}
-                    {sessions.length === 1 ? "analysis" : "analyses"}
-                  </p>
-                </div>
-              </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {compositeLevels.map((composite) => (
+                <CompositeLevelCard
+                  key={composite.composite}
+                  composite={composite}
+                />
+              ))}
             </div>
 
             <StudentLevelChart domainLevels={domainLevels} />

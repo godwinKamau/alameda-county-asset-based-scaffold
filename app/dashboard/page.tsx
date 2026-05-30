@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { AddStudentForm } from "@/components/AddStudentForm";
 import { DashboardShell } from "@/components/DashboardShell";
@@ -11,8 +10,6 @@ import {
 } from "@/lib/db/queries";
 import { hashEmail } from "@/lib/audit/log";
 import { collectExistingSubjects } from "@/lib/roster/subject";
-import { btnDashboardActionClassName } from "@/lib/ui/styles";
-import { currentUser } from "@clerk/nextjs/server";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -31,42 +28,56 @@ export default async function DashboardPage() {
   return (
     <DashboardShell title="Dashboard">
       <div className="mx-auto max-w-6xl space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="max-w-xs flex-1">
-            <StatCard
-              label="Students in roster"
-              value={roster.length}
-              accent="brand"
-              href="/students"
-              icon={
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="h-6 w-6"
-                  stroke="currentColor"
-                  strokeWidth={1.75}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 14l9-5-9-5-9 5 9 5z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
-                  />
-                </svg>
-              }
-            />
-          </div>
-          <Link
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <StatCard
+            label="Students in roster"
+            value={roster.length}
+            accent="brand"
+            href="/students"
+            icon={
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-6 w-6"
+                stroke="currentColor"
+                strokeWidth={1.75}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 14l9-5-9-5-9 5 9 5z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                />
+              </svg>
+            }
+          />
+          <StatCard
+            label="Upload & Assess Students' Work"
+            value="New Analysis"
+            accent="orange"
             href="/analyze"
-            className={`${btnDashboardActionClassName} text-center`}
-          >
-            New Analysis
-          </Link>
+            icon={
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-6 w-6"
+                stroke="currentColor"
+                strokeWidth={1.75}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            }
+          />
         </div>
 
         <AddStudentForm existingSubjects={existingSubjects} />

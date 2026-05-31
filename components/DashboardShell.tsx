@@ -12,7 +12,7 @@ export function DashboardShell({ title, children }: DashboardShellProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-white">
       <AppSidebar
         mobileOpen={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}

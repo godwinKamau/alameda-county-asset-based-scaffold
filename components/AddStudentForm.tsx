@@ -111,7 +111,7 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
     <div className={cardClassName}>
       <h2 className={sectionTitleClassName}>Add Student</h2>
       <p className={`mt-1 ${mutedTextClassName}`}>
-        Add a single student to your roster without uploading a CSV.
+        Add a single student to your roster or upload a CSV to add multiple students at once.
       </p>
 
       <form

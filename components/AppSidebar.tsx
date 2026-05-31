@@ -146,7 +146,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col border-r border-brand-soft/80 bg-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col border-r border-brand-soft/80 bg-slate-100 lg:flex">
         {sidebarContent}
       </aside>
 
@@ -162,7 +162,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
 
       {/* Mobile drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-brand-soft/80 bg-white transition-transform duration-200 lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-brand-soft/80 bg-slate-100 transition-transform duration-200 lg:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-hidden={!mobileOpen}

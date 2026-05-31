@@ -31,7 +31,7 @@ export default function StudentLoading() {
 
         {/* session entries */}
         {[1, 2, 3].map((i) => (
-          <SkeletonCard key={i} className="bg-brand-soft/20">
+          <SkeletonCard key={i}>
             <div className="flex items-start gap-3">
               <Skeleton className="mt-0.5 h-4 w-4 shrink-0 rounded" />
               <div className="flex-1 space-y-2">

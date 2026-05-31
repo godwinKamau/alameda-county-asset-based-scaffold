@@ -90,8 +90,8 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
 
   const sidebarContent = (
     <>
-      <div className="border-b border-brand-soft/60 px-5 py-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+      <div className="border-b border-white/10 px-5 py-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">
           ELPAC Writing Analysis
         </p>
         <div className="mt-4 flex items-center gap-3">
@@ -99,16 +99,16 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
             <UserButton
               appearance={{
                 elements: {
-                  avatarBox: "h-12 w-12 rounded-full ring-2 ring-brand-soft",
+                  avatarBox: "h-12 w-12 rounded-full ring-2 ring-white/20",
                 },
               }}
             />
           ) : (
-            <div className="h-12 w-12 animate-pulse rounded-full bg-brand-soft" />
+            <div className="h-12 w-12 animate-pulse rounded-full bg-white/10" />
           )}
           <div className="min-w-0">
-            <p className="truncate font-semibold text-brand-dark">{displayName}</p>
-            <p className="text-sm text-muted">Teacher</p>
+            <p className="truncate font-semibold text-white">{displayName}</p>
+            <p className="text-sm text-brand-soft/80">Teacher</p>
           </div>
         </div>
       </div>
@@ -127,7 +127,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
               className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-brand text-white shadow-sm"
-                  : "text-brand-dark hover:bg-brand-soft/80"
+                  : "text-brand-soft hover:bg-white/10 hover:text-white"
               }`}
             >
               {item.icon}
@@ -137,7 +137,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
         })}
       </nav>
 
-      <div className="border-t border-brand-soft/60 px-3 py-4">
+      <div className="border-t border-white/10 px-3 py-4">
         <LogoutButton />
       </div>
     </>
@@ -146,7 +146,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col border-r border-brand-soft/80 bg-slate-100 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col border-r border-white/10 bg-brand-dark lg:flex">
         {sidebarContent}
       </aside>
 
@@ -162,7 +162,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
 
       {/* Mobile drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-brand-soft/80 bg-slate-100 transition-transform duration-200 lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark transition-transform duration-200 lg:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-hidden={!mobileOpen}

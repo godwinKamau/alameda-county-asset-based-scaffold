@@ -1,5 +1,3 @@
-import "server-only";
-
 import fs from "fs";
 import path from "path";
 import type { ElpacDomain, GradeSpan } from "@/lib/types";

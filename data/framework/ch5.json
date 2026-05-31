@@ -1,0 +1,444 @@
+{
+  "_meta": {
+    "source": "California ELA/ELD Framework, Chapter 5: Grades Four and Five",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter5.pdf",
+    "coverage": [
+      "Grade 4",
+      "Grade 5",
+      "Integrated ELD",
+      "Designated ELD",
+      "Meaning Making",
+      "Language Development",
+      "Effective Expression",
+      "Content Knowledge",
+      "Foundational Skills"
+    ],
+    "scope_note": "Extracted from Chapter 5 covering grades 4-5, including snapshots of practice, vignettes, pedagogical guidance for the five key themes, and integrated/designated ELD examples."
+  },
+  "writing_moves": {
+    "3-12": {
+      "1": [
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "During shared writing, dictate a sentence slowly while pointing to each word, then invite the student to re-read the sentence, pointing left to right.",
+          "language_target": "Word-by-word correspondence, directionality of print",
+          "framework_anchor": "Foundational Skills",
+          "source_section": "Print Concepts",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "For newcomer ELs, provide a cognate (e.g., 'responsablemente' for 'responsibly') or code-switch to explain academic words in the student's primary language during instruction.",
+          "language_target": "Academic vocabulary (behaved, responsibly)",
+          "framework_anchor": "English Language Development in Grade Four",
+          "source_section": "p. 447",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Provide newcomer ELs opportunities to read or listen to texts in their primary language that are the same as those they read in English, prior to reading in English, so comprehension transfers.",
+          "framework_anchor": "English Language Development in Grade Four",
+          "source_section": "p. 447",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "During designated ELD, provide an open sentence frame (e.g., 'I think ____ behaved responsibly because ____.') for students at the Emerging level to use in expressing their ideas about a text-dependent question.",
+          "language_target": "Sentence frames for expressing opinions with reasons",
+          "framework_anchor": "English Language Development in Grade Four",
+          "source_section": "p. 447",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Explain the meaning of academic words (e.g., 'behaved,' 'responsibly') explicitly before asking students at the Emerging level to respond to text-dependent questions.",
+          "language_target": "Academic vocabulary for character analysis",
+          "framework_anchor": "English Language Development in Grade Four",
+          "source_section": "p. 447",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "In designated ELD, help newcomer ELs develop mathematical language by drawing attention to verbs used to identify (is/are) and classify (has/have) geometric shapes, using sentence frames for asking and answering questions.",
+          "language_target": "Mathematical verbs (is/are, has/have); sentence frames: 'Is this a (shape)? This is a (shape) because it has (attributes).'",
+          "framework_anchor": "Snapshot 5.4: Developing Mathematical Language",
+          "source_section": "p. 450",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        }
+      ],
+      "2": [
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide a graphic organizer that structures narrative writing into predictable stages (orientation, complication, resolution) and give students a mentor text to use as a model, highlighting expected narrative language such as dialogue and prepositional phrases.",
+          "language_target": "Narrative structure; dialogue; prepositional phrases for adding detail",
+          "framework_anchor": "English Language Development in Grade Five",
+          "source_section": "p. 481",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "During designated ELD with students at the Expanding level, explicitly teach how authors use 'telling' language (e.g., 'She was afraid') versus 'showing' language (e.g., 'She screamed') to express characters' attitudes and feelings, then guide students to mark up text examples and chart them.",
+          "language_target": "Explicit vs. implicit language for character feelings",
+          "framework_anchor": "Snapshot 5.3: Identifying Characters' Actions and Feelings",
+          "source_section": "p. 448",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Model for students at the Expanding level how to describe photographs or visual art in detail, provide a word bank and sentence frames (e.g., 'The stone bas-relief shows ___. These (animals/people) are ___.'), and listen to students as they describe, providing just-in-time scaffolding.",
+          "language_target": "Descriptive adjectives, prepositional phrases, academic art vocabulary",
+          "framework_anchor": "Snapshot 5.9: Connecting Photographs and Cultural Backgrounds",
+          "source_section": "p. 484",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "After students have described photographs with a partner, lead a jointly constructed class description: ask students to generate words and phrases, display a photograph, prompt students to share ideas with a partner, then with the class; write sentences using a document camera so students can see the description unfold and suggest revisions for precision.",
+          "language_target": "Precise word choice, prepositional phrases, sentence-level editing",
+          "framework_anchor": "Snapshot 5.9: Connecting Photographs and Cultural Backgrounds",
+          "source_section": "p. 485",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "After a content lesson, engage students in selecting ten important words from a trade book using sticky notes, building a histogram of word frequency, then discussing why words were chosen, what they mean, and their importance to the topic.",
+          "framework_anchor": "Snapshot 5.2: Histogram of Important Words in the Study of Volcanoes",
+          "source_section": "p. 443",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Distribute vocabulary term cards from a unit of study to students, have them explain their term to multiple peers in turn, then find a classmate whose word links to theirs, and articulate the connection to the whole class using an open sentence frame ('Our terms are related because ___.').",
+          "language_target": "General academic and domain-specific vocabulary; connectives for explaining relationships",
+          "framework_anchor": "Snapshot 5.1: Linking Vocabulary to Express Understanding of the California Gold Rush",
+          "source_section": "p. 441",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Recast a student's explanation in mathematics to stretch language (e.g., student: 'The rectangle has parallelogram,' teacher: 'You're saying that a triangle is not a parallelogram. Is that what you are saying?'), validating the student's ideas while modeling precise mathematical discourse.",
+          "language_target": "Mathematical academic language, precise phrasing",
+          "framework_anchor": "Snapshot 5.4: Developing Mathematical Language",
+          "source_section": "p. 450",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        }
+      ],
+      "3": [
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Design a sequence of text-based experiences before, during, and after reading: before reading, have students preview the text noting headings, captions, diagrams, title, author, and publisher, and answer predictive questions; during reading, pause to discuss text-dependent questions; after reading, have students summarize key points or complete a culminating task.",
+          "framework_anchor": "Meaning Making in Grade Five",
+          "source_section": "p. 465",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Develop text-dependent questions focused on important ideas in the text, designed to take students deeper and help them wrestle with difficult sections, and also teach students to generate their own text-dependent questions to promote active engagement.",
+          "framework_anchor": "Meaning Making in Grade Four",
+          "source_section": "p. 425, Figure 5.9",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Teach targeted vocabulary by providing 'student-friendly' definitions that capture the essence of a word, include how it is typically used, and use everyday language, after ensuring students have extensive exposure to the words in complex texts.",
+          "language_target": "Academic and domain-specific vocabulary",
+          "framework_anchor": "Language Development in Grade Four",
+          "source_section": "p. 427",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Establish a word-conscious environment by modeling fascination with language, exploring word etymologies, playing word games, and fostering both a cognitive and affective stance toward words.",
+          "framework_anchor": "Language Development in Grade Four",
+          "source_section": "p. 427",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide explicit instruction on writing multi-paragraph texts by teaching students to organize opinion pieces with an introduction, reasons supported by facts and details, linking words for relationships, and a conclusion, and to use domain-specific vocabulary and headings in informational/explanatory texts.",
+          "framework_anchor": "Writing in Grade Four",
+          "source_section": "p. 430",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "In narrative writing, teach students to orient the reader with an opening, unfold event sequences clearly and naturally, use concrete words and sensory details, employ transitional words and phrases, and provide a conclusion that follows from the narrated experience.",
+          "language_target": "Narrative structure; transitional words and phrases; concrete and sensory words",
+          "framework_anchor": "Writing in Grade Four",
+          "source_section": "p. 430",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Structure regular one-on-one, small group, and teacher-led discussions in every content area by having students prepare (e.g., reading or studying materials), establish discussion roles, and practice responding to specific questions, connecting comments to others' remarks, and explaining ideas in light of the discussion.",
+          "framework_anchor": "Discussing in Grade Four",
+          "source_section": "p. 434",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Assign students specific roles in literature circle discussions (e.g., Discussion Director, Literary Luminary, Connector, Illustrator, Summarizer, Vocabulary Enricher, Travel Tracer, Investigator), ensuring all members contribute and the group deepens comprehension.",
+          "framework_anchor": "Discussing in Grade Four, Figure 5.12",
+          "source_section": "p. 435",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Guide students to plan and deliver narrative presentations by modeling effective organization, use of descriptive details, and rehearsal, then provide time for partners or small groups to plan, rehearse, and present together, followed by debriefing to reflect on improvement.",
+          "language_target": "Presentation organization, descriptive details, oral delivery skills",
+          "framework_anchor": "Presenting in Grade Four",
+          "source_section": "p. 436",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Support students to plan and deliver opinion speeches by teaching them to state an opinion, sequence evidence logically, use transitional words (e.g., 'consequently,' 'therefore') to link opinions and evidence, and provide a concluding statement; scaffold with formative assessment and just-in-time feedback.",
+          "language_target": "Opinion statements, evidence sequencing, transitional words",
+          "framework_anchor": "Presenting in Grade Five",
+          "source_section": "p. 470",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Have students memorize and recite a poem or section of a speech or historical document using appropriate rate, expression, and gestures; provide ample time for practice with a partner or small group before presenting to a larger audience.",
+          "framework_anchor": "Presenting in Grade Five",
+          "source_section": "p. 471",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Teach language conventions (grammar, usage, capitalization, punctuation, spelling) explicitly and tie them to meaningful and effective communication in writing and speaking, not as isolated drills.",
+          "framework_anchor": "Using Language Conventions in Grade Four",
+          "source_section": "p. 437, Figure 5.13",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Ensure all students, including ELs and students with disabilities, are present for content instruction (hands-on activities, investigations, demonstrations, discussions) by avoiding removal for special services during core content time, and plan within a Multi-Tiered System of Supports to meet diverse needs.",
+          "framework_anchor": "Content Knowledge in Grade Four",
+          "source_section": "p. 438",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Provide explicit instruction on how to make meaning with the texts of different disciplines by teaching students the unique presentation of information, language use (vocabulary, syntax, text structures), and role of graphics and images in each content area.",
+          "framework_anchor": "Content Knowledge in Grade Four",
+          "source_section": "p. 438",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Build students' content knowledge and academic language by using text sets on a topic (e.g., Earth's systems, the American Revolution) that include a variety of genres (books, photo essays, picture books, online resources) and provide daily opportunities for wide reading and student-directed research.",
+          "framework_anchor": "Content Knowledge in Grades Four and Five",
+          "source_section": "p. 438, p. 473, Figures 5.14, 5.22",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "foundational_skills",
+          "eld_mode": "integrated",
+          "move": "Differentiate phonics and word recognition instruction based on assessment: students who demonstrate achievement of a specific skill should not receive unnecessary instruction; students experiencing difficulty must receive focused, explicit, and systematic instruction immediately.",
+          "framework_anchor": "Phonics and Word Recognition in Grade Four",
+          "source_section": "p. 439",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "foundational_skills",
+          "eld_mode": "integrated",
+          "move": "Develop fluency by having students engage in rereading for authentic purposes (preparing for reader's theatre, reading aloud a poem to an audience, audio or video recording a presentation) and, most importantly, promote daily independent reading of a wide range of texts.",
+          "framework_anchor": "Fluency in Grade Four",
+          "source_section": "p. 439",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "foundational_skills",
+          "eld_mode": "integrated",
+          "move": "For students reading more than ten words correct per minute below the 50th percentile, provide swift and appropriate additional instruction targeted to their needs, ensure high motivation with access to a wide selection of interesting books, and allow time to read and discuss texts with peers.",
+          "framework_anchor": "Fluency in Grade Five, Figure 5.23",
+          "source_section": "p. 473",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Model sentence combining by showing students half of an image, having them generate simple sentences describing it, then revealing the other half and generating more simple sentences; next, have pairs combine sentences to create a descriptive paragraph using expanded noun phrases, complex sentences, and varied conjunctions.",
+          "language_target": "Expanded noun phrases, complex sentences, coordinating and subordinating conjunctions",
+          "framework_anchor": "Snapshot 5.5: Sentence Combining with Grant Wood's Painting",
+          "source_section": "p. 475",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Guide students through deconstruction of a complex primary source text (e.g., the Preamble) by sorting it into categories (prepositional phrases, nouns/adjectives, action words, receivers of action), then use this analysis in structured paraphrase practice and to formulate interpretations using sentence frames.",
+          "language_target": "Sentence structure, paraphrasing, evidence-based interpretation",
+          "framework_anchor": "Snapshot 5.8: Close Reading of the Preamble to the Constitution",
+          "source_section": "p. 480",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Support a student-initiated research and action project by guiding students to clearly describe a problem, generate research questions, pursue investigations (observations, interviews, Internet research, measurements), communicate findings orally and in writing, and persuade multiple audiences using precise vocabulary and cohesive structure.",
+          "language_target": "General academic and domain-specific vocabulary; persuasive language structures",
+          "framework_anchor": "Snapshot 5.6: Student-Initiated Research and Action Project",
+          "source_section": "p. 477",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        }
+      ],
+      "4": [
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Continue to read aloud and think aloud from complex texts, modeling meaning making for students and expanding their exposure to sophisticated content, ideas, and language.",
+          "framework_anchor": "Meaning Making in Grade Five",
+          "source_section": "p. 465",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Guide students through a multi-day, purposeful engagement with a challenging informational text: before reading, have students discuss a key question and do a quickwrite, brainstorm and categorize related terms, preview the text, and answer predictive questions; during reading, engage with text-dependent questions; after reading, complete an authentic culminating task.",
+          "framework_anchor": "Meaning Making in Grade Five",
+          "source_section": "p. 465",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Provide a comprehensive vocabulary program: ensure extensive experiences with academic language through myriad collaborative conversations, regular read-alouds from a variety of sources, and daily independent reading; establish a word-conscious environment; teach words explicitly; teach word-learning strategies; and support students to develop language awareness.",
+          "framework_anchor": "Language Development in Grade Five",
+          "source_section": "p. 467",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Engage students in reflecting on and discussing language choices by examining the author's craft in a variety of genres and using some texts as mentor texts that contain targeted features for students to emulate in their own writing.",
+          "framework_anchor": "Language Development in Grade Five",
+          "source_section": "p. 467",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "In grade five, advance students' writing of logically organized and clearly supported opinion pieces, informational/explanatory texts, and narratives by teaching them to provide ample detail, use precise language, include formatting and multimedia as appropriate, and make deliberate language choices.",
+          "framework_anchor": "Writing in Grade Five",
+          "source_section": "p. 467",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Engage students in more sustained discussions than in previous grades, teaching them to synthesize information from a variety of sources, build on comments of others, express opinions not shared by peers, accept diverse viewpoints, and devote considerable attention to providing evidence for opinions and interpretations.",
+          "framework_anchor": "Discussing in Grade Five",
+          "source_section": "p. 469",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Ensure discussion materials are sufficiently interesting, the discussion structure ensures all participate, students have sufficient background knowledge (including vocabulary), and students feel safe to contribute; prepare students by having them read or study materials and establish discussion goals beforehand.",
+          "framework_anchor": "Discussing in Grade Five",
+          "source_section": "p. 469",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Guide students to creatively and critically prepare presentations by considering format and media, analyzing and synthesizing information, making judgments about what to include and how to effectively present it, and making careful choices about language and images used.",
+          "framework_anchor": "Presenting in Grade Five",
+          "source_section": "p. 470",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Teach students to create short silent films by having them storyboard the story structure, design costumes and sets, cast the film, create or identify music, film and edit footage, share a first draft for feedback using a rubric, revise and polish, present at a class film festival, and complete self-evaluations based on rubrics.",
+          "framework_anchor": "Snapshot 5.7: Silent Film Festival About Mars",
+          "source_section": "p. 479",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Ensure all students are present for content instruction and use a Multi-Tiered System of Supports to plan schedules that meet diverse needs, including ELs and students with disabilities, without removing students from core content learning.",
+          "framework_anchor": "Content Knowledge in Grade Five",
+          "source_section": "p. 472",
+          "grade_band": "4-5",
+          "source_chapter": 5
+        }
+      ]
+    }
+  }
+}

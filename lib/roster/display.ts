@@ -49,3 +49,38 @@ export function formatStudentGradeLabel(
   }
   return pldLabel;
 }
+
+export function getInitials(label: string): string {
+  const trimmed = label.trim();
+  if (!trimmed) return "?";
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+  }
+  return trimmed.slice(0, 2).toUpperCase();
+}
+
+export function formatRelativeTime(date: Date | string | null): string {
+  if (!date) return "";
+  const then = new Date(date);
+  if (Number.isNaN(then.getTime())) return "";
+
+  const now = new Date();
+  const diffMs = now.getTime() - then.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 0) return "today";
+  if (diffDays === 1) return "1 day ago";
+  if (diffDays < 7) return `${diffDays} days ago`;
+
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffWeeks === 1) return "1 week ago";
+  if (diffWeeks < 5) return `${diffWeeks} weeks ago`;
+
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths === 1) return "1 month ago";
+  if (diffMonths < 12) return `${diffMonths} months ago`;
+
+  const diffYears = Math.floor(diffDays / 365);
+  return diffYears === 1 ? "1 year ago" : `${diffYears} years ago`;
+}

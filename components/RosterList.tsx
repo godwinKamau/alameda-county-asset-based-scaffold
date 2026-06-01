@@ -21,6 +21,7 @@ import {
   selectClassName,
 } from "@/lib/ui/styles";
 import { SubjectInput } from "./SubjectInput";
+import { NewAnalysisIcon } from "./NewAnalysisIcon";
 
 export interface RosterListEntry {
   id: string;
@@ -37,9 +38,14 @@ const GRADE_SPANS: GradeSpan[] = ["K", "1-2", "3-12"];
 interface RosterListProps {
   entries: RosterListEntry[];
   existingSubjects: string[];
+  manageMode?: boolean;
 }
 
-export function RosterList({ entries, existingSubjects }: RosterListProps) {
+export function RosterList({
+  entries,
+  existingSubjects,
+  manageMode = false,
+}: RosterListProps) {
   const router = useRouter();
   const [mapping, setMapping] = useState<Record<string, string>>({});
   const [deletingUuid, setDeletingUuid] = useState<string | null>(null);
@@ -53,6 +59,7 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
   const [collapsedSubjects, setCollapsedSubjects] = useState<Set<string>>(
     () => new Set(),
   );
+  const [openMenuUuid, setOpenMenuUuid] = useState<string | null>(null);
 
   const groupedEntries = useMemo(
     () => groupEntriesBySubject(entries),
@@ -285,40 +292,42 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                         {entry.known_elpac_level != null &&
                           ` · Known level: ${entry.known_elpac_level}`}
                       </p>
-                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            isEditingGrade
-                              ? cancelEditingGrade()
-                              : startEditingGrade(entry)
-                          }
-                          aria-expanded={isEditingGrade}
-                          className={`text-xs transition-colors ${
-                            isEditingGrade
-                              ? "font-semibold text-brand"
-                              : "text-muted hover:text-brand-dark"
-                          }`}
-                        >
-                          Edit grade
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            isEditingSubject
-                              ? cancelEditing()
-                              : startEditing(entry)
-                          }
-                          aria-expanded={isEditingSubject}
-                          className={`text-xs transition-colors ${
-                            isEditingSubject
-                              ? "font-semibold text-brand"
-                              : "text-muted hover:text-brand-dark"
-                          }`}
-                        >
-                          Edit subject
-                        </button>
-                      </div>
+                      {!manageMode && (
+                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              isEditingGrade
+                                ? cancelEditingGrade()
+                                : startEditingGrade(entry)
+                            }
+                            aria-expanded={isEditingGrade}
+                            className={`text-xs transition-colors ${
+                              isEditingGrade
+                                ? "font-semibold text-brand"
+                                : "text-muted hover:text-brand-dark"
+                            }`}
+                          >
+                            Edit grade
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              isEditingSubject
+                                ? cancelEditing()
+                                : startEditing(entry)
+                            }
+                            aria-expanded={isEditingSubject}
+                            className={`text-xs transition-colors ${
+                              isEditingSubject
+                                ? "font-semibold text-brand"
+                                : "text-muted hover:text-brand-dark"
+                            }`}
+                          >
+                            Edit subject
+                          </button>
+                        </div>
+                      )}
                       {isEditingGrade && (
                         <div className="mt-3 space-y-2 rounded-lg border border-brand-soft bg-brand-soft/30 p-3">
                           <div className="flex flex-wrap items-center gap-2">
@@ -415,26 +424,115 @@ export function RosterList({ entries, existingSubjects }: RosterListProps) {
                         </div>
                       )}
                     </div>
-                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
-                      <Link href={buildAnalyzeUrl(entry)} className={linkClassName}>
-                        Analyze
-                      </Link>
-                      <Link
-                        href={`/student/${entry.student_uuid}`}
-                        className={linkClassName}
-                      >
-                        View history
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(entry)}
-                        disabled={deletingUuid === entry.student_uuid}
-                        className="text-sm text-error hover:text-red-800 disabled:opacity-50"
-                      >
-                        {deletingUuid === entry.student_uuid
-                          ? "Removing…"
-                          : "Remove"}
-                      </button>
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                      {manageMode ? (
+                        <>
+                          <Link
+                            href={buildAnalyzeUrl(entry)}
+                            aria-label={`Analyze ${resolveDisplayName(entry, mapping)}`}
+                            title="Analyze"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-brand transition-colors hover:bg-brand-soft hover:text-brand-dark"
+                          >
+                            <NewAnalysisIcon />
+                          </Link>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${resolveDisplayName(entry, mapping)}`}
+                            onClick={() => handleDelete(entry)}
+                            disabled={deletingUuid === entry.student_uuid}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-error transition-colors hover:bg-red-50 disabled:opacity-50"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              className="h-4 w-4"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                          <div className="relative">
+                            <button
+                              type="button"
+                              aria-label={`Edit ${resolveDisplayName(entry, mapping)}`}
+                              aria-expanded={openMenuUuid === entry.student_uuid}
+                              aria-haspopup="menu"
+                              onClick={() =>
+                                setOpenMenuUuid((current) =>
+                                  current === entry.student_uuid
+                                    ? null
+                                    : entry.student_uuid,
+                                )
+                              }
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-brand-soft hover:text-brand-dark"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                className="h-5 w-5"
+                              >
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                              </svg>
+                            </button>
+                            {openMenuUuid === entry.student_uuid && (
+                              <div
+                                role="menu"
+                                className="absolute right-0 z-10 mt-1 w-40 rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+                              >
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  onClick={() => {
+                                    setOpenMenuUuid(null);
+                                    startEditingGrade(entry);
+                                  }}
+                                  className="block w-full px-3 py-2 text-left text-sm text-brand-dark hover:bg-brand-soft/50"
+                                >
+                                  Edit grade
+                                </button>
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  onClick={() => {
+                                    setOpenMenuUuid(null);
+                                    startEditing(entry);
+                                  }}
+                                  className="block w-full px-3 py-2 text-left text-sm text-brand-dark hover:bg-brand-soft/50"
+                                >
+                                  Edit subject
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <Link href={buildAnalyzeUrl(entry)} className={linkClassName}>
+                            Analyze
+                          </Link>
+                          <Link
+                            href={`/student/${entry.student_uuid}`}
+                            className={linkClassName}
+                          >
+                            View history
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(entry)}
+                            disabled={deletingUuid === entry.student_uuid}
+                            className="text-sm text-error hover:text-red-800 disabled:opacity-50"
+                          >
+                            {deletingUuid === entry.student_uuid
+                              ? "Removing…"
+                              : "Remove"}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </li>
                 );

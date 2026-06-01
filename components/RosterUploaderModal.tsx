@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   btnDashboardActionClassName,
   btnUploadCsvClassName,
@@ -12,7 +13,11 @@ import {
 } from "@/lib/ui/styles";
 import { ErrorBanner } from "./ErrorBanner";
 
-export function RosterUploaderModal() {
+export function RosterUploaderModal({
+  buttonClassName = btnUploadCsvClassName,
+}: {
+  buttonClassName?: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -103,79 +108,81 @@ export function RosterUploaderModal() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={btnUploadCsvClassName}
+        className={buttonClassName}
       >
         Upload Roster
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          role="presentation"
-        >
-          <button
-            type="button"
-            aria-label="Close upload roster dialog"
-            className="absolute inset-0 bg-black/50"
-            onClick={closeModal}
-          />
-
+      {open &&
+        createPortal(
           <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="upload-roster-title"
-            className={`relative z-10 w-full max-w-lg ${cardClassName}`}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            role="presentation"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 id="upload-roster-title" className={sectionTitleClassName}>
-                  Upload Roster
-                </h2>
-                <p className={`mt-1 ${mutedTextClassName}`}>
-                  CSV columns:{" "}
-                  <code className="text-xs">
-                    label, grade_span, exact_grade (optional), known_elpac_level,
-                    subject (optional)
-                  </code>
-                </p>
+            <button
+              type="button"
+              aria-label="Close upload roster dialog"
+              className="absolute inset-0 bg-black/50"
+              onClick={closeModal}
+            />
+
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="upload-roster-title"
+              className={`relative z-10 w-full max-w-lg ${cardClassName}`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 id="upload-roster-title" className={sectionTitleClassName}>
+                    Upload Roster
+                  </h2>
+                  <p className={`mt-1 ${mutedTextClassName}`}>
+                    CSV columns:{" "}
+                    <code className="text-xs">
+                      label, grade_span, exact_grade (optional), known_elpac_level,
+                      subject (optional)
+                    </code>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  aria-label="Close"
+                  className="rounded-lg px-2 py-1 text-xl leading-none text-brand-dark transition-colors hover:bg-slate-100"
+                >
+                  ×
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={closeModal}
-                aria-label="Close"
-                className="rounded-lg px-2 py-1 text-xl leading-none text-brand-dark transition-colors hover:bg-slate-100"
-              >
-                ×
-              </button>
+
+              <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+                <input
+                  type="file"
+                  name="file"
+                  accept=".csv,text/csv"
+                  className={fileInputClassName}
+                />
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className={btnDashboardActionClassName}
+                >
+                  {uploading ? "Uploading…" : "Upload CSV"}
+                </button>
+              </form>
+
+              {error && (
+                <div className="mt-4">
+                  <ErrorBanner message={error} />
+                </div>
+              )}
+              {success && (
+                <p className="mt-4 text-sm text-accent-green">{success}</p>
+              )}
             </div>
-
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <input
-                type="file"
-                name="file"
-                accept=".csv,text/csv"
-                className={fileInputClassName}
-              />
-              <button
-                type="submit"
-                disabled={uploading}
-                className={btnDashboardActionClassName}
-              >
-                {uploading ? "Uploading…" : "Upload CSV"}
-              </button>
-            </form>
-
-            {error && (
-              <div className="mt-4">
-                <ErrorBanner message={error} />
-              </div>
-            )}
-            {success && (
-              <p className="mt-4 text-sm text-accent-green">{success}</p>
-            )}
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

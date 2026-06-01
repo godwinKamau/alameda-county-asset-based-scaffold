@@ -28,7 +28,7 @@ export function LogoutButton() {
     <button
       type="button"
       onClick={() => void logout()}
-      className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-dark transition-colors hover:bg-brand-soft/80"
+      className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft transition-colors hover:bg-white/10 hover:text-white"
     >
       <LogOutIcon />
       Log out

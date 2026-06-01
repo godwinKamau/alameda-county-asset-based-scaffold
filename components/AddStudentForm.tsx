@@ -2,23 +2,26 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { CA_ELD_LEVEL_LABELS } from "@/lib/elpac/labels";
 import { matchExistingSubject } from "@/lib/roster/subject";
 import { EXACT_GRADES } from "@/lib/roster/grade";
 import { deriveGradeSpan, type ExactGrade, type GradeSpan } from "@/lib/types";
 import {
   btnDashboardActionClassName,
   cardClassName,
+  helperTextClassName,
+  inputClassName,
   labelClassName,
   mutedTextClassName,
+  requiredDotClassName,
   sectionTitleClassName,
-  inputClassName,
   selectClassName,
 } from "@/lib/ui/styles";
 import { ErrorBanner } from "./ErrorBanner";
-import { RosterUploaderModal } from "./RosterUploaderModal";
 import { SubjectInput } from "./SubjectInput";
 
 const GRADE_SPANS: GradeSpan[] = ["K", "1-2", "3-12"];
+const ELPAC_LEVELS = [1, 2, 3, 4] as const;
 
 interface AddStudentFormProps {
   existingSubjects: string[];
@@ -48,7 +51,7 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
     const knownLevelRaw = String(formData.get("known_elpac_level") ?? "").trim();
 
     if (!label) {
-      setError("Student name is required.");
+      setError("Student label is required.");
       return;
     }
 
@@ -111,7 +114,8 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
     <div className={cardClassName}>
       <h2 className={sectionTitleClassName}>Add Student</h2>
       <p className={`mt-1 ${mutedTextClassName}`}>
-        Add a single student to your roster without uploading a CSV.
+        Add a single student to your roster. Use Upload Roster in the header to
+        add many at once.
       </p>
 
       <form
@@ -120,11 +124,9 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         className="mt-4 grid gap-4 sm:grid-cols-2"
       >
         <div className="sm:col-span-2">
-          <label
-            htmlFor="add-student-label"
-            className={labelClassName}
-          >
-            Student name
+          <label htmlFor="add-student-label" className={labelClassName}>
+            Student label
+            <span className={requiredDotClassName} aria-hidden="true" />
           </label>
           <input
             id="add-student-label"
@@ -132,16 +134,18 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
             type="text"
             required
             autoComplete="off"
-            placeholder="e.g. Maria G."
+            placeholder="e.g. MG for Maria G."
             className={inputClassName}
           />
+          <p className={helperTextClassName}>
+            <span className="font-medium text-brand-dark">FERPA note:</span> This
+            label stays on your device and is never sent to our servers. Use a
+            nickname or initials — not a legal name.
+          </p>
         </div>
 
         <div className="sm:col-span-2">
-          <label
-            htmlFor="add-student-subject"
-            className={labelClassName}
-          >
+          <label htmlFor="add-student-subject" className={labelClassName}>
             Subject <span className="text-muted">(optional)</span>
           </label>
           <SubjectInput
@@ -153,39 +157,9 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         </div>
 
         <div>
-          <label
-            htmlFor="add-student-exact-grade"
-            className={labelClassName}
-          >
-            Exact grade <span className="text-muted">(optional)</span>
-          </label>
-          <select
-            id="add-student-exact-grade"
-            value={exactGrade}
-            onChange={(event) => {
-              const value = event.target.value;
-              setExactGrade(value);
-              if (value) {
-                setGradeSpan(deriveGradeSpan(value as ExactGrade));
-              }
-            }}
-            className={selectClassName}
-          >
-            <option value="">Not set</option>
-            {EXACT_GRADES.map((grade) => (
-              <option key={grade} value={grade}>
-                {grade === "K" ? "Grade K" : `Grade ${grade}`}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label
-            htmlFor="add-student-grade-span"
-            className={labelClassName}
-          >
+          <label htmlFor="add-student-grade-span" className={labelClassName}>
             Grade span
+            <span className={requiredDotClassName} aria-hidden="true" />
           </label>
           <select
             id="add-student-grade-span"
@@ -209,10 +183,32 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         </div>
 
         <div>
-          <label
-            htmlFor="add-student-known-level"
-            className={labelClassName}
+          <label htmlFor="add-student-exact-grade" className={labelClassName}>
+            Exact grade <span className="text-muted">(optional)</span>
+          </label>
+          <select
+            id="add-student-exact-grade"
+            value={exactGrade}
+            onChange={(event) => {
+              const value = event.target.value;
+              setExactGrade(value);
+              if (value) {
+                setGradeSpan(deriveGradeSpan(value as ExactGrade));
+              }
+            }}
+            className={selectClassName}
           >
+            <option value="">Not set</option>
+            {EXACT_GRADES.map((grade) => (
+              <option key={grade} value={grade}>
+                {grade === "K" ? "Grade K" : `Grade ${grade}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="sm:col-span-2">
+          <label htmlFor="add-student-known-level" className={labelClassName}>
             Known ELPAC level <span className="text-muted">(optional)</span>
           </label>
           <select
@@ -222,16 +218,19 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
             className={selectClassName}
           >
             <option value="">Not set</option>
-            {[1, 2, 3, 4].map((level) => (
+            {ELPAC_LEVELS.map((level) => (
               <option key={level} value={level}>
-                Level {level}
+                Level {level} – {CA_ELD_LEVEL_LABELS[level]}
               </option>
             ))}
           </select>
+          <p className={helperTextClassName}>
+            Find the performance level on the student&apos;s ELPAC score report.
+          </p>
         </div>
       </form>
 
-      <div className="mt-4 flex flex-wrap gap-3">
+      <div className="mt-4">
         <button
           type="submit"
           form="add-student-form"
@@ -240,7 +239,6 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
         >
           {submitting ? "Adding…" : "Add Student"}
         </button>
-        <RosterUploaderModal />
       </div>
 
       {error && (

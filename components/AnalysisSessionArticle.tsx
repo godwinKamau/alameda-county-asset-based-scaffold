@@ -18,7 +18,7 @@ export function AnalysisSessionArticle({ session }: AnalysisSessionArticleProps)
   const submittedAt = new Date(session.submitted_at);
 
   return (
-    <article className={`${cardClassName} bg-brand-soft/20`}>
+    <article className={cardClassName}>
       <button
         type="button"
         onClick={() => setIsExpanded((prev) => !prev)}

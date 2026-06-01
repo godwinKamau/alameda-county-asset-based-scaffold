@@ -20,6 +20,8 @@ interface StatCardProps {
   value: string | number;
   icon: ReactNode;
   accent?: AccentColor;
+  sublabel?: string;
+  highlight?: boolean;
   href?: string;
 }
 
@@ -28,7 +30,8 @@ function StatCardContent({
   value,
   icon,
   accent = "brand",
-}: Omit<StatCardProps, "href">) {
+  sublabel,
+}: Omit<StatCardProps, "href" | "highlight">) {
   return (
     <>
       <div
@@ -43,9 +46,16 @@ function StatCardContent({
         </div>
         <div>
           <p className="text-sm font-medium text-muted">{label}</p>
-          <p className="mt-1 text-3xl font-bold tabular-nums text-brand-dark">
+          <p
+            className={`mt-1 text-3xl font-bold tabular-nums ${
+              accent === "orange" ? "text-accent-orange" : "text-brand-dark"
+            }`}
+          >
             {value}
           </p>
+          {sublabel && (
+            <p className="mt-1 text-xs text-muted">{sublabel}</p>
+          )}
         </div>
       </div>
     </>
@@ -57,11 +67,13 @@ export function StatCard({
   value,
   icon,
   accent = "brand",
+  sublabel,
+  highlight = false,
   href,
 }: StatCardProps) {
   const className = `ui-card relative h-full w-full overflow-hidden p-5${
-    href ? " transition-shadow hover:shadow-md" : ""
-  }`;
+    highlight ? " ring-2 ring-accent-orange/60" : ""
+  }${href ? " transition-shadow hover:shadow-md" : ""}`;
 
   if (href) {
     return (
@@ -71,6 +83,7 @@ export function StatCard({
           value={value}
           icon={icon}
           accent={accent}
+          sublabel={sublabel}
         />
       </Link>
     );
@@ -83,6 +96,7 @@ export function StatCard({
         value={value}
         icon={icon}
         accent={accent}
+        sublabel={sublabel}
       />
     </div>
   );

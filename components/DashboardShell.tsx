@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
 
 interface DashboardShellProps {
   title: string;
-  children: React.ReactNode;
+  actions?: ReactNode;
+  children: ReactNode;
 }
 
-export function DashboardShell({ title, children }: DashboardShellProps) {
+export function DashboardShell({ title, actions, children }: DashboardShellProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
@@ -22,7 +23,7 @@ export function DashboardShell({ title, children }: DashboardShellProps) {
         <header className="sticky top-0 z-20 flex items-center gap-4 border-b border-brand-soft/60 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-brand-dark lg:hidden"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-brand-dark lg:hidden"
             aria-label="Open menu"
             aria-expanded={mobileNavOpen}
             onClick={() => setMobileNavOpen(true)}
@@ -42,9 +43,14 @@ export function DashboardShell({ title, children }: DashboardShellProps) {
               />
             </svg>
           </button>
-          <h1 className="text-xl font-semibold text-brand-dark sm:text-2xl">
+          <h1 className="min-w-0 flex-1 text-xl font-semibold text-brand-dark sm:text-2xl">
             {title}
           </h1>
+          {actions && (
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
+              {actions}
+            </div>
+          )}
         </header>
 
         <main className="flex-1 bg-brand-soft px-4 py-6 sm:px-6 lg:px-8">{children}</main>

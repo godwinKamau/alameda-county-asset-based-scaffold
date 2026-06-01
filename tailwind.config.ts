@@ -11,9 +11,9 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#457B9D",
-          dark: "#1D3557",
-          soft: "#DCE8F5",
+          DEFAULT: "#0466c8",
+          dark: "#023e7d",
+          soft: "#d0e4f9",
         },
         accent: {
           orange: "#F99132",
@@ -21,14 +21,14 @@ const config: Config = {
           green: "#3ECD88",
         },
         muted: {
-          DEFAULT: "#ACACAC",
+          DEFAULT: "#979dac",
         },
         error: {
           DEFAULT: "#CE1821",
         },
       },
       boxShadow: {
-        card: "0 4px 24px -4px rgba(29, 53, 87, 0.08)",
+        card: "0 4px 24px -4px rgba(0, 18, 51, 0.08)",
       },
     },
   },

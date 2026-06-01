@@ -4,11 +4,11 @@
 
 :root {
   --background: #f1f5f9;
-  --foreground: #1d3557;
-  --brand: #457b9d;
-  --brand-dark: #1d3557;
-  --brand-soft: #dce8f5;
-  --input-fill: #eef4fa;
+  --foreground: #001233;
+  --brand: #0466c8;
+  --brand-dark: #023e7d;
+  --brand-soft: #d0e4f9;
+  --input-fill: #e8f0fb;
   --input-border: #000;
 }
 
@@ -87,7 +87,7 @@ body {
   }
 
   .ui-btn-secondary:hover:not(:disabled) {
-    background-color: #c8d9eb;
+    background-color: #b8d3f2;
   }
 
   .ui-btn-upload-csv {

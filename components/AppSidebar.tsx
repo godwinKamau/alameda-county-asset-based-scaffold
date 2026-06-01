@@ -20,19 +20,19 @@ function NavIconDashboard() {
   );
 }
 
-function NavIconAnalyze() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.75}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-  );
-}
-
 function NavIconStudents() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+    </svg>
+  );
+}
+
+function NavIconProgress() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
     </svg>
   );
 }
@@ -60,10 +60,10 @@ const navItems: NavItem[] = [
     match: (p) => p.startsWith("/students") || p.startsWith("/student/"),
   },
   {
-    href: "/analyze",
-    label: "Analyze",
-    icon: <NavIconAnalyze />,
-    match: (p) => p.startsWith("/analyze"),
+    href: "/progress",
+    label: "Progress",
+    icon: <NavIconProgress />,
+    match: (p) => p.startsWith("/progress"),
   },
   {
     href: "/admin",
@@ -90,8 +90,8 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
 
   const sidebarContent = (
     <>
-      <div className="border-b border-brand-soft/60 px-5 py-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+      <div className="border-b border-white/10 px-5 py-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">
           ELPAC Writing Analysis
         </p>
         <div className="mt-4 flex items-center gap-3">
@@ -99,16 +99,16 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
             <UserButton
               appearance={{
                 elements: {
-                  avatarBox: "h-12 w-12 rounded-full ring-2 ring-brand-soft",
+                  avatarBox: "h-12 w-12 rounded-full ring-2 ring-white/20",
                 },
               }}
             />
           ) : (
-            <div className="h-12 w-12 animate-pulse rounded-full bg-brand-soft" />
+            <div className="h-12 w-12 animate-pulse rounded-full bg-white/10" />
           )}
           <div className="min-w-0">
-            <p className="truncate font-semibold text-brand-dark">{displayName}</p>
-            <p className="text-sm text-muted">Teacher</p>
+            <p className="truncate font-semibold text-white">{displayName}</p>
+            <p className="text-sm text-brand-soft/80">Teacher</p>
           </div>
         </div>
       </div>
@@ -127,7 +127,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
               className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-brand text-white shadow-sm"
-                  : "text-brand-dark hover:bg-brand-soft/80"
+                  : "text-brand-soft hover:bg-white/10 hover:text-white"
               }`}
             >
               {item.icon}
@@ -137,7 +137,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
         })}
       </nav>
 
-      <div className="border-t border-brand-soft/60 px-3 py-4">
+      <div className="border-t border-white/10 px-3 py-4">
         <LogoutButton />
       </div>
     </>
@@ -146,7 +146,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col border-r border-brand-soft/80 bg-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[280px] flex-col border-r border-white/10 bg-brand-dark lg:flex">
         {sidebarContent}
       </aside>
 
@@ -162,7 +162,7 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
 
       {/* Mobile drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-brand-soft/80 bg-white transition-transform duration-200 lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark transition-transform duration-200 lg:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         aria-hidden={!mobileOpen}

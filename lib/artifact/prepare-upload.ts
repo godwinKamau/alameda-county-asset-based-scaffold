@@ -67,6 +67,38 @@ export function isPdfFile(file: File): boolean {
   );
 }
 
+export function isHeicOrHeifFile(file: File): boolean {
+  const lowerName = file.name.toLowerCase();
+  const mime = file.type.toLowerCase();
+  return (
+    mime === "image/heic" ||
+    mime === "image/heif" ||
+    lowerName.endsWith(".heic") ||
+    lowerName.endsWith(".heif")
+  );
+}
+
+async function ensureBrowserDecodableImage(file: File): Promise<File> {
+  if (!isHeicOrHeifFile(file)) {
+    return file;
+  }
+
+  const heic2any = (await import("heic2any")).default;
+  const result = await heic2any({
+    blob: file,
+    toType: "image/jpeg",
+    quality: 0.92,
+  });
+
+  const blob = Array.isArray(result) ? result[0] : result;
+  if (!blob) {
+    throw new Error("Could not read the HEIC image.");
+  }
+
+  const baseName = artifactBaseName(file.name);
+  return new File([blob], `${baseName}.jpg`, { type: "image/jpeg" });
+}
+
 async function loadPdfDocument(file: File) {
   await ensurePdfWorker();
   const { getDocument } = await import("pdfjs-dist");
@@ -255,9 +287,10 @@ export async function prepareArtifactForUpload(
   const baseName = artifactBaseName(file.name);
 
   if (kind === "image") {
+    const imageFile = await ensureBrowserDecodableImage(file);
     const outputName = `${baseName}.jpg`;
     const prepared = await fitCanvasToUploadLimit(
-      (maxLongEdge) => renderImageToCanvas(file, maxLongEdge),
+      (maxLongEdge) => renderImageToCanvas(imageFile, maxLongEdge),
       outputName,
       MAX_UPLOAD_BYTES,
     );

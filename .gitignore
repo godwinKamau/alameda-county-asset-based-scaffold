@@ -40,3 +40,6 @@ next-env.d.ts
 
 # python
 .pylibs/
+
+# Cursor debug logs
+.cursor/debug-*.log

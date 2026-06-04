@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AddStudentForm } from "@/components/AddStudentForm";
 import { RosterList, type RosterListEntry } from "@/components/RosterList";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
@@ -119,7 +120,36 @@ export function DashboardTabs({
   entries,
   existingSubjects,
 }: DashboardTabsProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("today");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<TabId>(
+    tabParam === "manage" ? "manage" : "today",
+  );
+  const formRef = useRef<HTMLDivElement>(null);
+
+  function navigateToTab(tab: TabId) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "manage") {
+      params.set("tab", "manage");
+    } else {
+      params.delete("tab");
+    }
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  }
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    setActiveTab(tab === "manage" ? "manage" : "today");
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (activeTab === "manage") {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [activeTab]);
 
   const neverAnalyzed = useMemo(
     () => entries.filter((entry) => entry.session_count === 0),
@@ -153,7 +183,7 @@ export function DashboardTabs({
           aria-selected={activeTab === "today"}
           id="tab-today"
           aria-controls="panel-today"
-          onClick={() => setActiveTab("today")}
+          onClick={() => navigateToTab("today")}
           className={
             activeTab === "today"
               ? tabButtonActiveClassName
@@ -168,7 +198,7 @@ export function DashboardTabs({
           aria-selected={activeTab === "manage"}
           id="tab-manage"
           aria-controls="panel-manage"
-          onClick={() => setActiveTab("manage")}
+          onClick={() => navigateToTab("manage")}
           className={
             activeTab === "manage"
               ? tabButtonActiveClassName
@@ -235,7 +265,9 @@ export function DashboardTabs({
           aria-labelledby="tab-manage"
           className="space-y-8"
         >
-          <AddStudentForm existingSubjects={existingSubjects} />
+          <div ref={formRef}>
+            <AddStudentForm existingSubjects={existingSubjects} />
+          </div>
           <section className="ui-card p-6">
             <h2 className="text-lg font-semibold text-brand-dark">Your Roster</h2>
             <RosterList

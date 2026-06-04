@@ -17,6 +17,7 @@
     "@napi-rs/canvas": "^0.1.67",
     "csv-parse": "^5.6.0",
     "csv-stringify": "^6.5.2",
+    "heic2any": "^0.0.4",
     "next": "^15.2.0",
     "pdfjs-dist": "^4.10.38",
     "pg": "^8.13.3",

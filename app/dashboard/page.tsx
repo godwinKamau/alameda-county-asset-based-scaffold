@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { currentUser } from "@clerk/nextjs/server";
 import { DashboardHeaderActions } from "@/components/DashboardHeaderActions";
 import { DashboardShell } from "@/components/DashboardShell";
@@ -134,10 +135,12 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <DashboardTabs
-          entries={serializedEntries}
-          existingSubjects={existingSubjects}
-        />
+        <Suspense fallback={null}>
+          <DashboardTabs
+            entries={serializedEntries}
+            existingSubjects={existingSubjects}
+          />
+        </Suspense>
       </div>
     </DashboardShell>
   );

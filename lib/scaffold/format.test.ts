@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   parseInlineEmphasis,
   parseScaffoldItems,
+  parseSentences,
 } from "./format";
 
 describe("parseScaffoldItems", () => {
@@ -67,5 +68,32 @@ describe("parseInlineEmphasis", () => {
           segment.value.includes("causal sentence"),
       ),
     );
+  });
+});
+
+describe("parseSentences", () => {
+  it("splits multiple sentences and applies inline emphasis", () => {
+    const sentences = parseSentences(
+      "The student uses **simple conjunctions**. They show **topic-relevant vocabulary**.",
+    );
+
+    assert.equal(sentences.length, 2);
+    assert.deepEqual(sentences[0], [
+      { type: "text", value: "The student uses " },
+      { type: "strong", value: "simple conjunctions" },
+      { type: "text", value: "." },
+    ]);
+    assert.ok(
+      sentences[1].some(
+        (segment) =>
+          segment.type === "strong" && segment.value === "topic-relevant vocabulary",
+      ),
+    );
+  });
+
+  it("returns a single parsed sentence for one-sentence text", () => {
+    const sentences = parseSentences("One sentence without trailing punctuation");
+    assert.equal(sentences.length, 1);
+    assert.ok(sentences[0].length > 0);
   });
 });

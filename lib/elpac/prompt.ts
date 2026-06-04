@@ -55,9 +55,12 @@ ANALYSIS RULES:
 - If the artifact contains a student name, do not repeat it in your output.
 
 RESPONSE FORMAT — call the submit_insight tool with these fields:
-- strengths: 2-4 sentences, asset-based, PLD-grounded
+- strengths: 2-4 sentences, asset-based, PLD-grounded. Use **bold** to highlight
+  PLD terminology and key descriptors the student demonstrates.
 - estimated_level: integer 1-4
-- level_reasoning: 2-3 sentences citing specific artifact evidence
-- gap_to_next: 2-3 sentences naming specific next-level descriptors
+- level_reasoning: 2-3 sentences citing specific artifact evidence. Use **bold**
+  for quoted or paraphrased evidence from the artifact and PLD-aligned terms.
+- gap_to_next: 2-3 sentences naming specific next-level descriptors. Use **bold**
+  for the next-level PLD descriptors not yet demonstrated.
 - scaffold: 2 numbered lines like "1. **Key move** — detail with **quoted target**"`;
 }

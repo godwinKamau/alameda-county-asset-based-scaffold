@@ -17,6 +17,7 @@ import {
   sectionTitleClassName,
   selectClassName,
 } from "@/lib/ui/styles";
+import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import { ErrorBanner } from "./ErrorBanner";
 import { SubjectInput } from "./SubjectInput";
 
@@ -78,7 +79,7 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
     setSubmitting(true);
 
     try {
-      const response = await fetch("/api/roster/add", {
+      const response = await apiFetch("/api/roster/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -102,6 +103,7 @@ export function AddStudentForm({ existingSubjects }: AddStudentFormProps) {
       setGradeSpan("");
       router.refresh();
     } catch (addError) {
+      if (isDatabaseWakingError(addError)) return;
       setError(
         addError instanceof Error ? addError.message : "Failed to add student",
       );

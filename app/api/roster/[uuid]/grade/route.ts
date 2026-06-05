@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { withDbGuard } from "@/lib/api/with-db-guard";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
+import {
+  databaseWakingResponse,
+  isDatabaseWakingError,
+} from "@/lib/db/errors";
 import {
   rosterEntryBelongsToTeacher,
   updateRosterEntryGrade,
@@ -17,7 +22,7 @@ const UpdateGradeSchema = z.object({
   exact_grade: ExactGradeSchema.nullable().optional(),
 });
 
-export async function PATCH(
+async function patchHandler(
   req: Request,
   { params }: { params: Promise<{ uuid: string }> },
 ) {
@@ -66,6 +71,9 @@ export async function PATCH(
       exact_grade: resolved.exact_grade,
     });
   } catch (error) {
+    if (isDatabaseWakingError(error)) {
+      return databaseWakingResponse();
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.errors[0]?.message ?? "Invalid request" },
@@ -82,3 +90,5 @@ export async function PATCH(
     );
   }
 }
+
+export const PATCH = withDbGuard(patchHandler);

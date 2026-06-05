@@ -3,9 +3,11 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
+import { DbWakingBanner } from "@/components/DbWakingBanner";
 import { InsightCard } from "@/components/InsightCard";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
 import { recordAudit, hashEmail } from "@/lib/audit/log";
+import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
   findTeacherByEmailHash,
   getSessionWithInsight,
@@ -29,24 +31,37 @@ export default async function AnalysisResultsPage({
   const email = user?.emailAddresses[0]?.emailAddress;
   if (!email) redirect("/login");
 
-  const teacher = await findTeacherByEmailHash(hashEmail(email));
+  let teacher: Awaited<ReturnType<typeof findTeacherByEmailHash>>;
+  let session: Awaited<ReturnType<typeof getSessionWithInsight>> = null;
+
+  try {
+    teacher = await findTeacherByEmailHash(hashEmail(email));
+    if (teacher) {
+      session = await getSessionWithInsight(teacher.id, sessionId);
+      if (session) {
+        const headerList = await headers();
+        await recordAudit({
+          actorId: teacher.id,
+          action: "analysis.read",
+          resourceType: "analysis_session",
+          resourceId: sessionId,
+          req: new Request("http://localhost", { headers: headerList }),
+        });
+      }
+    }
+  } catch (err) {
+    if (isDatabaseWakingError(err)) {
+      return (
+        <DashboardShell title="Analysis Results">
+          <DbWakingBanner />
+        </DashboardShell>
+      );
+    }
+    throw err;
+  }
+
   if (!teacher) redirect("/dashboard");
-
-  const session = await getSessionWithInsight(teacher.id, sessionId);
   if (!session) notFound();
-
-  const headerList = await headers();
-  const req = new Request("http://localhost", {
-    headers: headerList,
-  });
-
-  await recordAudit({
-    actorId: teacher.id,
-    action: "analysis.read",
-    resourceType: "analysis_session",
-    resourceId: sessionId,
-    req,
-  });
 
   const newAnalysisHref = buildAnalyzeUrl({
     student_uuid: session.student_uuid,

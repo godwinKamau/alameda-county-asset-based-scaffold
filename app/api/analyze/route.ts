@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
+import { withDbGuard } from "@/lib/api/with-db-guard";
 import { analyzeArtifact, ClaudeParseError } from "@/lib/claude/client";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
+import {
+  databaseWakingResponse,
+  isDatabaseWakingError,
+} from "@/lib/db/errors";
 import { recordAudit } from "@/lib/audit/log";
 import {
   getRosterGradeInfo,
@@ -45,7 +50,7 @@ async function fileToImagePayload(file: File): Promise<ImagePayload> {
   throw new Error("Unsupported file type");
 }
 
-export async function POST(req: Request) {
+async function postHandler(req: Request) {
   const teacher = await requireTeacher();
   if (isTeacherResponse(teacher)) return teacher;
 
@@ -172,6 +177,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ sessionId, insight });
   } catch (error) {
+    if (isDatabaseWakingError(error)) {
+      return databaseWakingResponse();
+    }
     if (error instanceof ClaudeParseError) {
       console.error("[api/analyze] Claude parse error");
       return NextResponse.json(
@@ -190,3 +198,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const POST = withDbGuard(postHandler);

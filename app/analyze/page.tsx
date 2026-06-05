@@ -19,6 +19,7 @@ import {
 import { normalizeSubject, sortSubjects } from "@/lib/roster/display";
 import { parseAnalyzePrefill } from "@/lib/analyze/url";
 import type { GradeSpan } from "@/lib/types";
+import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import {
   btnPrimaryClassName,
   btnSecondaryClassName,
@@ -58,15 +59,21 @@ export default function AnalyzePage() {
 
   useEffect(() => {
     async function loadSubjects() {
-      const response = await fetch("/api/roster/list");
-      if (!response.ok) return;
+      try {
+        const response = await apiFetch("/api/roster/list");
+        if (!response.ok) return;
 
-      const data = await response.json();
-      const subjects = new Set<string>();
-      for (const entry of data.entries ?? []) {
-        subjects.add(normalizeSubject(entry.subject));
+        const data = await response.json();
+        const subjects = new Set<string>();
+        for (const entry of data.entries ?? []) {
+          subjects.add(normalizeSubject(entry.subject));
+        }
+        setAvailableSubjects(sortSubjects([...subjects]));
+      } catch (loadError) {
+        if (!isDatabaseWakingError(loadError)) {
+          console.error("[analyze] Failed to load subjects", loadError);
+        }
       }
-      setAvailableSubjects(sortSubjects([...subjects]));
     }
 
     loadSubjects();
@@ -155,7 +162,7 @@ export default function AnalyzePage() {
         formData.append("provided_elpac_level", providedLevel);
       }
 
-      const response = await fetch("/api/analyze", {
+      const response = await apiFetch("/api/analyze", {
         method: "POST",
         body: formData,
       });
@@ -173,6 +180,7 @@ export default function AnalyzePage() {
       succeeded = true;
       router.push(`/analyze/results/${data.sessionId}`);
     } catch (submitError) {
+      if (isDatabaseWakingError(submitError)) return;
       setError(
         submitError instanceof Error
           ? submitError.message

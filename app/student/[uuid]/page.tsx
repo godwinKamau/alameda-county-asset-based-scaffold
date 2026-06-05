@@ -2,11 +2,12 @@ import Link from "next/link";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
+import { DbWakingBanner } from "@/components/DbWakingBanner";
 import { AnalysisSessionArticle } from "@/components/AnalysisSessionArticle";
 import { StudentLevelChart, computeDomainLevels } from "@/components/StudentLevelChart";
 import { StudentNameHeading } from "@/components/StudentNameHeading";
-import { recordAudit } from "@/lib/audit/log";
-import { hashEmail } from "@/lib/audit/log";
+import { recordAudit, hashEmail } from "@/lib/audit/log";
+import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
   findTeacherByEmailHash,
   getRosterEntryLabel,
@@ -33,29 +34,44 @@ export default async function StudentPage({ params }: StudentPageProps) {
   const email = user?.emailAddresses[0]?.emailAddress;
   if (!email) redirect("/login");
 
-  const teacher = await findTeacherByEmailHash(hashEmail(email));
+  let teacher: Awaited<ReturnType<typeof findTeacherByEmailHash>>;
+  let ownsStudent = false;
+  let sessions: Awaited<ReturnType<typeof listSessionsForStudent>> = [];
+  let label: string | null = null;
+
+  try {
+    teacher = await findTeacherByEmailHash(hashEmail(email));
+    if (teacher) {
+      ownsStudent = await rosterEntryBelongsToTeacher(teacher.id, uuid);
+    }
+    if (teacher && ownsStudent) {
+      [sessions, label] = await Promise.all([
+        listSessionsForStudent(teacher.id, uuid),
+        getRosterEntryLabel(teacher.id, uuid),
+      ]);
+
+      const headerList = await headers();
+      await recordAudit({
+        actorId: teacher.id,
+        action: "analysis.read",
+        resourceType: "student",
+        resourceId: uuid,
+        req: new Request("http://localhost", { headers: headerList }),
+      });
+    }
+  } catch (err) {
+    if (isDatabaseWakingError(err)) {
+      return (
+        <DashboardShell title="Student History">
+          <DbWakingBanner />
+        </DashboardShell>
+      );
+    }
+    throw err;
+  }
+
   if (!teacher) redirect("/dashboard");
-
-  const ownsStudent = await rosterEntryBelongsToTeacher(teacher.id, uuid);
   if (!ownsStudent) redirect("/dashboard");
-
-  const [sessions, label] = await Promise.all([
-    listSessionsForStudent(teacher.id, uuid),
-    getRosterEntryLabel(teacher.id, uuid),
-  ]);
-
-  const headerList = await headers();
-  const req = new Request("http://localhost", {
-    headers: headerList,
-  });
-
-  await recordAudit({
-    actorId: teacher.id,
-    action: "analysis.read",
-    resourceType: "student",
-    resourceId: uuid,
-    req,
-  });
 
   const avgLevel =
     sessions.length > 0

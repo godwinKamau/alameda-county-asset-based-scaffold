@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { parse } from "csv-parse/sync";
+import { withDbGuard } from "@/lib/api/with-db-guard";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
+import {
+  databaseWakingResponse,
+  isDatabaseWakingError,
+} from "@/lib/db/errors";
 import { createRosterEntries } from "@/lib/db/queries";
 import {
   deriveGradeSpan,
@@ -25,7 +30,7 @@ function parseExactGrade(raw: string | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
-export async function POST(req: Request) {
+async function postHandler(req: Request) {
   const teacher = await requireTeacher();
   if (isTeacherResponse(teacher)) return teacher;
 
@@ -144,9 +149,14 @@ export async function POST(req: Request) {
       entries: mappingRows,
     });
   } catch (error) {
+    if (isDatabaseWakingError(error)) {
+      return databaseWakingResponse();
+    }
     console.error("[api/roster]", error);
     const message =
       error instanceof Error ? error.message : "Failed to process roster upload";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
+
+export const POST = withDbGuard(postHandler);

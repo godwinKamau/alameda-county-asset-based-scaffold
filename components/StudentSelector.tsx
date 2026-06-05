@@ -7,6 +7,7 @@ import {
   normalizeSubject,
 } from "@/lib/roster/display";
 import type { ExactGrade, GradeSpan } from "@/lib/types";
+import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import { labelClassName, selectClassName } from "@/lib/ui/styles";
 
 export interface RosterOption {
@@ -64,33 +65,40 @@ export function StudentSelector({
 
   useEffect(() => {
     async function loadRoster() {
-      const response = await fetch("/api/roster/list");
-      if (!response.ok) {
+      try {
+        const response = await apiFetch("/api/roster/list");
+        if (!response.ok) {
+          setLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+        const mapping = getLabelMapping();
+
+        setOptions(
+          data.entries.map(
+            (entry: {
+              student_uuid: string;
+              label?: string;
+              subject?: string;
+              grade_span: GradeSpan;
+              exact_grade: ExactGrade | null;
+              known_elpac_level: number | null;
+            }) => ({
+              ...entry,
+              subject: entry.subject ?? "",
+              exact_grade: entry.exact_grade ?? null,
+              label: resolveLabel(entry, mapping),
+            }),
+          ),
+        );
+      } catch (loadError) {
+        if (!isDatabaseWakingError(loadError)) {
+          console.error("[StudentSelector] Failed to load roster", loadError);
+        }
+      } finally {
         setLoading(false);
-        return;
       }
-
-      const data = await response.json();
-      const mapping = getLabelMapping();
-
-      setOptions(
-        data.entries.map(
-          (entry: {
-            student_uuid: string;
-            label?: string;
-            subject?: string;
-            grade_span: GradeSpan;
-            exact_grade: ExactGrade | null;
-            known_elpac_level: number | null;
-          }) => ({
-            ...entry,
-            subject: entry.subject ?? "",
-            exact_grade: entry.exact_grade ?? null,
-            label: resolveLabel(entry, mapping),
-          }),
-        ),
-      );
-      setLoading(false);
     }
 
     loadRoster();

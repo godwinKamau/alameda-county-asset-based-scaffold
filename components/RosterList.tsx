@@ -20,6 +20,7 @@ import {
   linkClassName,
   selectClassName,
 } from "@/lib/ui/styles";
+import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import { SubjectInput } from "./SubjectInput";
 import { NewAnalysisIcon } from "./NewAnalysisIcon";
 
@@ -120,7 +121,7 @@ export function RosterList({
     setSavingUuid(entry.student_uuid);
 
     try {
-      const response = await fetch(`/api/roster/${entry.student_uuid}/grade`, {
+      const response = await apiFetch(`/api/roster/${entry.student_uuid}/grade`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -136,6 +137,7 @@ export function RosterList({
       cancelEditingGrade();
       router.refresh();
     } catch (saveError) {
+      if (isDatabaseWakingError(saveError)) return;
       setError(
         saveError instanceof Error
           ? saveError.message
@@ -155,7 +157,7 @@ export function RosterList({
         editSubjectValue,
         existingSubjects,
       );
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/roster/${entry.student_uuid}/subject`,
         {
           method: "PATCH",
@@ -172,6 +174,7 @@ export function RosterList({
       setEditSubjectValue("");
       router.refresh();
     } catch (saveError) {
+      if (isDatabaseWakingError(saveError)) return;
       setError(
         saveError instanceof Error
           ? saveError.message
@@ -193,7 +196,7 @@ export function RosterList({
     setDeletingUuid(entry.student_uuid);
 
     try {
-      const response = await fetch(`/api/roster/${entry.student_uuid}`, {
+      const response = await apiFetch(`/api/roster/${entry.student_uuid}`, {
         method: "DELETE",
       });
       const data = await response.json().catch(() => ({}));
@@ -205,6 +208,7 @@ export function RosterList({
       setMapping(getLabelMapping());
       router.refresh();
     } catch (deleteError) {
+      if (isDatabaseWakingError(deleteError)) return;
       setError(
         deleteError instanceof Error
           ? deleteError.message

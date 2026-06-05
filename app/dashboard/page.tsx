@@ -4,12 +4,14 @@ import { Suspense } from "react";
 import { currentUser } from "@clerk/nextjs/server";
 import { DashboardHeaderActions } from "@/components/DashboardHeaderActions";
 import { DashboardShell } from "@/components/DashboardShell";
+import { DbWakingBanner } from "@/components/DbWakingBanner";
 import {
   DashboardTabs,
   type DashboardRosterEntry,
 } from "@/components/DashboardTabs";
 import { StatCard } from "@/components/StatCard";
 import { hashEmail } from "@/lib/audit/log";
+import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
   findTeacherByEmailHash,
   listRosterEntriesWithStats,
@@ -44,8 +46,21 @@ export default async function DashboardPage() {
   const email = user?.emailAddresses[0]?.emailAddress;
   if (!email) redirect("/login");
 
-  const teacher = await findTeacherByEmailHash(hashEmail(email));
-  const roster = teacher ? await listRosterEntriesWithStats(teacher.id) : [];
+  let teacher: Awaited<ReturnType<typeof findTeacherByEmailHash>>;
+  let roster: Awaited<ReturnType<typeof listRosterEntriesWithStats>>;
+  try {
+    teacher = await findTeacherByEmailHash(hashEmail(email));
+    roster = teacher ? await listRosterEntriesWithStats(teacher.id) : [];
+  } catch (err) {
+    if (isDatabaseWakingError(err)) {
+      return (
+        <DashboardShell title="Dashboard" actions={<DashboardHeaderActions />}>
+          <DbWakingBanner />
+        </DashboardShell>
+      );
+    }
+    throw err;
+  }
   const existingSubjects = collectExistingSubjects(
     roster.map((entry) => entry.subject),
   );

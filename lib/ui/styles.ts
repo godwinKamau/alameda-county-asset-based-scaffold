@@ -17,6 +17,9 @@ export const btnSecondaryClassName = "ui-btn-secondary";
 
 export const btnUploadCsvClassName = "ui-btn-upload-csv";
 
+/** Compact row actions (History / Analyze) — shared height, radius, and padding */
+export const btnRowActionClassName = "h-8 rounded-2xl px-3 py-0 text-xs";
+
 export const fileInputClassName = "ui-file-input";
 
 export const linkClassName = "ui-link text-sm font-medium";

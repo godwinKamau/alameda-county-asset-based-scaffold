@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { NewAnalysisIcon } from "@/components/NewAnalysisIcon";
 import { RosterUploaderModal } from "@/components/RosterUploaderModal";
 import {
@@ -10,14 +10,20 @@ import {
 } from "@/lib/ui/styles";
 
 export function DashboardHeaderActions() {
-  const router = useRouter();
   const pathname = usePathname();
+
+  function openManageTab() {
+    window.history.pushState(null, "", `${pathname}?tab=manage`);
+    window.dispatchEvent(
+      new CustomEvent("dashboardTabChange", { detail: { tab: "manage" } }),
+    );
+  }
 
   return (
     <>
       <button
         type="button"
-        onClick={() => router.push(`${pathname}?tab=manage`)}
+        onClick={openManageTab}
         className={`${btnDashboardActionClassName} gap-2`}
       >
         <svg

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AddStudentForm } from "@/components/AddStudentForm";
 import { RosterList, type RosterListEntry } from "@/components/RosterList";
@@ -18,6 +18,7 @@ import {
   badgeLevelClassName,
   badgeNeverAnalyzedClassName,
   btnDashboardActionClassName,
+  btnRowActionClassName,
   btnSecondaryClassName,
   tabButtonActiveClassName,
   tabButtonInactiveClassName,
@@ -100,14 +101,14 @@ function WorkStudentCard({
         {variant === "recent" && (
           <Link
             href={`/student/${entry.student_uuid}`}
-            className={`${btnSecondaryClassName} px-3 py-1.5 text-xs`}
+            className={`${btnSecondaryClassName} ${btnRowActionClassName}`}
           >
             History
           </Link>
         )}
         <Link
           href={buildAnalyzeUrl(entry)}
-          className={`${btnDashboardActionClassName} px-4 py-2 text-xs`}
+          className={`${btnDashboardActionClassName} ${btnRowActionClassName}`}
         >
           Analyze
         </Link>
@@ -120,7 +121,6 @@ export function DashboardTabs({
   entries,
   existingSubjects,
 }: DashboardTabsProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
@@ -137,13 +137,26 @@ export function DashboardTabs({
       params.delete("tab");
     }
     const qs = params.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname);
+    window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
+  }
+
+  function handleTabClick(tab: TabId) {
+    setActiveTab(tab);
+    navigateToTab(tab);
   }
 
   useEffect(() => {
-    const tab = searchParams.get("tab");
-    setActiveTab(tab === "manage" ? "manage" : "today");
-  }, [searchParams]);
+    function handleTabChange(event: Event) {
+      const tab = (event as CustomEvent<{ tab: TabId }>).detail.tab;
+      setActiveTab(tab);
+      if (tab === "manage") {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    window.addEventListener("dashboardTabChange", handleTabChange);
+    return () => window.removeEventListener("dashboardTabChange", handleTabChange);
+  }, []);
 
   useEffect(() => {
     if (activeTab === "manage") {
@@ -183,7 +196,7 @@ export function DashboardTabs({
           aria-selected={activeTab === "today"}
           id="tab-today"
           aria-controls="panel-today"
-          onClick={() => navigateToTab("today")}
+          onClick={() => handleTabClick("today")}
           className={
             activeTab === "today"
               ? tabButtonActiveClassName
@@ -198,7 +211,7 @@ export function DashboardTabs({
           aria-selected={activeTab === "manage"}
           id="tab-manage"
           aria-controls="panel-manage"
-          onClick={() => navigateToTab("manage")}
+          onClick={() => handleTabClick("manage")}
           className={
             activeTab === "manage"
               ? tabButtonActiveClassName

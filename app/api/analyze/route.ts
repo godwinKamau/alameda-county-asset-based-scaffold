@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
+import { withDbGuard } from "@/lib/api/with-db-guard";
 import { analyzeArtifact, ClaudeParseError } from "@/lib/claude/client";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
+import {
+  databaseWakingResponse,
+  isDatabaseWakingError,
+} from "@/lib/db/errors";
 import { recordAudit } from "@/lib/audit/log";
 import {
   getRosterGradeInfo,
@@ -10,11 +15,7 @@ import {
   bufferToBase64Image,
   rasterizePdfFirstPage,
 } from "@/lib/pdf/rasterize";
-import {
-  ElpacDomainSchema,
-  ENABLED_DOMAINS,
-  GradeSpanSchema,
-} from "@/lib/types";
+import { GradeSpanSchema } from "@/lib/types";
 import {
   MAX_PAGES_PER_ANALYSIS,
   MAX_UPLOAD_BYTES,
@@ -49,7 +50,7 @@ async function fileToImagePayload(file: File): Promise<ImagePayload> {
   throw new Error("Unsupported file type");
 }
 
-export async function POST(req: Request) {
+async function postHandler(req: Request) {
   const teacher = await requireTeacher();
   if (isTeacherResponse(teacher)) return teacher;
 
@@ -72,7 +73,6 @@ export async function POST(req: Request) {
       .filter((entry): entry is File => entry instanceof File);
 
     const studentUuid = formData.get("student_uuid");
-    const domainRaw = formData.get("domain");
     const gradeSpanRaw = formData.get("grade_span");
     const providedLevelRaw = formData.get("provided_elpac_level");
 
@@ -101,29 +101,6 @@ export async function POST(req: Request) {
     if (typeof studentUuid !== "string" || !studentUuid) {
       return NextResponse.json(
         { error: "student_uuid is required" },
-        { status: 400 },
-      );
-    }
-
-    if (typeof domainRaw !== "string" || !domainRaw) {
-      return NextResponse.json({ error: "domain is required" }, { status: 400 });
-    }
-
-    const domainResult = ElpacDomainSchema.safeParse(domainRaw);
-    if (!domainResult.success) {
-      return NextResponse.json(
-        {
-          error:
-            "domain must be one of: writing, reading, speaking, listening",
-        },
-        { status: 400 },
-      );
-    }
-
-    const domain = domainResult.data;
-    if (!ENABLED_DOMAINS.has(domain)) {
-      return NextResponse.json(
-        { error: `${domain} analysis is not available yet` },
         { status: 400 },
       );
     }
@@ -176,7 +153,6 @@ export async function POST(req: Request) {
         imageBase64: image.base64,
         mediaType: image.mediaType,
       })),
-      domain,
       gradeSpan,
       exactGrade,
       providedLevel,
@@ -185,7 +161,6 @@ export async function POST(req: Request) {
     const { sessionId } = await insertSessionAndInsight({
       teacherId: teacher.id,
       studentUuid,
-      domain,
       gradeSpan,
       exactGrade,
       providedElpacLevel: providedLevel,
@@ -202,6 +177,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ sessionId, insight });
   } catch (error) {
+    if (isDatabaseWakingError(error)) {
+      return databaseWakingResponse();
+    }
     if (error instanceof ClaudeParseError) {
       console.error("[api/analyze] Claude parse error");
       return NextResponse.json(
@@ -220,3 +198,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const POST = withDbGuard(postHandler);

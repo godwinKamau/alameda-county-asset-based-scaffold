@@ -18,13 +18,8 @@ import {
 } from "@/lib/artifact/prepare-upload";
 import { normalizeSubject, sortSubjects } from "@/lib/roster/display";
 import { parseAnalyzePrefill } from "@/lib/analyze/url";
-import { DOMAIN_LABELS } from "@/lib/elpac/domains";
-import {
-  ELPAC_DOMAINS,
-  ENABLED_DOMAINS,
-  type ElpacDomain,
-  type GradeSpan,
-} from "@/lib/types";
+import type { GradeSpan } from "@/lib/types";
+import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import {
   btnPrimaryClassName,
   btnSecondaryClassName,
@@ -39,7 +34,6 @@ export default function AnalyzePage() {
   const [studentUuid, setStudentUuid] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("All");
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
-  const [domain, setDomain] = useState<ElpacDomain>("writing");
   const [gradeSpan, setGradeSpan] = useState<GradeSpan>("3-12");
   const [providedLevel, setProvidedLevel] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
@@ -61,20 +55,25 @@ export default function AnalyzePage() {
     setStudentUuid(prefill.studentUuid);
     setGradeSpan(prefill.gradeSpan);
     setProvidedLevel(prefill.providedLevel);
-    setDomain(prefill.domain);
   }, [searchParams]);
 
   useEffect(() => {
     async function loadSubjects() {
-      const response = await fetch("/api/roster/list");
-      if (!response.ok) return;
+      try {
+        const response = await apiFetch("/api/roster/list");
+        if (!response.ok) return;
 
-      const data = await response.json();
-      const subjects = new Set<string>();
-      for (const entry of data.entries ?? []) {
-        subjects.add(normalizeSubject(entry.subject));
+        const data = await response.json();
+        const subjects = new Set<string>();
+        for (const entry of data.entries ?? []) {
+          subjects.add(normalizeSubject(entry.subject));
+        }
+        setAvailableSubjects(sortSubjects([...subjects]));
+      } catch (loadError) {
+        if (!isDatabaseWakingError(loadError)) {
+          console.error("[analyze] Failed to load subjects", loadError);
+        }
       }
-      setAvailableSubjects(sortSubjects([...subjects]));
     }
 
     loadSubjects();
@@ -132,7 +131,7 @@ export default function AnalyzePage() {
     }
 
     if (isPdfFile(file) && selectedPages.length === 0) {
-      setError("Select at least one PDF page containing student work.");
+      setError("Select at least one PDF page containing student writing.");
       return;
     }
 
@@ -158,13 +157,12 @@ export default function AnalyzePage() {
       });
       formData.append("page_count", String(preparedFiles.length));
       formData.append("student_uuid", studentUuid);
-      formData.append("domain", domain);
       formData.append("grade_span", gradeSpan);
       if (providedLevel) {
         formData.append("provided_elpac_level", providedLevel);
       }
 
-      const response = await fetch("/api/analyze", {
+      const response = await apiFetch("/api/analyze", {
         method: "POST",
         body: formData,
       });
@@ -182,6 +180,7 @@ export default function AnalyzePage() {
       succeeded = true;
       router.push(`/analyze/results/${data.sessionId}`);
     } catch (submitError) {
+      if (isDatabaseWakingError(submitError)) return;
       setError(
         submitError instanceof Error
           ? submitError.message
@@ -241,29 +240,6 @@ export default function AnalyzePage() {
               onChange={handleStudentChange}
               subjectFilter={subjectFilter}
             />
-          </div>
-
-          <div>
-            <label htmlFor="domain" className={labelClassName}>
-              What are you assessing?
-            </label>
-            <select
-              id="domain"
-              value={domain}
-              onChange={(event) => setDomain(event.target.value as ElpacDomain)}
-              className={selectClassName}
-            >
-              {ELPAC_DOMAINS.map((d) => (
-                <option
-                  key={d}
-                  value={d}
-                  disabled={!ENABLED_DOMAINS.has(d)}
-                >
-                  {DOMAIN_LABELS[d]}
-                  {!ENABLED_DOMAINS.has(d) ? " (coming soon)" : ""}
-                </option>
-              ))}
-            </select>
           </div>
 
           <ArtifactDropzone

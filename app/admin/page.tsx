@@ -2,8 +2,9 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { DashboardShell } from "@/components/DashboardShell";
-import { recordAudit } from "@/lib/audit/log";
-import { hashEmail } from "@/lib/audit/log";
+import { DbWakingBanner } from "@/components/DbWakingBanner";
+import { recordAudit, hashEmail } from "@/lib/audit/log";
+import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
   findTeacherByEmailHash,
   listSchoolAccessForTeacher,
@@ -18,23 +19,39 @@ export default async function AdminPage() {
   const email = user?.emailAddresses[0]?.emailAddress;
   if (!email) redirect("/login");
 
-  const teacher = await findTeacherByEmailHash(hashEmail(email));
-  if (!teacher) redirect("/dashboard");
+  let teacher: Awaited<ReturnType<typeof findTeacherByEmailHash>>;
+  let accessRows: Awaited<ReturnType<typeof listSchoolAccessForTeacher>> = [];
 
+  try {
+    teacher = await findTeacherByEmailHash(hashEmail(email));
+    const isAdmin =
+      teacher?.role === "eld_coordinator" || teacher?.role === "admin";
+    if (teacher && isAdmin) {
+      accessRows = await listSchoolAccessForTeacher(teacher.id);
+      const headerList = await headers();
+      await recordAudit({
+        actorId: teacher.id,
+        action: "admin.view",
+        resourceType: "admin",
+        resourceId: teacher.id,
+        req: new Request("http://localhost", { headers: headerList }),
+      });
+    }
+  } catch (err) {
+    if (isDatabaseWakingError(err)) {
+      return (
+        <DashboardShell title="Admin — School Access">
+          <DbWakingBanner />
+        </DashboardShell>
+      );
+    }
+    throw err;
+  }
+
+  if (!teacher) redirect("/dashboard");
   if (teacher.role !== "eld_coordinator" && teacher.role !== "admin") {
     redirect("/dashboard");
   }
-
-  const accessRows = await listSchoolAccessForTeacher(teacher.id);
-
-  const headerList = await headers();
-  await recordAudit({
-    actorId: teacher.id,
-    action: "admin.view",
-    resourceType: "admin",
-    resourceId: teacher.id,
-    req: new Request("http://localhost", { headers: headerList }),
-  });
 
   return (
     <DashboardShell title="Admin — School Access">

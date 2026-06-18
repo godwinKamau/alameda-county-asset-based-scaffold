@@ -11,6 +11,7 @@ import {
   mutedTextClassName,
   sectionTitleClassName,
 } from "@/lib/ui/styles";
+import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import { ErrorBanner } from "./ErrorBanner";
 
 export function RosterUploaderModal({
@@ -63,7 +64,7 @@ export function RosterUploaderModal({
       const body = new FormData();
       body.append("file", file);
 
-      const response = await fetch("/api/roster", {
+      const response = await apiFetch("/api/roster", {
         method: "POST",
         body,
       });
@@ -93,6 +94,7 @@ export function RosterUploaderModal({
       form.reset();
       router.refresh();
     } catch (uploadError) {
+      if (isDatabaseWakingError(uploadError)) return;
       setError(
         uploadError instanceof Error
           ? uploadError.message

@@ -2,32 +2,28 @@ import {
   getCaEldLevelLabel,
   getElpacPerformanceLevelLabel,
 } from "@/lib/elpac/labels";
-import { DOMAIN_LABELS } from "@/lib/elpac/domains";
-import { ELPAC_DOMAINS, type ElpacDomain } from "@/lib/types";
 
-export type { ElpacDomain };
+export const ELPAC_DOMAINS = [
+  "listening",
+  "speaking",
+  "reading",
+  "writing",
+] as const;
+
+export type ElpacDomain = (typeof ELPAC_DOMAINS)[number];
+
+const DOMAIN_LABELS: Record<ElpacDomain, string> = {
+  listening: "Listening",
+  speaking: "Speaking",
+  reading: "Reading",
+  writing: "Writing",
+};
 
 export interface DomainLevel {
   domain: ElpacDomain;
   level: number | null;
   sessionCount: number;
 }
-
-export type ElpacComposite = "oral" | "written";
-
-export interface CompositeLevel {
-  composite: ElpacComposite;
-  level: number | null;
-  sessionCount: number;
-}
-
-const COMPOSITE_LABELS: Record<ElpacComposite, string> = {
-  oral: "Oral language",
-  written: "Written language",
-};
-
-const ORAL_DOMAINS: readonly ElpacDomain[] = ["listening", "speaking"];
-const WRITTEN_DOMAINS: readonly ElpacDomain[] = ["reading", "writing"];
 
 interface StudentLevelChartProps {
   domainLevels: DomainLevel[];
@@ -41,74 +37,32 @@ function normalizeDomain(domain: string): ElpacDomain | null {
   return null;
 }
 
-function averageLevels(levels: number[]): { level: number; sessionCount: number } | null {
-  if (levels.length === 0) return null;
-  const avg = levels.reduce((sum, level) => sum + level, 0) / levels.length;
-  return {
-    level: Math.round(avg * 10) / 10,
-    sessionCount: levels.length,
-  };
-}
-
 export function computeDomainLevels(
   sessions: { domain: string; estimated_level: number }[],
 ): DomainLevel[] {
   const buckets = new Map<ElpacDomain, number[]>();
 
   for (const session of sessions) {
-    const d = normalizeDomain(session.domain);
-    if (!d) continue;
-    const levels = buckets.get(d) ?? [];
+    const domain = normalizeDomain(session.domain);
+    if (!domain) continue;
+    const levels = buckets.get(domain) ?? [];
     levels.push(session.estimated_level);
-    buckets.set(d, levels);
+    buckets.set(domain, levels);
   }
 
-  return ELPAC_DOMAINS.map((d) => {
-    const levels = buckets.get(d);
+  return ELPAC_DOMAINS.map((domain) => {
+    const levels = buckets.get(domain);
     if (!levels || levels.length === 0) {
-      return { domain: d, level: null, sessionCount: 0 };
+      return { domain, level: null, sessionCount: 0 };
     }
     const avg =
       levels.reduce((sum, level) => sum + level, 0) / levels.length;
     return {
-      domain: d,
+      domain,
       level: Math.round(avg * 10) / 10,
       sessionCount: levels.length,
     };
   });
-}
-
-export function computeCompositeLevels(
-  sessions: { domain: string; estimated_level: number }[],
-): CompositeLevel[] {
-  const oralLevels: number[] = [];
-  const writtenLevels: number[] = [];
-
-  for (const session of sessions) {
-    const d = normalizeDomain(session.domain);
-    if (!d) continue;
-    if (ORAL_DOMAINS.includes(d)) {
-      oralLevels.push(session.estimated_level);
-    } else if (WRITTEN_DOMAINS.includes(d)) {
-      writtenLevels.push(session.estimated_level);
-    }
-  }
-
-  const oralAvg = averageLevels(oralLevels);
-  const writtenAvg = averageLevels(writtenLevels);
-
-  return [
-    {
-      composite: "oral",
-      level: oralAvg?.level ?? null,
-      sessionCount: oralAvg?.sessionCount ?? 0,
-    },
-    {
-      composite: "written",
-      level: writtenAvg?.level ?? null,
-      sessionCount: writtenAvg?.sessionCount ?? 0,
-    },
-  ];
 }
 
 export function StudentLevelChart({ domainLevels }: StudentLevelChartProps) {
@@ -169,52 +123,6 @@ export function StudentLevelChart({ domainLevels }: StudentLevelChartProps) {
           );
         })}
       </div>
-    </div>
-  );
-}
-
-interface CompositeLevelCardProps {
-  composite: CompositeLevel;
-}
-
-export function CompositeLevelCard({ composite }: CompositeLevelCardProps) {
-  const label = COMPOSITE_LABELS[composite.composite];
-  const hasData = composite.level != null;
-  const level = composite.level;
-  const roundedLevel = hasData && level != null ? Math.round(level) : null;
-
-  return (
-    <div className="ui-card p-6">
-      <p className="text-sm font-medium text-muted">{label}</p>
-      {hasData ? (
-        <div className="mt-3 flex items-start gap-4">
-          <div
-            aria-hidden="true"
-            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-brand-soft ring-1 ring-brand-soft"
-          >
-            <span className="text-3xl font-bold tabular-nums text-brand-dark">
-              {composite.level}
-            </span>
-          </div>
-          <div className="min-w-0 pt-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-              ELPAC Level {roundedLevel}
-            </p>
-            <p className="mt-1 text-2xl font-semibold leading-tight text-brand-dark">
-              {getCaEldLevelLabel(roundedLevel!)}
-            </p>
-            <p className="mt-1 text-sm text-muted">
-              {getElpacPerformanceLevelLabel(roundedLevel!)}
-            </p>
-            <p className="mt-1 text-xs text-muted">
-              Based on {composite.sessionCount}{" "}
-              {composite.sessionCount === 1 ? "analysis" : "analyses"}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <p className="mt-3 text-sm text-muted">No data yet</p>
-      )}
     </div>
   );
 }

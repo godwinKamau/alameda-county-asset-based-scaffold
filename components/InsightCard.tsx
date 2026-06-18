@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Insight } from "@/lib/types";
 import { getCaEldLevelLabel, getElpacPerformanceLevelLabel } from "@/lib/elpac/labels";
 import { Panel } from "./Panel";
+import { RichSentenceList } from "./RichSentenceList";
 import { ScaffoldContent } from "./ScaffoldContent";
 
 type InsightTab = "scaffold" | "level" | "strengths" | "gap";
@@ -141,9 +142,12 @@ export function InsightCard({ insight }: InsightCardProps) {
                 </p>
               </div>
             </div>
-            <p className="mt-4 leading-relaxed text-brand-dark/90">
-              {insight.level_reasoning}
+            <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted">
+              Evidence from artifact
             </p>
+            <div className="mt-2 text-brand-dark/90">
+              <RichSentenceList text={insight.level_reasoning} />
+            </div>
           </Panel>
         </div>
 
@@ -159,7 +163,7 @@ export function InsightCard({ insight }: InsightCardProps) {
           }
         >
           <Panel title="Observed Strengths" variant="strengths" showTitle={false}>
-            <p className="leading-relaxed">{insight.strengths}</p>
+            <RichSentenceList text={insight.strengths} />
           </Panel>
         </div>
 
@@ -175,7 +179,7 @@ export function InsightCard({ insight }: InsightCardProps) {
           }
         >
           <Panel title="Gap to Next Level" variant="gap" showTitle={false}>
-            <p className="leading-relaxed">{insight.gap_to_next}</p>
+            <RichSentenceList text={insight.gap_to_next} />
           </Panel>
         </div>
       </div>

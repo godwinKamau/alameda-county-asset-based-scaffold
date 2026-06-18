@@ -26,28 +26,6 @@ export function deriveGradeSpan(exactGrade: ExactGrade): GradeSpan {
   return "3-12";
 }
 
-export const ElpacDomainSchema = z.enum([
-  "listening",
-  "speaking",
-  "reading",
-  "writing",
-]);
-export type ElpacDomain = z.infer<typeof ElpacDomainSchema>;
-
-export const ELPAC_DOMAINS = [
-  "listening",
-  "speaking",
-  "reading",
-  "writing",
-] as const;
-
-export const ENABLED_DOMAINS: ReadonlySet<ElpacDomain> = new Set([
-  "writing",
-  "reading",
-]);
-
-export type PldGradeSpanKey = GradeSpan | "K-2";
-
 export const InsightSchema = z.object({
   strengths: z.string().min(1),
   estimated_level: z.number().int().min(1).max(4),
@@ -91,7 +69,7 @@ export interface RosterEntryWithStats extends RosterEntry {
 export interface AnalysisSessionWithInsight {
   id: string;
   student_uuid: string;
-  domain: ElpacDomain;
+  domain: string;
   grade_span: GradeSpan;
   provided_elpac_level: number | null;
   submitted_at: Date;

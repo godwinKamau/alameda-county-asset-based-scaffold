@@ -119,3 +119,16 @@ export function parseInlineEmphasis(text: string): TextSegment[] {
     (segment) => segment.type === "strong" || segment.value.length > 0,
   );
 }
+
+export function parseSentences(text: string): TextSegment[][] {
+  const trimmed = text.trim();
+  if (!trimmed) return [];
+
+  const sentences = trimmed.split(/(?<=[.!?])\s+/).filter(Boolean);
+
+  if (sentences.length === 0) {
+    return [parseInlineEmphasis(trimmed)];
+  }
+
+  return sentences.map((sentence) => parseInlineEmphasis(sentence.trim()));
+}

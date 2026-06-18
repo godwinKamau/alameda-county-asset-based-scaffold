@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withDbGuard } from "@/lib/api/with-db-guard";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
 import { listSessionsForStudent, rosterEntryBelongsToTeacher } from "@/lib/db/queries";
@@ -10,7 +11,7 @@ interface RouteContext {
   params: Promise<{ uuid: string }>;
 }
 
-export async function GET(req: Request, context: RouteContext) {
+async function getHandler(req: Request, context: RouteContext) {
   const teacher = await requireTeacher();
   if (isTeacherResponse(teacher)) return teacher;
 
@@ -43,3 +44,5 @@ export async function GET(req: Request, context: RouteContext) {
     })),
   });
 }
+
+export const GET = withDbGuard(getHandler);

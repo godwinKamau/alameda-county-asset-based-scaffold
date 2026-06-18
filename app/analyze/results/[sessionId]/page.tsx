@@ -3,14 +3,15 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
+import { DbWakingBanner } from "@/components/DbWakingBanner";
 import { InsightCard } from "@/components/InsightCard";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
 import { recordAudit, hashEmail } from "@/lib/audit/log";
+import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
   findTeacherByEmailHash,
   getSessionWithInsight,
 } from "@/lib/db/queries";
-import { DOMAIN_LABELS } from "@/lib/elpac/domains";
 import { getCaEldLevelLabel } from "@/lib/elpac/labels";
 import { getStudentDisplayName } from "@/lib/roster/display";
 import { btnSecondaryClassName, cardClassName } from "@/lib/ui/styles";
@@ -30,31 +31,43 @@ export default async function AnalysisResultsPage({
   const email = user?.emailAddresses[0]?.emailAddress;
   if (!email) redirect("/login");
 
-  const teacher = await findTeacherByEmailHash(hashEmail(email));
+  let teacher: Awaited<ReturnType<typeof findTeacherByEmailHash>>;
+  let session: Awaited<ReturnType<typeof getSessionWithInsight>> = null;
+
+  try {
+    teacher = await findTeacherByEmailHash(hashEmail(email));
+    if (teacher) {
+      session = await getSessionWithInsight(teacher.id, sessionId);
+      if (session) {
+        const headerList = await headers();
+        await recordAudit({
+          actorId: teacher.id,
+          action: "analysis.read",
+          resourceType: "analysis_session",
+          resourceId: sessionId,
+          req: new Request("http://localhost", { headers: headerList }),
+        });
+      }
+    }
+  } catch (err) {
+    if (isDatabaseWakingError(err)) {
+      return (
+        <DashboardShell title="Analysis Results">
+          <DbWakingBanner />
+        </DashboardShell>
+      );
+    }
+    throw err;
+  }
+
   if (!teacher) redirect("/dashboard");
-
-  const session = await getSessionWithInsight(teacher.id, sessionId);
   if (!session) notFound();
-
-  const headerList = await headers();
-  const req = new Request("http://localhost", {
-    headers: headerList,
-  });
-
-  await recordAudit({
-    actorId: teacher.id,
-    action: "analysis.read",
-    resourceType: "analysis_session",
-    resourceId: sessionId,
-    req,
-  });
 
   const newAnalysisHref = buildAnalyzeUrl({
     student_uuid: session.student_uuid,
     subject: session.subject,
     grade_span: session.grade_span,
     known_elpac_level: session.provided_elpac_level,
-    domain: session.domain,
   });
 
   const studentName = getStudentDisplayName({
@@ -104,9 +117,6 @@ export default async function AnalysisResultsPage({
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-brand-soft px-3 py-1 text-sm font-semibold text-brand-dark ring-1 ring-brand-soft">
                 Level {estimatedLevel} · {eldLevelLabel}
-              </span>
-              <span className="inline-flex items-center rounded-full bg-brand-soft/60 px-3 py-1 text-sm font-medium text-brand-dark ring-1 ring-brand-soft">
-                {DOMAIN_LABELS[session.domain]}
               </span>
               <span className="text-sm text-muted">
                 Grade span: {session.grade_span}

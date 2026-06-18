@@ -12,8 +12,10 @@ import {
 import { getCaEldLevelLabel } from "@/lib/elpac/labels";
 import type { ExactGrade, GradeSpan } from "@/lib/types";
 import {
+  btnDashboardActionClassName,
+  btnRowActionClassName,
+  btnSecondaryClassName,
   inputClassName,
-  linkClassName,
   selectClassName,
 } from "@/lib/ui/styles";
 
@@ -84,7 +86,7 @@ function groupEntriesByAvgLevel(
   const groups: { subject: string; entries: StudentExplorerEntry[] }[] = [];
 
   if (withData.length > 0) {
-    groups.push({ subject: "By written language level", entries: withData });
+    groups.push({ subject: "By average level", entries: withData });
   }
   if (withoutData.length > 0) {
     groups.push({ subject: "No analysis yet", entries: withoutData });
@@ -115,7 +117,7 @@ function StudentRow({ entry, displayName }: StudentRowProps) {
       <div className="min-w-0 flex-1">
         <Link
           href={`/student/${entry.student_uuid}`}
-          className="font-medium text-brand-dark hover:text-brand"
+          className="text-lg font-medium text-brand-dark hover:text-brand"
         >
           {displayName}
         </Link>
@@ -127,18 +129,21 @@ function StudentRow({ entry, displayName }: StudentRowProps) {
         <p className="mt-0.5 text-xs text-muted">
           {entry.session_count === 0
             ? "No analyses yet"
-            : `${entry.session_count} ${entry.session_count === 1 ? "analysis" : "analyses"} · Written language ${formatAvgLevel(entry.avg_level)}`}
+            : `${entry.session_count} ${entry.session_count === 1 ? "analysis" : "analyses"} · Avg level ${formatAvgLevel(entry.avg_level)}`}
         </p>
       </div>
-      <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
-        <Link href={buildAnalyzeUrl(entry)} className={linkClassName}>
-          Analyze
-        </Link>
+      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
         <Link
           href={`/student/${entry.student_uuid}`}
-          className={linkClassName}
+          className={`${btnSecondaryClassName} ${btnRowActionClassName}`}
         >
           View history
+        </Link>
+        <Link
+          href={buildAnalyzeUrl(entry)}
+          className={`${btnDashboardActionClassName} ${btnRowActionClassName}`}
+        >
+          Analyze
         </Link>
       </div>
     </li>
@@ -156,6 +161,7 @@ export function StudentsExplorer({
   const [minLevel, setMinLevel] = useState("");
   const [maxLevel, setMaxLevel] = useState("");
   const [organizeBy, setOrganizeBy] = useState<OrganizeBy>("subject");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
   );
@@ -241,10 +247,10 @@ export function StudentsExplorer({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div>
-          <label htmlFor="student-search" className="sr-only">
-            Search by name
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <label htmlFor="student-search" className="shrink-0 font-bold text-sm">
+            Search:
           </label>
           <input
             id="student-search"
@@ -252,96 +258,122 @@ export function StudentsExplorer({
             placeholder="Search by name…"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className={inputClassName}
+            className={`${inputClassName} flex-1`}
           />
         </div>
+
         <div>
-          <label htmlFor="subject-filter" className="sr-only">
-            Filter by subject
-          </label>
-          <select
-            id="subject-filter"
-            value={subjectFilter}
-            onChange={(event) => setSubjectFilter(event.target.value)}
-            className={selectClassName}
+          <button
+            type="button"
+            onClick={() => setShowAdvancedFilters((prev) => !prev)}
+            className="flex items-center gap-1.5 text-sm text-brand hover:underline"
           >
-            <option value="">All subjects</option>
-            {existingSubjects.map((subject) => (
-              <option key={subject} value={subject}>
-                {subject}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="grade-span-filter" className="sr-only">
-            Filter by grade span
-          </label>
-          <select
-            id="grade-span-filter"
-            value={gradeSpanFilter}
-            onChange={(event) => setGradeSpanFilter(event.target.value)}
-            className={selectClassName}
-          >
-            <option value="">All grade spans</option>
-            {GRADE_SPANS.map((span) => (
-              <option key={span} value={span}>
-                {GRADE_SPAN_LABELS[span]}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="min-level-filter" className="sr-only">
-            Minimum average level
-          </label>
-          <select
-            id="min-level-filter"
-            value={minLevel}
-            onChange={(event) => setMinLevel(event.target.value)}
-            className={selectClassName}
-          >
-            <option value="">Min written level</option>
-            {[1, 2, 3, 4].map((level) => (
-              <option key={level} value={level}>
-                Level {level}+
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="max-level-filter" className="sr-only">
-            Maximum average level
-          </label>
-          <select
-            id="max-level-filter"
-            value={maxLevel}
-            onChange={(event) => setMaxLevel(event.target.value)}
-            className={selectClassName}
-          >
-            <option value="">Max written level</option>
-            {[1, 2, 3, 4].map((level) => (
-              <option key={level} value={level}>
-                Level {level} or below
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="organize-by" className="sr-only">
-            Organize by
-          </label>
-          <select
-            id="organize-by"
-            value={organizeBy}
-            onChange={(event) => setOrganizeBy(event.target.value as OrganizeBy)}
-            className={selectClassName}
-          >
-            <option value="subject">Organize by subject</option>
-            <option value="grade_span">Organize by grade span</option>
-            <option value="avg_level">Organize by written language level</option>
-            <option value="flat">Flat list (A–Z)</option>
-          </select>
+            <span>{showAdvancedFilters ? "Hide" : "Advanced"} filters</span>
+            <svg
+              className={`h-4 w-4 transition-transform duration-200 ${showAdvancedFilters ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showAdvancedFilters && (
+            <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <label htmlFor="subject-filter" className="sr-only">
+                  Filter by subject
+                </label>
+                <select
+                  id="subject-filter"
+                  value={subjectFilter}
+                  onChange={(event) => setSubjectFilter(event.target.value)}
+                  className={selectClassName}
+                >
+                  <option value="">All subjects</option>
+                  {existingSubjects.map((subject) => (
+                    <option key={subject} value={subject}>
+                      {subject}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="grade-span-filter" className="sr-only">
+                  Filter by grade span
+                </label>
+                <select
+                  id="grade-span-filter"
+                  value={gradeSpanFilter}
+                  onChange={(event) => setGradeSpanFilter(event.target.value)}
+                  className={selectClassName}
+                >
+                  <option value="">All grade spans</option>
+                  {GRADE_SPANS.map((span) => (
+                    <option key={span} value={span}>
+                      {GRADE_SPAN_LABELS[span]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="min-level-filter" className="sr-only">
+                  Minimum average level
+                </label>
+                <select
+                  id="min-level-filter"
+                  value={minLevel}
+                  onChange={(event) => setMinLevel(event.target.value)}
+                  className={selectClassName}
+                >
+                  <option value="">Min avg level</option>
+                  {[1, 2, 3, 4].map((level) => (
+                    <option key={level} value={level}>
+                      Level {level}+
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="max-level-filter" className="sr-only">
+                  Maximum average level
+                </label>
+                <select
+                  id="max-level-filter"
+                  value={maxLevel}
+                  onChange={(event) => setMaxLevel(event.target.value)}
+                  className={selectClassName}
+                >
+                  <option value="">Max avg level</option>
+                  {[1, 2, 3, 4].map((level) => (
+                    <option key={level} value={level}>
+                      Level {level} or below
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="organize-by" className="sr-only">
+                  Organize by
+                </label>
+                <select
+                  id="organize-by"
+                  value={organizeBy}
+                  onChange={(event) =>
+                    setOrganizeBy(event.target.value as OrganizeBy)
+                  }
+                  className={selectClassName}
+                >
+                  <option value="subject">Organize by subject</option>
+                  <option value="grade_span">Organize by grade span</option>
+                  <option value="avg_level">Organize by average level</option>
+                  <option value="flat">Flat list (A–Z)</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -366,7 +398,7 @@ export function StudentsExplorer({
                   onClick={() => toggleGroup(group.subject)}
                   aria-expanded={!isCollapsed}
                   aria-controls={listId}
-                  className="flex w-full items-center gap-2 text-left text-sm font-semibold text-brand-dark hover:text-brand"
+                  className="flex w-full items-center gap-2 text-left text-lg font-semibold text-brand-dark hover:text-brand"
                 >
                   <svg
                     aria-hidden="true"

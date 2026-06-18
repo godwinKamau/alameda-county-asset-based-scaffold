@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AddStudentForm } from "@/components/AddStudentForm";
 import { RosterList, type RosterListEntry } from "@/components/RosterList";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
@@ -17,6 +18,7 @@ import {
   badgeLevelClassName,
   badgeNeverAnalyzedClassName,
   btnDashboardActionClassName,
+  btnRowActionClassName,
   btnSecondaryClassName,
   tabButtonActiveClassName,
   tabButtonInactiveClassName,
@@ -99,14 +101,14 @@ function WorkStudentCard({
         {variant === "recent" && (
           <Link
             href={`/student/${entry.student_uuid}`}
-            className={`${btnSecondaryClassName} px-3 py-1.5 text-xs`}
+            className={`${btnSecondaryClassName} ${btnRowActionClassName}`}
           >
             History
           </Link>
         )}
         <Link
           href={buildAnalyzeUrl(entry)}
-          className={`${btnDashboardActionClassName} px-4 py-2 text-xs`}
+          className={`${btnDashboardActionClassName} ${btnRowActionClassName}`}
         >
           Analyze
         </Link>
@@ -119,7 +121,48 @@ export function DashboardTabs({
   entries,
   existingSubjects,
 }: DashboardTabsProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("today");
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<TabId>(
+    tabParam === "manage" ? "manage" : "today",
+  );
+  const formRef = useRef<HTMLDivElement>(null);
+
+  function navigateToTab(tab: TabId) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "manage") {
+      params.set("tab", "manage");
+    } else {
+      params.delete("tab");
+    }
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
+  }
+
+  function handleTabClick(tab: TabId) {
+    setActiveTab(tab);
+    navigateToTab(tab);
+  }
+
+  useEffect(() => {
+    function handleTabChange(event: Event) {
+      const tab = (event as CustomEvent<{ tab: TabId }>).detail.tab;
+      setActiveTab(tab);
+      if (tab === "manage") {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    window.addEventListener("dashboardTabChange", handleTabChange);
+    return () => window.removeEventListener("dashboardTabChange", handleTabChange);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "manage") {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [activeTab]);
 
   const neverAnalyzed = useMemo(
     () => entries.filter((entry) => entry.session_count === 0),
@@ -153,7 +196,7 @@ export function DashboardTabs({
           aria-selected={activeTab === "today"}
           id="tab-today"
           aria-controls="panel-today"
-          onClick={() => setActiveTab("today")}
+          onClick={() => handleTabClick("today")}
           className={
             activeTab === "today"
               ? tabButtonActiveClassName
@@ -168,7 +211,7 @@ export function DashboardTabs({
           aria-selected={activeTab === "manage"}
           id="tab-manage"
           aria-controls="panel-manage"
-          onClick={() => setActiveTab("manage")}
+          onClick={() => handleTabClick("manage")}
           className={
             activeTab === "manage"
               ? tabButtonActiveClassName
@@ -235,7 +278,9 @@ export function DashboardTabs({
           aria-labelledby="tab-manage"
           className="space-y-8"
         >
-          <AddStudentForm existingSubjects={existingSubjects} />
+          <div ref={formRef}>
+            <AddStudentForm existingSubjects={existingSubjects} />
+          </div>
           <section className="ui-card p-6">
             <h2 className="text-lg font-semibold text-brand-dark">Your Roster</h2>
             <RosterList

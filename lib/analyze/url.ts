@@ -1,5 +1,5 @@
 import { normalizeSubject } from "@/lib/roster/display";
-import { ElpacDomainSchema, type ElpacDomain, type GradeSpan } from "@/lib/types";
+import type { GradeSpan } from "@/lib/types";
 
 const GRADE_SPANS: GradeSpan[] = ["K", "1-2", "3-12"];
 
@@ -8,7 +8,6 @@ export interface AnalyzePrefill {
   subject: string;
   gradeSpan: GradeSpan;
   providedLevel: string;
-  domain: ElpacDomain;
 }
 
 export interface AnalyzeUrlInput {
@@ -16,7 +15,6 @@ export interface AnalyzeUrlInput {
   subject: string;
   grade_span: GradeSpan;
   known_elpac_level: number | null;
-  domain?: ElpacDomain;
 }
 
 export function buildAnalyzeUrl(entry: AnalyzeUrlInput): string {
@@ -32,10 +30,6 @@ export function buildAnalyzeUrl(entry: AnalyzeUrlInput): string {
 
   if (entry.known_elpac_level != null) {
     params.set("level", String(entry.known_elpac_level));
-  }
-
-  if (entry.domain) {
-    params.set("domain", entry.domain);
   }
 
   return `/analyze?${params.toString()}`;
@@ -55,11 +49,6 @@ function parseProvidedLevel(value: string | null): string {
   return "";
 }
 
-function parseDomain(value: string | null): ElpacDomain {
-  const parsed = ElpacDomainSchema.safeParse(value);
-  return parsed.success ? parsed.data : "writing";
-}
-
 export function parseAnalyzePrefill(
   searchParams: URLSearchParams,
 ): AnalyzePrefill | null {
@@ -74,6 +63,5 @@ export function parseAnalyzePrefill(
     subject: subject || "All",
     gradeSpan: parseGradeSpan(searchParams.get("grade_span")) ?? "3-12",
     providedLevel: parseProvidedLevel(searchParams.get("level")),
-    domain: parseDomain(searchParams.get("domain")),
   };
 }

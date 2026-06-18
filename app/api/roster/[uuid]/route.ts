@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
+import { withDbGuard } from "@/lib/api/with-db-guard";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
+import {
+  databaseWakingResponse,
+  isDatabaseWakingError,
+} from "@/lib/db/errors";
 import { deleteRosterEntry } from "@/lib/db/queries";
 
 export const runtime = "nodejs";
@@ -10,7 +15,7 @@ interface RouteContext {
   params: Promise<{ uuid: string }>;
 }
 
-export async function DELETE(req: Request, context: RouteContext) {
+async function deleteHandler(req: Request, context: RouteContext) {
   const teacher = await requireTeacher();
   if (isTeacherResponse(teacher)) return teacher;
 
@@ -32,6 +37,9 @@ export async function DELETE(req: Request, context: RouteContext) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (isDatabaseWakingError(error)) {
+      return databaseWakingResponse();
+    }
     console.error("[api/roster/[uuid]]", error);
     return NextResponse.json(
       { error: "Failed to delete student" },
@@ -39,3 +47,5 @@ export async function DELETE(req: Request, context: RouteContext) {
     );
   }
 }
+
+export const DELETE = withDbGuard(deleteHandler);

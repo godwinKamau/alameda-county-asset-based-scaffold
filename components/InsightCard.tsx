@@ -105,7 +105,10 @@ export function InsightCard({ insight }: InsightCardProps) {
             showTitle={false}
             className="p-6 shadow-md ring-1 ring-brand-soft"
           >
-            <ScaffoldContent text={insight.scaffold} />
+            <ScaffoldContent
+              text={insight.scaffold}
+              sources={insight.scaffold_sources}
+            />
           </Panel>
         </div>
 

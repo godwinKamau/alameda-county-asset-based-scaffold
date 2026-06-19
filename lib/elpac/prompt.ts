@@ -3,6 +3,7 @@ import "server-only";
 import { getWritingPldsForGradeSpan } from "./loader";
 import { getFrameworkMovesForGradeSpan } from "@/lib/framework/loader";
 import { buildFrameworkBlockFromMoves } from "@/lib/framework/prompt-block";
+import type { FrameworkMove } from "@/lib/framework/types";
 import type { ExactGrade, GradeSpan } from "@/lib/types";
 
 function formatLevelBlock(
@@ -13,10 +14,15 @@ function formatLevelBlock(
   return `Level ${level} — ${data.label} (${data.frequency_marker}):\n${bullets}`;
 }
 
+export interface SystemPromptResult {
+  systemPrompt: string;
+  citableMoves: FrameworkMove[];
+}
+
 export function buildSystemPrompt(
   gradeSpan: GradeSpan,
   exactGrade?: ExactGrade | null,
-): string {
+): SystemPromptResult {
   const plds = getWritingPldsForGradeSpan(gradeSpan);
 
   const injected = (["1", "2", "3", "4"] as const)
@@ -28,7 +34,7 @@ export function buildSystemPrompt(
       ? `\nThe student is in grade ${exactGrade}. While the Range PLDs above apply across grades 3–12, calibrate your expectations for 'grade-appropriate' vocabulary, text complexity, sentence structure, and writing conventions specifically to grade ${exactGrade}. A grade 3 student and a grade 11 student share these descriptors but have very different grade-level benchmarks.\n`
       : "";
 
-  const frameworkBlock = buildFrameworkBlockFromMoves(
+  const { block: frameworkBlock, citableMoves } = buildFrameworkBlockFromMoves(
     getFrameworkMovesForGradeSpan(gradeSpan),
     gradeSpan,
     exactGrade,
@@ -38,7 +44,11 @@ export function buildSystemPrompt(
     ? " When framework moves are provided above, base each scaffold step on one and\n  name its ELD mode (integrated/designated)."
     : "";
 
-  return `You are an expert ELD (English Language Development) analyst trained in the
+  const scaffoldSourceClause = citableMoves.length
+    ? "\n- In scaffold_source_ids, list the [F#] id(s) of the framework move(s) you\n  based the scaffold on. Use only ids shown in the suggested moves above."
+    : "";
+
+  const systemPrompt = `You are an expert ELD (English Language Development) analyst trained in the
 California ELPAC assessment framework. You analyze student writing artifacts
 and produce proficiency insights grounded in official ELPAC Range Performance
 Level Descriptors (PLDs).
@@ -74,5 +84,7 @@ RESPONSE FORMAT — call the submit_insight tool with these fields:
   for quoted or paraphrased evidence from the artifact and PLD-aligned terms.
 - gap_to_next: 2-3 sentences naming specific next-level descriptors. Use **bold**
   for the next-level PLD descriptors not yet demonstrated.
-- scaffold: 2 numbered lines like "1. **Key move** — detail with **quoted target**"`;
+- scaffold: 2 numbered lines like "1. **Key move** — detail with **quoted target**"${scaffoldSourceClause}`;
+
+  return { systemPrompt, citableMoves };
 }

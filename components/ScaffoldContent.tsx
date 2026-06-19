@@ -1,11 +1,15 @@
+import type { ScaffoldSource } from "@/lib/types";
+import { distributeScaffoldSources } from "@/lib/framework/sources";
 import {
   parseInlineEmphasis,
   parseScaffoldItems,
   type TextSegment,
 } from "@/lib/scaffold/format";
+import { ScaffoldSourcePills } from "./ScaffoldSourcePills";
 
 interface ScaffoldContentProps {
   text: string;
+  sources?: ScaffoldSource[];
 }
 
 function renderSegments(segments: TextSegment[]) {
@@ -23,12 +27,16 @@ function renderSegments(segments: TextSegment[]) {
   );
 }
 
-export function ScaffoldContent({ text }: ScaffoldContentProps) {
+export function ScaffoldContent({ text, sources = [] }: ScaffoldContentProps) {
   const items = parseScaffoldItems(text);
+  const sourcesByItem = distributeScaffoldSources(items.length, sources);
 
   if (items.length <= 1 && !/^\d+\.\s/.test(text.trim())) {
     return (
-      <p className="leading-relaxed">{renderSegments(parseInlineEmphasis(text))}</p>
+      <p className="leading-relaxed">
+        {renderSegments(parseInlineEmphasis(text))}
+        <ScaffoldSourcePills sources={sources} />
+      </p>
     );
   }
 
@@ -40,7 +48,10 @@ export function ScaffoldContent({ text }: ScaffoldContentProps) {
             {index + 1}.
           </span>
           <div className="min-w-0 border-l-2 border-slate-100 pl-4">
-            {renderSegments(parseInlineEmphasis(item))}
+            <p className="leading-relaxed">
+              {renderSegments(parseInlineEmphasis(item))}
+              <ScaffoldSourcePills sources={sourcesByItem[index] ?? []} />
+            </p>
           </div>
         </li>
       ))}

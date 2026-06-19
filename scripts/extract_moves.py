@@ -142,7 +142,15 @@ Each `Move` object:
           connective, vocabulary item, or grammatical structure,
   "framework_anchor": string — the chapter section, theme, strand, or vignette
           title this move comes from,
-  "source_section": string (optional) — a page number or section header,
+  "source_section": string — the printed page number(s) from the framework PDF
+          where this move appears, including grade/section context.
+          Format: "Grade context, p. NNN" or "Grade context, p. NNN–NNN".
+          Examples: "Grade 2, p. 305"  /  "Grades 2–3 Overview, p. 298–300"  /
+                    "Grade 3, Snapshot 4.1, p. 321–324".
+          ALWAYS include the page number. NEVER use a snapshot or vignette name
+          alone (e.g. "Snapshot 4.1") — that duplicates framework_anchor and
+          adds no citation value. Omit the field only when the page truly cannot
+          be determined from the source text.
   "grade_band": "{grade_band}",
   "source_chapter": {chapter}
 }}

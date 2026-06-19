@@ -22,6 +22,8 @@ export const FrameworkMoveSchema = z.object({
   language_target: z.string().optional(),
   framework_anchor: z.string().min(1),
   source_section: z.string().optional(),
+  source_page: z.number().int().optional(),
+  source_page_end: z.number().int().optional(),
   grade_band: GradeBandSchema.optional(),
   source_chapter: z.number().int().min(3).max(7).optional(),
 });
@@ -53,6 +55,7 @@ export const FrameworkMovesSchema = z.object({
       source_url: z.string().url(),
       coverage: z.array(z.string()).optional(),
       scope_note: z.string().optional(),
+      pdf_page_offset: z.number().nullable().optional(),
     })
     .optional(),
   writing_moves: FrameworkGradeSpanSchema,

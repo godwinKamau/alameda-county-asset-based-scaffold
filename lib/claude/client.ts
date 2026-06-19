@@ -2,7 +2,14 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 import { buildSystemPrompt } from "@/lib/elpac/prompt";
-import { InsightSchema, type ExactGrade, type GradeSpan, type Insight } from "@/lib/types";
+import { resolveScaffoldSourcesFromIds } from "@/lib/framework/sources";
+import {
+  InsightSchema,
+  InsightToolSchema,
+  type ExactGrade,
+  type GradeSpan,
+  type Insight,
+} from "@/lib/types";
 
 const MODEL = "claude-sonnet-4-6";
 const INSIGHT_TOOL_NAME = "submit_insight";
@@ -38,6 +45,12 @@ const INSIGHT_TOOL: Anthropic.Tool = {
         type: "string",
         description:
           "2 numbered scaffold moves. Start each with a bold key teaching move, then supporting detail.",
+      },
+      scaffold_source_ids: {
+        type: "array",
+        items: { type: "integer", minimum: 1 },
+        description:
+          "The [F#] id(s) of framework move(s) the scaffold is based on, from the suggested moves list.",
       },
     },
     required: [
@@ -85,7 +98,10 @@ export async function analyzeArtifact(
   }
 
   const client = getClient();
-  const systemPrompt = buildSystemPrompt(input.gradeSpan, input.exactGrade);
+  const { systemPrompt, citableMoves } = buildSystemPrompt(
+    input.gradeSpan,
+    input.exactGrade,
+  );
 
   const contextParts: string[] = [`Grade span: ${input.gradeSpan}`];
   if (input.providedLevel != null) {
@@ -140,11 +156,28 @@ export async function analyzeArtifact(
 
   const parsed: unknown = toolBlock.input;
 
-  const validated = InsightSchema.safeParse(parsed);
+  const validated = InsightToolSchema.safeParse(parsed);
   if (!validated.success) {
     console.error("[claude] Insight schema validation failed");
     throw new ClaudeParseError("Analysis response did not match expected format");
   }
 
-  return validated.data;
+  const { scaffold_source_ids, ...insightFields } = validated.data;
+  const scaffoldSources = resolveScaffoldSourcesFromIds(
+    scaffold_source_ids,
+    citableMoves,
+  );
+
+  const insightPayload = {
+    ...insightFields,
+    ...(scaffoldSources.length > 0 ? { scaffold_sources: scaffoldSources } : {}),
+  };
+
+  const insightValidated = InsightSchema.safeParse(insightPayload);
+  if (!insightValidated.success) {
+    console.error("[claude] Insight schema validation failed after resolution");
+    throw new ClaudeParseError("Analysis response did not match expected format");
+  }
+
+  return insightValidated.data;
 }

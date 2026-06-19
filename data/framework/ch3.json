@@ -2,8 +2,13 @@
   "_meta": {
     "source": "California ELA/ELD Framework, Chapter 3: Content and Pedagogy — Transitional Kindergarten Through Grade One (California Department of Education, adopted by the State Board of Education July 2014)",
     "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter3.pdf",
-    "coverage": ["Transitional Kindergarten", "Kindergarten", "Grade One"],
-    "scope_note": "Writing-focused instructional moves extracted from Chapter 3 snapshots of practice, classroom vignettes, and the five key-theme guidance sections. Chapter 3 covers TK–Grade 1 only, so there are no 3–12 moves. TK and kindergarten moves are filed under \"K\"; grade one moves under \"1-2\"; span-wide moves presented for TK–1 are duplicated under both. Level keys map ELPAC / CA ELD proficiency to the student each move serves (1 = Emerging, 2 = low–mid Expanding, 3 = upper Expanding–lower Bridging, 4 = upper Bridging)."
+    "coverage": [
+      "Transitional Kindergarten",
+      "Kindergarten",
+      "Grade One"
+    ],
+    "scope_note": "Writing-focused instructional moves extracted from Chapter 3 snapshots of practice, classroom vignettes, and the five key-theme guidance sections. Chapter 3 covers TK–Grade 1 only, so there are no 3–12 moves. TK and kindergarten moves are filed under \"K\"; grade one moves under \"1-2\"; span-wide moves presented for TK–1 are duplicated under both. Level keys map ELPAC / CA ELD proficiency to the student each move serves (1 = Emerging, 2 = low–mid Expanding, 3 = upper Expanding–lower Bridging, 4 = upper Bridging).",
+    "pdf_page_offset": 127
   },
   "writing_moves": {
     "K": {
@@ -15,6 +20,7 @@
           "language_target": "syllable segmentation of one's own name (one to four syllables)",
           "framework_anchor": "Snapshot 3.1: Tingo Tango Mango Tree (Integrated ELA and Mathematics in TK)",
           "source_section": "Transitional Kindergarten, p. 184",
+          "source_page": 184,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -25,6 +31,7 @@
           "language_target": "transition words 'then' / 'next'; past-tense verbs (e.g., 'said')",
           "framework_anchor": "Snapshot 3.2: Goldilocks and the Three Bears (Integrated ELA and ELD in TK)",
           "source_section": "Transitional Kindergarten, p. 186",
+          "source_page": 186,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -35,6 +42,7 @@
           "language_target": "past-tense verbs (were, blew, ran)",
           "framework_anchor": "Vignette 3.2: Retelling The Three Little Pigs Using Past Tense Verbs and Expanded Sentences (Designated ELD in TK)",
           "source_section": "Transitional Kindergarten, p. 197",
+          "source_page": 197,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -45,6 +53,8 @@
           "language_target": "temporal story openers 'Once upon a time…' / 'After …'; general academic vocabulary",
           "framework_anchor": "Snapshot 3.7: Learning Two Languages in an Alternative Dual Language Program — Interacting with Storybooks: Principles for Planning",
           "source_section": "Kindergarten, p. 225–226",
+          "source_page": 225,
+          "source_page_end": 226,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -55,6 +65,7 @@
           "language_target": "noun-phrase expansion with adjectives; prepositional phrase 'on the leaf'; domain words larva/thorax",
           "framework_anchor": "Snapshot 3.6: Expanding Science Observations, Designated ELD Connected to Science",
           "source_section": "Kindergarten, p. 222",
+          "source_page": 222,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -65,6 +76,7 @@
           "language_target": "coordinating conjunction 'and' (compound sentence)",
           "framework_anchor": "Snapshot 3.6: Expanding Science Observations, Designated ELD Connected to Science",
           "source_section": "Kindergarten, p. 222",
+          "source_page": 222,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -75,6 +87,7 @@
           "language_target": "cognates (furious / furioso)",
           "framework_anchor": "Vignette 3.4: General Academic Vocabulary Instruction from Storybooks (Designated ELD in Kindergarten)",
           "source_section": "Kindergarten, p. 233",
+          "source_page": 233,
           "grade_band": "TK-1",
           "source_chapter": 3
         }
@@ -87,6 +100,7 @@
           "language_target": "comparison terms: more than / fewer than / the same number as",
           "framework_anchor": "Snapshot 3.1: Tingo Tango Mango Tree (Integrated ELA and Mathematics in TK)",
           "source_section": "Transitional Kindergarten, p. 185",
+          "source_page": 185,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -96,6 +110,7 @@
           "move": "After charting the characters, setting, and plot events, have each child fold 12x18 construction paper into a five-page book and draw or cut the home in the forest, three bowls, three chairs, and three beds, then use Goldilocks-and-bears paper cutouts as props to retell the story to a partner page by page.",
           "framework_anchor": "Snapshot 3.2: Goldilocks and the Three Bears (Integrated ELA and ELD in TK)",
           "source_section": "Transitional Kindergarten, p. 186",
+          "source_page": 186,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -106,6 +121,7 @@
           "language_target": "descriptive detail and precise domain vocabulary (e.g., plankton)",
           "framework_anchor": "Snapshot 3.3: Animal Informational Alphabet Books (Integrated ELA, Science, and Visual Arts in TK)",
           "source_section": "Transitional Kindergarten, p. 187",
+          "source_page": 187,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -115,6 +131,7 @@
           "move": "Write with and for the children every day—thinking aloud as you compose a text in front of them—so they see that print conveys meaning and can study the author's craft in the model you produce.",
           "framework_anchor": "Effective Expression: Writing (Key Themes, overview of the span)",
           "source_section": "Overview of the Span, p. 145",
+          "source_page": 145,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -124,6 +141,8 @@
           "move": "Use the children's projected pictures of the five key story events to have partners take turns orally retelling the story, while you listen for their sequencing and language and note it before the class rewrites the story together.",
           "framework_anchor": "Vignette 3.1: Retelling and Rewriting The Three Little Pigs (Integrated ELA/Literacy and ELD in TK)",
           "source_section": "Transitional Kindergarten, p. 191–192",
+          "source_page": 191,
+          "source_page_end": 192,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -134,6 +153,7 @@
           "language_target": "noun-phrase expansion (adjective 'frightened') plus prepositional phrase 'into his house'",
           "framework_anchor": "Vignette 3.2: Retelling The Three Little Pigs Using Past Tense Verbs and Expanded Sentences (Designated ELD in TK)",
           "source_section": "Transitional Kindergarten, p. 197",
+          "source_page": 197,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -143,6 +163,7 @@
           "move": "Turn the jointly reconstructed English (and Spanish) story into an illustrated bilingual big book using photographs of the children acting it out, and place it in the library corner for repeated rereading.",
           "framework_anchor": "Vignette 3.1: Retelling and Rewriting The Three Little Pigs (Integrated ELA/Literacy and ELD in TK)",
           "source_section": "Transitional Kindergarten, p. 195",
+          "source_page": 195,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -152,6 +173,7 @@
           "move": "Have small groups draw an illustration of what they learned about litter and collaboratively decide on the words to label it, then present and explain the labeled illustration to the class.",
           "framework_anchor": "Snapshot 3.4: Collecting and Reporting Data on Litter at School (Integrated ELA, ELD, Science, and History–Social Science)",
           "source_section": "Kindergarten, p. 219",
+          "source_page": 219,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -162,6 +184,7 @@
           "language_target": "prepositional-phrase expansion ('with full pollen baskets,' 'around the flowers')",
           "framework_anchor": "Snapshot 3.6: Expanding Science Observations, Designated ELD Connected to Science",
           "source_section": "Kindergarten, p. 222",
+          "source_page": 222,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -172,6 +195,7 @@
           "language_target": "relative clause 'that' (complex sentence)",
           "framework_anchor": "Snapshot 3.6: Expanding Science Observations, Designated ELD Connected to Science",
           "source_section": "Kindergarten, p. 222",
+          "source_page": 222,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -181,6 +205,7 @@
           "move": "Teach 4–5 general academic words a week with a fixed routine—contextualize the word in the story, give a child-friendly explanation in complete sentences with examples, guide use in one or two think-pair-shares with scaffolds, then check understanding—so students can reuse the words when they retell or compose their own stories.",
           "framework_anchor": "Vignette 3.4: General Academic Vocabulary Instruction from Storybooks (Designated ELD in Kindergarten)",
           "source_section": "Kindergarten, p. 233",
+          "source_page": 233,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -190,6 +215,7 @@
           "move": "Once a story has been read several times and its vocabulary taught, place copies in the library, writing, and listening centers and encourage children to retell, dramatize, and write their own (or an altered) version of it.",
           "framework_anchor": "Snapshot 3.7: Learning Two Languages in an Alternative Dual Language Program — Extending Understandings",
           "source_section": "Kindergarten, p. 226",
+          "source_page": 226,
           "grade_band": "TK-1",
           "source_chapter": 3
         }
@@ -202,6 +228,7 @@
           "language_target": "general academic + domain-specific vocabulary (discard, accumulate, habitat, pollute, litter)",
           "framework_anchor": "Snapshot 3.4: Collecting and Reporting Data on Litter at School (Integrated ELA, ELD, Science, and History–Social Science)",
           "source_section": "Kindergarten, p. 219",
+          "source_page": 219,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -212,6 +239,7 @@
           "language_target": "domain terminology used in persuasive writing",
           "framework_anchor": "Snapshot 3.4: Collecting and Reporting Data on Litter at School (Integrated ELA, ELD, Science, and History–Social Science)",
           "source_section": "Kindergarten, p. 219",
+          "source_page": 219,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -222,6 +250,7 @@
           "language_target": "opinion frame 'We should add/change ___ because ___.'",
           "framework_anchor": "Snapshot 3.5: David Goes to School (Integrated ELA and Civics in Kindergarten)",
           "source_section": "Kindergarten, p. 220",
+          "source_page": 220,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -232,6 +261,7 @@
           "language_target": "metalanguage for story stages: orientation / complication / resolution",
           "framework_anchor": "Vignette 3.1: Retelling and Rewriting The Three Little Pigs (Integrated ELA/Literacy and ELD in TK)",
           "source_section": "Transitional Kindergarten, p. 193",
+          "source_page": 193,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -242,6 +272,8 @@
           "language_target": "vivid past-tense verbs and adjectives (destroyed, demolished, ferocious)",
           "framework_anchor": "Vignette 3.1: Retelling and Rewriting The Three Little Pigs (Integrated ELA/Literacy and ELD in TK)",
           "source_section": "Transitional Kindergarten, p. 192–194",
+          "source_page": 192,
+          "source_page_end": 194,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -252,6 +284,7 @@
           "language_target": "signal/transition word 'suddenly'",
           "framework_anchor": "Vignette 3.1: Retelling and Rewriting The Three Little Pigs (Integrated ELA/Literacy and ELD in TK)",
           "source_section": "Transitional Kindergarten, p. 194",
+          "source_page": 194,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -261,6 +294,7 @@
           "move": "On day five of the read-aloud sequence, jointly reconstruct the story as you write it under a document camera for all to see, scaffolding sophisticated language and helping children extend and refine each sentence.",
           "framework_anchor": "Vignette 3.3: Interactive Storybook Read Aloud (Integrated ELA/Literacy and ELD in Kindergarten)",
           "source_section": "Kindergarten, p. 231",
+          "source_page": 231,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -270,6 +304,8 @@
           "move": "At the end of the week, have pairs compose and illustrate either a retelling of the read-aloud story or an alternate version of it with different characters or a new ending.",
           "framework_anchor": "Vignette 3.3: Interactive Storybook Read Aloud (Integrated ELA/Literacy and ELD in Kindergarten)",
           "source_section": "Kindergarten, p. 228–229",
+          "source_page": 228,
+          "source_page_end": 229,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -279,6 +315,7 @@
           "move": "Have children share their finished writing with peers and respond to classmates' questions and suggestions, then add details to strengthen the piece so it better communicates their ideas.",
           "framework_anchor": "Effective Expression: Writing (Key Themes, overview of the span) — W.K–1.5",
           "source_section": "Overview of the Span, p. 145",
+          "source_page": 145,
           "grade_band": "TK-1",
           "source_chapter": 3
         }
@@ -293,6 +330,7 @@
           "language_target": "labeling drawings with content words (pollen, bee, fly)",
           "framework_anchor": "Vignette 3.5: Interactive Read Alouds with Informational Texts (Integrated ELA, Literacy, and Science in Grade One)",
           "source_section": "Grade 1, p. 268",
+          "source_page": 268,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -303,6 +341,7 @@
           "language_target": "sequencing connectives first / then / next",
           "framework_anchor": "Snapshot 3.10: Mathematical Word Problems (Designated ELD Connected to Mathematics in Grade One)",
           "source_section": "Grade 1, p. 259",
+          "source_page": 259,
           "grade_band": "TK-1",
           "source_chapter": 3
         }
@@ -315,6 +354,7 @@
           "language_target": "causal connectives because / so",
           "framework_anchor": "Snapshot 3.10: Mathematical Word Problems (Designated ELD Connected to Mathematics in Grade One)",
           "source_section": "Grade 1, p. 259",
+          "source_page": 259,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -325,6 +365,8 @@
           "language_target": "subordinating conjunction 'as'; dense clause structure",
           "framework_anchor": "Vignette 3.6: Unpacking Sentences (Designated ELD in Grade One)",
           "source_section": "Grade 1, p. 270–271",
+          "source_page": 270,
+          "source_page_end": 271,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -335,6 +377,7 @@
           "language_target": "temporal subordinating conjunctions 'as' / 'while'; clause combining",
           "framework_anchor": "Vignette 3.6: Unpacking Sentences (Designated ELD in Grade One)",
           "source_section": "Grade 1, p. 272",
+          "source_page": 272,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -344,6 +387,7 @@
           "move": "Write with and for the children every day—thinking aloud as you compose a text in front of them—so they see that print conveys meaning and can study the author's craft in the model you produce.",
           "framework_anchor": "Effective Expression: Writing (Key Themes, overview of the span)",
           "source_section": "Overview of the Span, p. 145",
+          "source_page": 145,
           "grade_band": "TK-1",
           "source_chapter": 3
         }
@@ -356,6 +400,7 @@
           "language_target": "main-idea frame 'This part is mostly about ___.'",
           "framework_anchor": "Vignette 3.5: Interactive Read Alouds with Informational Texts (Integrated ELA, Literacy, and Science in Grade One)",
           "source_section": "Grade 1, p. 265",
+          "source_page": 265,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -365,6 +410,8 @@
           "move": "Have children examine and discuss the purpose of an informational text's Table of Contents, then, when they write their own informational books, guide them to organize the information and add headings and a Table of Contents modeled on the books they explored.",
           "framework_anchor": "Snapshot 3.8: Examining a Table of Contents in Grade One",
           "source_section": "Grade 1, p. 255–256",
+          "source_page": 255,
+          "source_page_end": 256,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -375,6 +422,8 @@
           "language_target": "domain vocabulary (metamorphosis, cycle, mature, develop)",
           "framework_anchor": "Snapshot 3.9: Teaching Science Vocabulary (Integrated ELA, ELD, and Science in Grade One)",
           "source_section": "Grade 1, p. 256–257",
+          "source_page": 256,
+          "source_page_end": 257,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -385,6 +434,8 @@
           "language_target": "agreement frames; 'One thing that's important about ___ is ___.'",
           "framework_anchor": "Snapshot 3.9: Teaching Science Vocabulary (Integrated ELA, ELD, and Science in Grade One)",
           "source_section": "Grade 1, p. 256–257",
+          "source_page": 256,
+          "source_page_end": 257,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -395,6 +446,7 @@
           "language_target": "semantically grouped domain vocabulary (head, thorax, abdomen, proboscis)",
           "framework_anchor": "Vignette 3.5: Interactive Read Alouds with Informational Texts (Integrated ELA, Literacy, and Science in Grade One)",
           "source_section": "Grade 1, p. 263",
+          "source_page": 263,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -404,6 +456,7 @@
           "move": "For the culminating project, have each child plan and write an illustrated informational book with a contents page (e.g., Introduction, Bee anatomy, Pollination, Honey), drawing on the word wall, posted charts, sentence frames, and mentor texts, then read it aloud from the 'Author's Chair.'",
           "framework_anchor": "Vignette 3.5: Interactive Read Alouds with Informational Texts (Integrated ELA, Literacy, and Science in Grade One)",
           "source_section": "Grade 1, p. 268",
+          "source_page": 268,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -414,6 +467,7 @@
           "language_target": "abstract concept vocabulary (courage, determination, honesty, responsibility)",
           "framework_anchor": "Snapshot 3.11: Expanding Sentences and Building Vocabulary (Designated ELD Connected to ELA/Social Studies in Grade One)",
           "source_section": "Grade 1, p. 260",
+          "source_page": 260,
           "grade_band": "TK-1",
           "source_chapter": 3
         },
@@ -423,6 +477,7 @@
           "move": "Have children share their finished writing with peers and respond to classmates' questions and suggestions, then add details to strengthen the piece so it better communicates their ideas.",
           "framework_anchor": "Effective Expression: Writing (Key Themes, overview of the span) — W.K–1.5",
           "source_section": "Overview of the Span, p. 145",
+          "source_page": 145,
           "grade_band": "TK-1",
           "source_chapter": 3
         }
@@ -435,6 +490,7 @@
           "language_target": "sentence expansion with prepositional/adverbial detail (where, when, how)",
           "framework_anchor": "Snapshot 3.11: Expanding Sentences and Building Vocabulary (Designated ELD Connected to ELA/Social Studies in Grade One)",
           "source_section": "Grade 1, p. 260",
+          "source_page": 260,
           "grade_band": "TK-1",
           "source_chapter": 3
         }

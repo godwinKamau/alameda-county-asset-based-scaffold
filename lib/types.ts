@@ -32,9 +32,28 @@ export const InsightSchema = z.object({
   level_reasoning: z.string().min(1),
   gap_to_next: z.string().min(1),
   scaffold: z.string().min(1),
+  scaffold_sources: z
+    .array(
+      z.object({
+        chapter: z.number().int().min(3).max(7),
+        page: z.number().int().positive(),
+        page_end: z.number().int().positive().optional(),
+        url: z.string().url(),
+        anchor: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export type Insight = z.infer<typeof InsightSchema>;
+
+export const InsightToolSchema = InsightSchema.extend({
+  scaffold_source_ids: z.array(z.number().int().positive()).optional(),
+});
+
+export type InsightToolOutput = z.infer<typeof InsightToolSchema>;
+
+export type ScaffoldSource = NonNullable<Insight["scaffold_sources"]>[number];
 
 export const TeacherRoleSchema = z.enum(["teacher", "eld_coordinator", "admin"]);
 export type TeacherRole = z.infer<typeof TeacherRoleSchema>;

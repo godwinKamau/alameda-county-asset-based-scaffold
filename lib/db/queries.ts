@@ -11,11 +11,19 @@ import type {
   RosterEntry,
   RosterEntryWithStats,
   SchoolAccessRow,
+  ScaffoldSource,
   TeacherAccount,
 } from "@/lib/types";
 import { decrypt, encrypt } from "@/lib/encryption/aes";
 
 const DEFAULT_SCHOOL_ID = "00000000-0000-4000-8000-000000000002";
+
+function parseScaffoldSources(value: unknown): ScaffoldSource[] | undefined {
+  if (!value || !Array.isArray(value) || value.length === 0) {
+    return undefined;
+  }
+  return value as ScaffoldSource[];
+}
 
 export async function findTeacherByEmailHash(
   emailHash: string,
@@ -288,8 +296,9 @@ export async function insertSessionAndInsight(
          estimated_level,
          level_reasoning_encrypted, level_reasoning_iv,
          gap_to_next_encrypted, gap_to_next_iv,
-         scaffold_encrypted, scaffold_iv
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+         scaffold_encrypted, scaffold_iv,
+         scaffold_sources
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         sessionId,
         strengthsEnc.ciphertext,
@@ -301,6 +310,9 @@ export async function insertSessionAndInsight(
         gapEnc.iv,
         scaffoldEnc.ciphertext,
         scaffoldEnc.iv,
+        input.insight.scaffold_sources?.length
+          ? JSON.stringify(input.insight.scaffold_sources)
+          : null,
       ],
     );
 
@@ -318,7 +330,9 @@ function decryptInsightRow(row: {
   gap_to_next_iv: string;
   scaffold_encrypted: string;
   scaffold_iv: string;
+  scaffold_sources?: unknown;
 }): Insight {
+  const scaffoldSources = parseScaffoldSources(row.scaffold_sources);
   return {
     strengths: decrypt({
       ciphertext: row.strengths_encrypted,
@@ -337,6 +351,7 @@ function decryptInsightRow(row: {
       ciphertext: row.scaffold_encrypted,
       iv: row.scaffold_iv,
     }),
+    ...(scaffoldSources ? { scaffold_sources: scaffoldSources } : {}),
   };
 }
 
@@ -373,7 +388,8 @@ export async function listSessionsForStudent(
        i.gap_to_next_encrypted,
        i.gap_to_next_iv,
        i.scaffold_encrypted,
-       i.scaffold_iv
+       i.scaffold_iv,
+       i.scaffold_sources
      FROM analysis_sessions s
      JOIN insights i ON i.session_id = s.id
      WHERE s.teacher_id = $1 AND s.student_uuid = $2
@@ -429,7 +445,8 @@ export async function getSessionWithInsight(
        i.gap_to_next_encrypted,
        i.gap_to_next_iv,
        i.scaffold_encrypted,
-       i.scaffold_iv
+       i.scaffold_iv,
+       i.scaffold_sources
      FROM analysis_sessions s
      JOIN insights i ON i.session_id = s.id
      LEFT JOIN student_roster_entries r

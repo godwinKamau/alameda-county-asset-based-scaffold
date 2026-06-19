@@ -140,7 +140,7 @@ describe("loadFrameworkMovesFromDirectory", () => {
 describe("buildFrameworkBlockFromMoves", () => {
   it("filters 3-12 moves by exact grade when provided", () => {
     const merged = loadFrameworkMovesFromDirectory(fixturesDir);
-    const block = buildFrameworkBlockFromMoves(
+    const { block } = buildFrameworkBlockFromMoves(
       merged?.writing_moves["3-12"] ?? null,
       "3-12",
       "3",
@@ -150,7 +150,21 @@ describe("buildFrameworkBlockFromMoves", () => {
     assert.doesNotMatch(block, /precise verbs/);
   });
 
-  it("returns an empty string when no moves exist", () => {
-    assert.equal(buildFrameworkBlockFromMoves(null, "K", "K"), "");
+  it("tags moves with [F#] ids and returns citableMoves", () => {
+    const merged = loadFrameworkMovesFromDirectory(fixturesDir);
+    const { block, citableMoves } = buildFrameworkBlockFromMoves(
+      merged?.writing_moves["3-12"] ?? null,
+      "3-12",
+      "3",
+    );
+
+    assert.match(block, /\[F1\]/);
+    assert.ok(citableMoves.length > 0);
+  });
+
+  it("returns an empty block when no moves exist", () => {
+    const { block, citableMoves } = buildFrameworkBlockFromMoves(null, "K", "K");
+    assert.equal(block, "");
+    assert.deepEqual(citableMoves, []);
   });
 });

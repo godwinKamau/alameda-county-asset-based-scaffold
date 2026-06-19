@@ -11,6 +11,7 @@ import {
   deleteScaffoldInsight,
   saveScaffoldInsight,
 } from "@/lib/db/queries";
+import { ScaffoldSourceSchema } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +19,8 @@ export const dynamic = "force-dynamic";
 const SavedInsightBodySchema = z.object({
   sessionId: z.string().uuid(),
   itemIndex: z.number().int().min(0),
+  text: z.string().min(1).optional(),
+  sources: z.array(ScaffoldSourceSchema).optional(),
 });
 
 async function postHandler(req: Request) {
@@ -31,6 +34,9 @@ async function postHandler(req: Request) {
       teacher.id,
       body.sessionId,
       body.itemIndex,
+      body.text
+        ? { text: body.text, sources: body.sources }
+        : undefined,
     );
 
     if (!saved) {
@@ -78,6 +84,7 @@ async function deleteHandler(req: Request) {
       teacher.id,
       body.sessionId,
       body.itemIndex,
+      body.text ? { text: body.text } : undefined,
     );
 
     if (!deleted) {

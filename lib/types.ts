@@ -55,6 +55,26 @@ export type InsightToolOutput = z.infer<typeof InsightToolSchema>;
 
 export type ScaffoldSource = NonNullable<Insight["scaffold_sources"]>[number];
 
+export const RemixScaffoldToolSchema = z.object({
+  scaffold: z.string().min(1),
+  scaffold_source_ids: z.array(z.number().int().positive()).optional(),
+});
+
+export type RemixScaffoldToolOutput = z.infer<typeof RemixScaffoldToolSchema>;
+
+export interface RemixScaffoldResult {
+  scaffold: string;
+  scaffold_sources?: ScaffoldSource[];
+}
+
+export const ScaffoldSourceSchema = z.object({
+  chapter: z.number().int().min(3).max(7),
+  page: z.number().int().positive(),
+  page_end: z.number().int().positive().optional(),
+  url: z.string().url(),
+  anchor: z.string().optional(),
+});
+
 export const TeacherRoleSchema = z.enum(["teacher", "eld_coordinator", "admin"]);
 export type TeacherRole = z.infer<typeof TeacherRoleSchema>;
 

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createHash } from "crypto";
 import type { PoolClient } from "pg";
 import { getPool, withTransaction } from "./pool";
 import type {
@@ -489,6 +490,10 @@ export async function listSchoolAccessForTeacher(
   return result.rows;
 }
 
+function sha256Hex(text: string): string {
+  return createHash("sha256").update(text).digest("hex");
+}
+
 function extractScaffoldItem(
   insight: Insight,
   itemIndex: number,
@@ -509,40 +514,60 @@ function extractScaffoldItem(
   };
 }
 
+export interface SaveScaffoldInsightOverride {
+  text: string;
+  sources?: ScaffoldSource[];
+}
+
 export async function saveScaffoldInsight(
   teacherId: string,
   sessionId: string,
   itemIndex: number,
+  override?: SaveScaffoldInsightOverride,
 ): Promise<boolean> {
-  const session = await getSessionWithInsight(teacherId, sessionId);
-  if (!session) {
-    return false;
+  let text: string;
+  let sources: ScaffoldSource[];
+
+  if (override) {
+    text = override.text;
+    sources = override.sources ?? [];
+  } else {
+    const session = await getSessionWithInsight(teacherId, sessionId);
+    if (!session) {
+      return false;
+    }
+
+    const item = extractScaffoldItem(session.insight, itemIndex);
+    if (!item) {
+      return false;
+    }
+
+    text = item.text;
+    sources = item.sources;
   }
 
-  const item = extractScaffoldItem(session.insight, itemIndex);
-  if (!item) {
-    return false;
-  }
-
-  const encrypted = encrypt(item.text);
+  const contentHash = sha256Hex(text);
+  const encrypted = encrypt(text);
   const pool = getPool();
   const result = await pool.query(
     `INSERT INTO saved_insights (
        teacher_id,
        session_id,
        item_index,
+       content_hash,
        scaffold_text_encrypted,
        scaffold_text_iv,
        scaffold_sources
-     ) VALUES ($1, $2, $3, $4, $5, $6)
-     ON CONFLICT (teacher_id, session_id, item_index) DO NOTHING`,
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT (teacher_id, session_id, content_hash) DO NOTHING`,
     [
       teacherId,
       sessionId,
       itemIndex,
+      contentHash,
       encrypted.ciphertext,
       encrypted.iv,
-      item.sources.length ? JSON.stringify(item.sources) : null,
+      sources.length ? JSON.stringify(sources) : null,
     ],
   );
 
@@ -552,8 +577,8 @@ export async function saveScaffoldInsight(
 
   const existing = await pool.query(
     `SELECT 1 FROM saved_insights
-     WHERE teacher_id = $1 AND session_id = $2 AND item_index = $3`,
-    [teacherId, sessionId, itemIndex],
+     WHERE teacher_id = $1 AND session_id = $2 AND content_hash = $3`,
+    [teacherId, sessionId, contentHash],
   );
   return (existing.rowCount ?? 0) > 0;
 }
@@ -562,12 +587,32 @@ export async function deleteScaffoldInsight(
   teacherId: string,
   sessionId: string,
   itemIndex: number,
+  override?: { text: string },
 ): Promise<boolean> {
+  let text: string;
+
+  if (override) {
+    text = override.text;
+  } else {
+    const session = await getSessionWithInsight(teacherId, sessionId);
+    if (!session) {
+      return false;
+    }
+
+    const item = extractScaffoldItem(session.insight, itemIndex);
+    if (!item) {
+      return false;
+    }
+
+    text = item.text;
+  }
+
+  const contentHash = sha256Hex(text);
   const pool = getPool();
   const result = await pool.query(
     `DELETE FROM saved_insights
-     WHERE teacher_id = $1 AND session_id = $2 AND item_index = $3`,
-    [teacherId, sessionId, itemIndex],
+     WHERE teacher_id = $1 AND session_id = $2 AND content_hash = $3`,
+    [teacherId, sessionId, contentHash],
   );
   return (result.rowCount ?? 0) > 0;
 }
@@ -576,15 +621,29 @@ export async function listSavedItemIndicesForSession(
   teacherId: string,
   sessionId: string,
 ): Promise<number[]> {
+  const session = await getSessionWithInsight(teacherId, sessionId);
+  if (!session) {
+    return [];
+  }
+
+  const items = parseScaffoldItems(session.insight.scaffold);
+  if (items.length === 0) {
+    return [];
+  }
+
+  const itemHashes = items.map((item) => sha256Hex(item));
   const pool = getPool();
-  const result = await pool.query<{ item_index: number }>(
-    `SELECT item_index
+  const result = await pool.query<{ content_hash: string }>(
+    `SELECT content_hash
      FROM saved_insights
-     WHERE teacher_id = $1 AND session_id = $2
-     ORDER BY item_index ASC`,
+     WHERE teacher_id = $1 AND session_id = $2`,
     [teacherId, sessionId],
   );
-  return result.rows.map((row) => row.item_index);
+
+  const savedHashes = new Set(result.rows.map((row) => row.content_hash));
+  return itemHashes
+    .map((hash, index) => (savedHashes.has(hash) ? index : -1))
+    .filter((index) => index >= 0);
 }
 
 export async function listSavedInsights(

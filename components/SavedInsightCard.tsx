@@ -47,6 +47,8 @@ export function SavedInsightCard({ insight }: SavedInsightCardProps) {
           sessionId={insight.session_id}
           itemIndex={insight.item_index}
           initialSaved={true}
+          itemText={insight.scaffold_text}
+          itemSources={insight.scaffold_sources}
           onChange={(saved) => {
             if (!saved) {
               router.refresh();

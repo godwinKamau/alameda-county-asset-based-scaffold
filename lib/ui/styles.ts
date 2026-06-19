@@ -20,6 +20,14 @@ export const btnUploadCsvClassName = "ui-btn-upload-csv";
 /** Compact row actions (History / Analyze) — shared height, radius, and padding */
 export const btnRowActionClassName = "h-8 rounded-2xl px-3 py-0 text-xs";
 
+/** Expandable label shown beside nav-column icons on hover */
+export const navColHoverLabelClassName =
+  "max-w-0 overflow-hidden whitespace-nowrap pl-0 text-[11px] leading-tight text-muted opacity-0 transition-all duration-300 ease-out group-hover/nav-col:max-w-[9.5rem] group-hover/nav-col:pl-1.5 group-hover/nav-col:opacity-100";
+
+/** Full-width nav-column action control (icon + expandable label) */
+export const navColActionButtonClassName =
+  "inline-flex w-full max-w-full shrink-0 items-center justify-center rounded-lg p-2 transition-colors hover:bg-brand-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50 disabled:hover:bg-transparent group-hover/nav-col:justify-start";
+
 export const fileInputClassName = "ui-file-input";
 
 export const linkClassName = "ui-link text-sm font-medium";

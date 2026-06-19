@@ -10,11 +10,14 @@ import type {
   Insight,
   RosterEntry,
   RosterEntryWithStats,
+  SavedInsight,
   SchoolAccessRow,
   ScaffoldSource,
   TeacherAccount,
 } from "@/lib/types";
 import { decrypt, encrypt } from "@/lib/encryption/aes";
+import { distributeScaffoldSources } from "@/lib/framework/sources";
+import { parseScaffoldItems } from "@/lib/scaffold/format";
 
 const DEFAULT_SCHOOL_ID = "00000000-0000-4000-8000-000000000002";
 
@@ -484,4 +487,157 @@ export async function listSchoolAccessForTeacher(
     [teacherId],
   );
   return result.rows;
+}
+
+function extractScaffoldItem(
+  insight: Insight,
+  itemIndex: number,
+): { text: string; sources: ScaffoldSource[] } | null {
+  const items = parseScaffoldItems(insight.scaffold);
+  if (itemIndex < 0 || itemIndex >= items.length) {
+    return null;
+  }
+
+  const sourcesByItem = distributeScaffoldSources(
+    items.length,
+    insight.scaffold_sources ?? [],
+  );
+
+  return {
+    text: items[itemIndex],
+    sources: sourcesByItem[itemIndex] ?? [],
+  };
+}
+
+export async function saveScaffoldInsight(
+  teacherId: string,
+  sessionId: string,
+  itemIndex: number,
+): Promise<boolean> {
+  const session = await getSessionWithInsight(teacherId, sessionId);
+  if (!session) {
+    return false;
+  }
+
+  const item = extractScaffoldItem(session.insight, itemIndex);
+  if (!item) {
+    return false;
+  }
+
+  const encrypted = encrypt(item.text);
+  const pool = getPool();
+  const result = await pool.query(
+    `INSERT INTO saved_insights (
+       teacher_id,
+       session_id,
+       item_index,
+       scaffold_text_encrypted,
+       scaffold_text_iv,
+       scaffold_sources
+     ) VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (teacher_id, session_id, item_index) DO NOTHING`,
+    [
+      teacherId,
+      sessionId,
+      itemIndex,
+      encrypted.ciphertext,
+      encrypted.iv,
+      item.sources.length ? JSON.stringify(item.sources) : null,
+    ],
+  );
+
+  if ((result.rowCount ?? 0) > 0) {
+    return true;
+  }
+
+  const existing = await pool.query(
+    `SELECT 1 FROM saved_insights
+     WHERE teacher_id = $1 AND session_id = $2 AND item_index = $3`,
+    [teacherId, sessionId, itemIndex],
+  );
+  return (existing.rowCount ?? 0) > 0;
+}
+
+export async function deleteScaffoldInsight(
+  teacherId: string,
+  sessionId: string,
+  itemIndex: number,
+): Promise<boolean> {
+  const pool = getPool();
+  const result = await pool.query(
+    `DELETE FROM saved_insights
+     WHERE teacher_id = $1 AND session_id = $2 AND item_index = $3`,
+    [teacherId, sessionId, itemIndex],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function listSavedItemIndicesForSession(
+  teacherId: string,
+  sessionId: string,
+): Promise<number[]> {
+  const pool = getPool();
+  const result = await pool.query<{ item_index: number }>(
+    `SELECT item_index
+     FROM saved_insights
+     WHERE teacher_id = $1 AND session_id = $2
+     ORDER BY item_index ASC`,
+    [teacherId, sessionId],
+  );
+  return result.rows.map((row) => row.item_index);
+}
+
+export async function listSavedInsights(
+  teacherId: string,
+): Promise<SavedInsight[]> {
+  const pool = getPool();
+  const result = await pool.query<
+    SavedInsight & {
+      scaffold_text_encrypted: string;
+      scaffold_text_iv: string;
+      scaffold_sources: unknown;
+    }
+  >(
+    `SELECT
+       si.id,
+       si.item_index,
+       si.session_id,
+       si.scaffold_text_encrypted,
+       si.scaffold_text_iv,
+       si.scaffold_sources,
+       si.created_at,
+       s.student_uuid,
+       s.grade_span,
+       s.submitted_at,
+       COALESCE(r.label, '') AS student_label,
+       i.estimated_level
+     FROM saved_insights si
+     JOIN analysis_sessions s ON s.id = si.session_id
+     JOIN insights i ON i.session_id = s.id
+     LEFT JOIN student_roster_entries r
+       ON r.teacher_id = s.teacher_id AND r.student_uuid = s.student_uuid
+     WHERE si.teacher_id = $1
+     ORDER BY si.created_at DESC`,
+    [teacherId],
+  );
+
+  return result.rows.map((row) => {
+    const scaffoldSources = parseScaffoldSources(row.scaffold_sources);
+    return {
+      id: row.id,
+      scaffold_text: decrypt({
+        ciphertext: row.scaffold_text_encrypted,
+        iv: row.scaffold_text_iv,
+      }),
+      ...(scaffoldSources ? { scaffold_sources: scaffoldSources } : {}),
+      item_index: row.item_index,
+      session_id: row.session_id,
+      student_uuid: row.student_uuid,
+      student_label: row.student_label,
+      estimated_level: row.estimated_level,
+      grade_span: row.grade_span as GradeSpan,
+      submitted_at: row.submitted_at,
+      created_at: row.created_at,
+    };
+  });
 }

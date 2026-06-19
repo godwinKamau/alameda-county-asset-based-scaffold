@@ -52,9 +52,15 @@ const TABS: {
 
 interface InsightCardProps {
   insight: Insight;
+  sessionId?: string;
+  savedScaffoldIndices?: number[];
 }
 
-export function InsightCard({ insight }: InsightCardProps) {
+export function InsightCard({
+  insight,
+  sessionId,
+  savedScaffoldIndices,
+}: InsightCardProps) {
   const [activeTab, setActiveTab] = useState<InsightTab>("scaffold");
 
   return (
@@ -108,6 +114,8 @@ export function InsightCard({ insight }: InsightCardProps) {
             <ScaffoldContent
               text={insight.scaffold}
               sources={insight.scaffold_sources}
+              sessionId={sessionId}
+              savedIndices={savedScaffoldIndices}
             />
           </Panel>
         </div>

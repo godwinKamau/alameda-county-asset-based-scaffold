@@ -107,3 +107,17 @@ export interface SchoolAccessRow {
   access_level: "read" | "write";
   granted_at: Date;
 }
+
+export interface SavedInsight {
+  id: string;
+  scaffold_text: string;
+  scaffold_sources?: ScaffoldSource[];
+  item_index: number;
+  session_id: string;
+  student_uuid: string;
+  student_label: string;
+  estimated_level: number;
+  grade_span: GradeSpan;
+  submitted_at: Date;
+  created_at: Date;
+}

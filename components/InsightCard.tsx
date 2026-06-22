@@ -52,39 +52,47 @@ const TABS: {
 
 interface InsightCardProps {
   insight: Insight;
+  sessionId?: string;
+  savedScaffoldIndices?: number[];
 }
 
-export function InsightCard({ insight }: InsightCardProps) {
+export function InsightCard({
+  insight,
+  sessionId,
+  savedScaffoldIndices,
+}: InsightCardProps) {
   const [activeTab, setActiveTab] = useState<InsightTab>("scaffold");
 
   return (
     <div>
-      <div
-        role="tablist"
-        aria-label="Analysis insights"
-        className="flex flex-wrap gap-2 border-b border-brand-soft pb-3"
-      >
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand-soft pb-3">
+        <div
+          role="tablist"
+          aria-label="Analysis insights"
+          className="flex flex-wrap gap-2"
+        >
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
 
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              id={`insight-tab-${tab.id}`}
-              aria-selected={isActive}
-              aria-controls={`insight-panel-${tab.id}`}
-              onClick={() => setActiveTab(tab.id)}
-              className={`rounded-t-md border-b-2 px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
-                isActive ? tab.activeClass : tab.inactiveClass
-              }`}
-            >
-              <span className="sm:hidden">{tab.shortLabel}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                id={`insight-tab-${tab.id}`}
+                aria-selected={isActive}
+                aria-controls={`insight-panel-${tab.id}`}
+                onClick={() => setActiveTab(tab.id)}
+                className={`rounded-t-md border-b-2 px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
+                  isActive ? tab.activeClass : tab.inactiveClass
+                }`}
+              >
+                <span className="sm:hidden">{tab.shortLabel}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="relative mt-4 min-h-[12rem]">
@@ -105,7 +113,12 @@ export function InsightCard({ insight }: InsightCardProps) {
             showTitle={false}
             className="p-6 shadow-md ring-1 ring-brand-soft"
           >
-            <ScaffoldContent text={insight.scaffold} />
+            <ScaffoldContent
+              text={insight.scaffold}
+              sources={insight.scaffold_sources}
+              sessionId={sessionId}
+              savedIndices={savedScaffoldIndices}
+            />
           </Panel>
         </div>
 

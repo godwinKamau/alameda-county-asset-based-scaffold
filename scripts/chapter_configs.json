@@ -1,0 +1,53 @@
+{
+  "_comment": "Per-chapter metadata for the CA ELA/ELD Framework extraction pipeline. span_keys are the ELPAC writing-domain grade spans (K | 1-2 | 3-12) this chapter's content maps to. span_notes explain the assignment logic.",
+
+  "3": {
+    "chapter": 3,
+    "title": "Content and Pedagogy: Transitional Kindergarten Through Grade One",
+    "grade_range": "TK-1",
+    "grade_band": "TK-1",
+    "span_keys": ["K", "1-2"],
+    "span_notes": "TK and Kindergarten content → K; Grade 1 content → 1-2; span-wide TK–1 moves duplicate to both.",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter3.pdf"
+  },
+
+  "4": {
+    "chapter": 4,
+    "title": "Content and Pedagogy: Grades Two and Three",
+    "grade_range": "2-3",
+    "grade_band": "2-3",
+    "span_keys": ["1-2", "3-12"],
+    "span_notes": "Grade 2 content → 1-2; Grade 3 content → 3-12; span-wide 2–3 moves duplicate to both.",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter4.pdf"
+  },
+
+  "5": {
+    "chapter": 5,
+    "title": "Content and Pedagogy: Grades Four and Five",
+    "grade_range": "4-5",
+    "grade_band": "4-5",
+    "span_keys": ["3-12"],
+    "span_notes": "All grades 4-5 content maps to the 3-12 ELPAC writing span.",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter5.pdf"
+  },
+
+  "6": {
+    "chapter": 6,
+    "title": "Content and Pedagogy: Grades Six Through Eight",
+    "grade_range": "6-8",
+    "grade_band": "6-8",
+    "span_keys": ["3-12"],
+    "span_notes": "All grades 6-8 content maps to the 3-12 ELPAC writing span.",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter6.pdf"
+  },
+
+  "7": {
+    "chapter": 7,
+    "title": "Content and Pedagogy: Grades Nine Through Twelve",
+    "grade_range": "9-12",
+    "grade_band": "9-12",
+    "span_keys": ["3-12"],
+    "span_notes": "All grades 9-12 content maps to the 3-12 ELPAC writing span.",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter7.pdf"
+  }
+}

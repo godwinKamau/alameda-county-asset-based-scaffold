@@ -1,0 +1,616 @@
+{
+  "_meta": {
+    "source": "California ELA/ELD Framework, Chapter 7: Content and Pedagogy: Grades Nine Through Twelve",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter7.pdf",
+    "coverage": [
+      "Meaning Making",
+      "Language Development",
+      "Effective Expression",
+      "Content Knowledge",
+      "Foundational Skills",
+      "Integrated and Designated ELD",
+      "Grades 9–10",
+      "Grades 11–12"
+    ],
+    "scope_note": "Chapter 7 focuses on grades 9–12 literacy and language instruction, including snapshots, vignettes, and instructional guidance organized by five key themes, with separate sections for grades 9–10 and 11–12. The chapter emphasizes disciplinary literacy, academic language, and support for English Learners through both integrated and designated ELD.",
+    "pdf_page_offset": 659
+  },
+  "writing_moves": {
+    "3-12": {
+      "1": [
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Model Questioning the Author (QtA) by reading a complex text together, segmenting it into discussion-sized chunks, and using initiating, follow-up, and narrative queries during initial reading to help students grapple with text ideas rather than simply assessing comprehension.",
+          "framework_anchor": "Meaning Making, Grades 9–10",
+          "source_section": "Meaning Making (Grades 9–10), Questioning the Author (p. 769)",
+          "source_page": 769,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Provide a graphic organizer that structures the essay into the stages of the text type (e.g., position statement with issue and appeal, argument with point and elaboration, reiteration of appeal) to support students writing an argumentative essay.",
+          "framework_anchor": "English Language Development in Grades Nine and Ten",
+          "source_section": "ELD Grades 9–10 (p. 737)",
+          "source_page": 737,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Guide students to analyze model essays as mentor texts, highlighting the rhetorical moves that are typical of arguments (e.g., ethos, pathos, logos) and particular language features expected in arguments (e.g., use of particular vocabulary and phrasing to persuade the reader or text connectives to create cohesion).",
+          "framework_anchor": "English Language Development in Grades Nine and Ten",
+          "source_section": "ELD Grades 9–10 (p. 737)",
+          "source_page": 737,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Provide sentence or paragraph frames for key phases of the essay to support students at the Emerging level of English language proficiency.",
+          "framework_anchor": "English Language Development in Grades Nine and Ten",
+          "source_section": "ELD Grades 9–10 (p. 737)",
+          "source_page": 737,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Provide bilingual dictionaries and thesauruses so students can include precise vocabulary related to the topic and text structure.",
+          "framework_anchor": "English Language Development in Grades Nine and Ten",
+          "source_section": "ELD Grades 9–10 (p. 737)",
+          "source_page": 737,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Explicitly teach select general academic vocabulary words (for example, determine, consequences) by defining them, using them in context, and providing opportunities for students to use them in speaking and writing.",
+          "language_target": "general academic vocabulary (e.g., determine, consequences)",
+          "framework_anchor": "English Language Development in Grades Nine and Ten",
+          "source_section": "ELD Grades 9–10 (p. 737)",
+          "source_page": 737,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Explicitly teach particular grammatical structures (modal verbs to temper statements, such as should, might, could) so that students feel confident in using them in their own writing.",
+          "language_target": "modal verbs (should, might, could)",
+          "framework_anchor": "English Language Development in Grades Nine and Ten",
+          "source_section": "ELD Grades 9–10 (p. 737)",
+          "source_page": 737,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Amplify technical vocabulary by explicitly teaching the word, defining it, using gestures or visuals to illustrate meaning, and providing students with templates for recording word information (word in English, part of speech, word in my language, meaning).",
+          "language_target": "technical science vocabulary (e.g., extract, replicate, complimentary)",
+          "framework_anchor": "Snapshot 7.5. High School Program for Newcomer English Learners",
+          "source_section": "Snapshot 7.5 (p. 739–741)",
+          "source_page": 739,
+          "source_page_end": 741,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Encourage students who share the same primary language to speak with one another in that language during research and content learning, so they can more readily develop understanding, while making clear that they will eventually need to use English to convey this knowledge.",
+          "framework_anchor": "Snapshot 7.5. High School Program for Newcomer English Learners",
+          "source_section": "Snapshot 7.5 (p. 739–741)",
+          "source_page": 739,
+          "source_page_end": 741,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Teach sentence chunking by displaying a long complex sentence, drawing slashes between chunks of meaning, reading each chunk aloud, explaining its meaning, and then reading the entire sentence together, helping students see how the chunks connect.",
+          "framework_anchor": "Vignette 7.2. Analyzing Texts from World History, Designated ELD",
+          "source_section": "Vignette 7.2 (p. 764–767)",
+          "source_page": 764,
+          "source_page_end": 767,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Teach students to identify nominalizations in complex texts by finding noun forms of verbs (e.g., 'removal' from 'remove'), discussing how nominalizations hide the agent of an action, and having students rewrite nominalized sentences in active voice to clarify who is doing what.",
+          "language_target": "nominalization",
+          "framework_anchor": "Vignette 7.4. Unpacking Sentences and Nominalization in Complex History Texts",
+          "source_section": "Vignette 7.4 (p. 794–796)",
+          "source_page": 794,
+          "source_page_end": 796,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Scaffold students' ability to analyze language in complex texts by underlining long noun phrases together, identifying the head noun, and discussing what additional information the words around the main noun are providing.",
+          "framework_anchor": "Snapshot 7.6. Reading Like a Scientist",
+          "source_section": "Snapshot 7.6 (p. 770–771)",
+          "source_page": 770,
+          "source_page_end": 771,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Provide a graphic organizer to help students break down and organize information from dense informational text, assigning each category of information to team members to research, then bringing the information together for collaborative analysis.",
+          "framework_anchor": "Snapshot 7.11. Using a Graphic Organizer, Integrated ELA/Literacy and Economics",
+          "source_section": "Snapshot 7.11 (p. 784–785)",
+          "source_page": 784,
+          "source_page_end": 785,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "When teaching science or technical content, explain to students how scientific texts pack a lot of information into long noun phrases and technical vocabulary, and model how to unpack these phrases by identifying the main noun and discussing what additional information surrounds it.",
+          "framework_anchor": "Snapshot 7.6. Reading Like a Scientist",
+          "source_section": "Snapshot 7.6 (p. 770–771)",
+          "source_page": 770,
+          "source_page_end": 771,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After reading a complex passage together, have students work in pairs to paraphrase the passage in their own words, then call the class together and collaboratively write a paraphrase on the board, refining it line by line with student input to ensure precision and clarity.",
+          "framework_anchor": "Snapshot 7.7. Paraphrasing Textual Evidence to Support Argumentative Writing",
+          "source_section": "Snapshot 7.7 (p. 773–774)",
+          "source_page": 773,
+          "source_page_end": 774,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        }
+      ],
+      "2": [
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "During collaborative discussions, place students in heterogeneous triads (considering English language proficiency, primary language, and learning needs), have them read a text together, discuss meanings, and note confusing vocabulary or passages, then facilitate a whole-class conversation to clarify and build a vocabulary chart together.",
+          "framework_anchor": "Snapshot 7.6. Reading Like a Scientist",
+          "source_section": "Snapshot 7.6 (p. 770–771)",
+          "source_page": 770,
+          "source_page_end": 771,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Model generating questions that connect written information in a procedural or technical text with accompanying diagrams or formulas, recording your question for students to copy, then have lab partners collaboratively generate additional questions that check their understanding of how the text and visuals connect.",
+          "framework_anchor": "Snapshot 7.4. Force and Motion, Integrated ELA/Literacy and Science",
+          "source_section": "Snapshot 7.4 (p. 734–736)",
+          "source_page": 734,
+          "source_page_end": 736,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "After student pairs write questions to check understanding of a complex text, circulate and guide pairs who write overly specific questions to reword them so they apply to other situations and remind them of broader conceptual connections.",
+          "framework_anchor": "Snapshot 7.4. Force and Motion, Integrated ELA/Literacy and Science",
+          "source_section": "Snapshot 7.4 (p. 734–736)",
+          "source_page": 734,
+          "source_page_end": 736,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Use a chart or template to help students explore technical vocabulary by recording the word in English, its part of speech, the word in their primary language, and its meaning, allowing them to use smartphone dictionaries and thesauruses to deepen their understanding.",
+          "language_target": "technical vocabulary",
+          "framework_anchor": "Snapshot 7.5. High School Program for Newcomer English Learners",
+          "source_section": "Snapshot 7.5 (p. 739–741)",
+          "source_page": 739,
+          "source_page_end": 741,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "When reading a text with reference devices (words or phrases that refer readers backward or forward), explicitly teach students to identify these devices and discuss what they are referring to, helping students break down abstract and complex text.",
+          "language_target": "reference devices (e.g., this, that, these)",
+          "framework_anchor": "Snapshot 7.12. Understanding War-Making Powers",
+          "source_section": "Snapshot 7.12 (p. 786–787)",
+          "source_page": 786,
+          "source_page_end": 787,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Point out when a writer uses a pronoun or demonstrative (like 'this') to refer to an entire idea or sentence, not just a single noun, and model how to identify what it refers to by circling the word and drawing an arrow to the referent.",
+          "language_target": "pronouns and demonstratives as reference devices",
+          "framework_anchor": "Snapshot 7.6. Reading Like a Scientist",
+          "source_section": "Snapshot 7.6 (p. 770–771)",
+          "source_page": 770,
+          "source_page_end": 771,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After students generate a list of evidence through timed brainstorming, bring the class together to share examples aloud, listing them on the board and encouraging students to copy them, then go back through the list together to discuss which examples they know the most about and could say the most about in their writing.",
+          "framework_anchor": "Snapshot 7.7. Paraphrasing Textual Evidence to Support Argumentative Writing",
+          "source_section": "Snapshot 7.7 (p. 773–774)",
+          "source_page": 773,
+          "source_page_end": 774,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Structure collaborative discussions using protocols such as expert groups (where each group reads a different chapter) and then jigsaw groups (where one member from each expert group shares their expertise), providing students with specific roles and questions to guide their discussions.",
+          "framework_anchor": "Snapshot 7.8. Invisible Man: Cultivating Conversations About Literature",
+          "source_section": "Snapshot 7.8 (p. 778–780)",
+          "source_page": 778,
+          "source_page_end": 780,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Have students list evidence (direct quotes, physical evidence, and textual citations) for each act of a play or section of a novel as they read, organizing evidence by prosecution or defense, claim or counterclaim, to prepare for a debate or mock trial.",
+          "framework_anchor": "Snapshot 7.3. Using Mock Trials to Construct Arguments",
+          "source_section": "Snapshot 7.3 (p. 731–732)",
+          "source_page": 731,
+          "source_page_end": 732,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After students assemble their best arguments and evidence in groups, have them individually write an opening and closing argument for their side with major claims and supporting evidence from the text, then guide them through an oral presentation process before they write a formal argumentative essay.",
+          "framework_anchor": "Snapshot 7.3. Using Mock Trials to Construct Arguments",
+          "source_section": "Snapshot 7.3 (p. 731–732)",
+          "source_page": 731,
+          "source_page_end": 732,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "When assigning research on a country or economic topic, divide the research categories among team members (e.g., one student researches balance of trade, another tradable goods, another exchange rate) and require students to provide sources, then bring the team together to evaluate the information collectively.",
+          "framework_anchor": "Snapshot 7.11. Using a Graphic Organizer, Integrated ELA/Literacy and Economics",
+          "source_section": "Snapshot 7.11 (p. 784–785)",
+          "source_page": 784,
+          "source_page_end": 785,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Provide support strategies for reading complex primary sources, such as graphic organizers to understand the construction of an argument or sentence chunking to break down dense text, differentiated by the demands of each document.",
+          "framework_anchor": "Snapshot 7.12. Understanding War-Making Powers",
+          "source_section": "Snapshot 7.12 (p. 786–787)",
+          "source_page": 786,
+          "source_page_end": 787,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "To help students understand passive voice and nominalization, write examples of active voice, passive voice, and nominalized forms on the board (e.g., 'The government removed the Cherokees' / 'The Cherokees were removed' / 'Their removal'), then discuss how each form hides or reveals the agent and what questions readers should ask when they encounter nominalizations.",
+          "language_target": "passive voice and nominalization",
+          "framework_anchor": "Vignette 7.4. Unpacking Sentences and Nominalization in Complex History Texts",
+          "source_section": "Vignette 7.4 (p. 794–796)",
+          "source_page": 794,
+          "source_page_end": 796,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        }
+      ],
+      "3": [
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Guide students to read a text first 'with its grain' (listening to understand the text's perspective and composing a rough-draft interpretation) and then 'against the grain' (viewing the text analytically and skeptically, questioning claims and evidence).",
+          "framework_anchor": "Meaning Making, Grades 11–12",
+          "source_section": "Meaning Making (Grades 11–12, p. 769)",
+          "source_page": 769,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Have students freewrite the reasons to agree with an author's argument (believing) and then freewrite the reasons to disagree (doubting), identifying problems, limitations, and weaknesses in the author's argument, to develop the skill of holding contradictory evidence in mind.",
+          "framework_anchor": "Meaning Making, Grades 11–12",
+          "source_section": "Meaning Making (Grades 11–12, p. 769)",
+          "source_page": 769,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "To teach syntax and its effects, identify sentences with effective uses of syntax from a text being studied (e.g., participial modifiers), present simplified versions alongside the author's sentence, and discuss what different information each communicates and how they affect the reader differently.",
+          "language_target": "syntax (e.g., participial modifiers)",
+          "framework_anchor": "Language Development, Grades 11–12",
+          "source_section": "Language Development (Grades 11–12, p. 772)",
+          "source_page": 772,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Leverage the structure of a mock trial or formal debate to promote students' close reading, argumentative writing, and academic discussion skills, having students prepare written arguments, list evidence with citations, and present claims orally before writing a formal essay.",
+          "framework_anchor": "Snapshot 7.3. Using Mock Trials to Construct Arguments",
+          "source_section": "Snapshot 7.3 (p. 731–732)",
+          "source_page": 731,
+          "source_page_end": 732,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Before students engage in a Socratic seminar, have them read and annotate multiple texts, create a series of open-ended questions based on the texts, remind students to base their answers on evidence from the texts, and afterward guide the class in creating summary statements of 'new understandings' developed during the seminar.",
+          "framework_anchor": "Snapshot 7.2. Socratic Seminar",
+          "source_section": "Snapshot 7.2 (p. 729–730)",
+          "source_page": 729,
+          "source_page_end": 730,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After a Socratic seminar, have students use rubrics to reflect on their participation and readiness to engage in the content discussed, supporting metacognition and self-assessment.",
+          "framework_anchor": "Snapshot 7.2. Socratic Seminar",
+          "source_section": "Snapshot 7.2 (p. 729–730)",
+          "source_page": 729,
+          "source_page_end": 730,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During collaborative discussions about literature, circulate and take notes on which students are more or less engaged, jot down misconceptions to clarify, and note comments students make that can be highlighted as examples they may want to use in their writing.",
+          "framework_anchor": "Snapshot 7.8. Invisible Man: Cultivating Conversations About Literature",
+          "source_section": "Snapshot 7.8 (p. 778–780)",
+          "source_page": 778,
+          "source_page_end": 780,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Structure formal debates by having students research multiple sides of an issue, strategically form debate teams, provide guidelines for delivering arguments and rebuttals, and culminate with a written argument on a related but different topic to support transfer of learning.",
+          "framework_anchor": "Snapshot 7.10. Debating Challenging Topics: Race, Religion, and Income",
+          "source_section": "Snapshot 7.10 (p. 782–783)",
+          "source_page": 782,
+          "source_page_end": 783,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Engage students in inquiry-based learning with hands-on projects that require them to use English to collaborate, write, and orally present about their projects (e.g., making a scale model of a building using mathematical concepts), providing numerous opportunities to use English meaningfully while developing sophisticated content knowledge.",
+          "framework_anchor": "Snapshot 7.5. High School Program for Newcomer English Learners",
+          "source_section": "Snapshot 7.5 (p. 739–741)",
+          "source_page": 739,
+          "source_page_end": 741,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "After students analyze a complex ballot measure or primary source in small groups using guiding questions, have them create a group record of their discussion, evaluate the strength of arguments, and then create a media piece or flier that communicates their understanding to a broader audience.",
+          "framework_anchor": "Snapshot 7.9. Why Vote?",
+          "source_section": "Snapshot 7.9 (p. 780–781)",
+          "source_page": 780,
+          "source_page_end": 781,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Focus students' attention on the verbs and nouns in a constitutional or legal passage to help answer a focus question, then have them deconstruct the passage to identify key powers, responsibilities, or definitions.",
+          "framework_anchor": "Snapshot 7.12. Understanding War-Making Powers",
+          "source_section": "Snapshot 7.12 (p. 786–787)",
+          "source_page": 786,
+          "source_page_end": 787,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After students individually analyze multiple primary sources using different support strategies (graphic organizers, reference device analysis), have them compare their findings in small groups and collaboratively write the first draft of an argumentative essay responding to a focus question.",
+          "framework_anchor": "Snapshot 7.12. Understanding War-Making Powers",
+          "source_section": "Snapshot 7.12 (p. 786–787)",
+          "source_page": 786,
+          "source_page_end": 787,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Design a project where students reflect on their own multilingual or multidialectal experiences (linguistic autobiographies), viewing and discussing films, reading memoirs and essays, analyzing poetry and music lyrics, interviewing family members, and producing multimedia pieces to present their research.",
+          "framework_anchor": "Snapshot 7.1. Investigating Language, Culture, and Society: Linguistic Autobiographies",
+          "source_section": "Snapshot 7.1 (p. 727–728)",
+          "source_page": 727,
+          "source_page_end": 728,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Through collaborative conversations about language and identity, support students to value linguistic and cultural diversity—their own and others'—and develop assertive and diplomatic ways of responding to pejorative comments regarding their primary languages or dialects.",
+          "framework_anchor": "Snapshot 7.1. Investigating Language, Culture, and Society: Linguistic Autobiographies",
+          "source_section": "Snapshot 7.1 (p. 727–728)",
+          "source_page": 727,
+          "source_page_end": 728,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide a safe, structured, and scholarly debate format for discussing challenging social issues (such as race, religion, poverty, immigration), ensuring that students who may be reluctant to speak learn how to do it in a way that is convincing yet not inflammatory, which often results in stronger argumentative writing.",
+          "framework_anchor": "Snapshot 7.10. Debating Challenging Topics: Race, Religion, and Income",
+          "source_section": "Snapshot 7.10 (p. 782–783)",
+          "source_page": 782,
+          "source_page_end": 783,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        }
+      ],
+      "4": [
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Facilitate a discussion in which students synthesize comments, claims, and evidence made on all sides of an issue, resolve contradictions by returning to the text, and determine what additional information is needed to deepen the investigation.",
+          "framework_anchor": "Discussing, Grades 11–12",
+          "source_section": "Discussing (Grades 11–12, p. 777)",
+          "source_page": 777,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Offer strategic guidance during student-led discussions to move the conversation toward synthesis and to ensure that divergent and creative perspectives are heard, while students manage the conversational flow independently.",
+          "framework_anchor": "Discussing, Grades 11–12",
+          "source_section": "Discussing (Grades 11–12, p. 777)",
+          "source_page": 777,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During the editing process (after revisions have been made), work with students to identify the conventions in their papers that most need correction, providing focused and judicious feedback to develop their awareness and independent editing skills.",
+          "framework_anchor": "Using Language Conventions, Grades 11–12",
+          "source_section": "Using Language Conventions (Grades 11–12, p. 783)",
+          "source_page": 783,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Have students identify models of language conventions (e.g., parallel structure, use of phrases and clauses, semicolons, colons) in the texts they read and then emulate those models in their own writing, calling attention to the conventions and clarifying their purpose and use as needed.",
+          "language_target": "language conventions (parallel structure, phrases, clauses, semicolons, colons)",
+          "framework_anchor": "Using Language Conventions, Grades 9–10 and Grades 11–12",
+          "source_section": "Using Language Conventions (p. 733, p. 783)",
+          "source_page": 733,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "After analyzing sentences with effective syntax from a text, have students explain the different information each sentence communicates and how it affects the reader, then provide focused practice with sentence combining to help students vary syntax for effect in their own writing.",
+          "language_target": "syntax and sentence combining",
+          "framework_anchor": "Language Development, Grades 11–12",
+          "source_section": "Language Development (Grades 11–12, p. 772)",
+          "source_page": 772,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Guide students to offer their own interpretations or evaluations of texts, launch research projects of their own, synthesize ideas from a number of readings, and draw independent conclusions, as these are the skills expected in college and work.",
+          "framework_anchor": "Meaning Making, Grades 11–12",
+          "source_section": "Meaning Making (Grades 11–12, p. 769)",
+          "source_page": 769,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Collaborate with teachers across disciplines to address the variations of language use and text structures in multiple subjects and text types, recognizing that academic language shares characteristics across disciplines but is also highly dependent upon disciplinary content.",
+          "framework_anchor": "Language Development, Overview",
+          "source_section": "Language Development (p. 681)",
+          "source_page": 681,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Develop deep understandings of the inextricable links between content knowledge and language, making these understandings transparent to students by teaching them to reflect on their use of language in speaking and writing and consider how they can shape it to achieve different purposes for different audiences.",
+          "framework_anchor": "Language Development, Grades 11–12",
+          "source_section": "Language Development (p. 681, p. 772)",
+          "source_page": 681,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "When teaching argumentative writing, explicitly teach prewriting skills such as paraphrasing, working line by line with students to parse complex language, refine their paraphrases for precision, and then use the jointly constructed paraphrase as a foundation for brainstorming evidence to support or refute a claim.",
+          "framework_anchor": "Snapshot 7.7. Paraphrasing Textual Evidence to Support Argumentative Writing",
+          "source_section": "Snapshot 7.7 (p. 773–774)",
+          "source_page": 773,
+          "source_page_end": 774,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Have students work in pairs during timed brainstorming sessions to generate as many examples as possible to support or refute a claim, emphasizing that all ideas are legitimate and worth capturing, then compile and discuss the evidence to determine which examples they know the most about and could develop most fully in writing.",
+          "framework_anchor": "Snapshot 7.7. Paraphrasing Textual Evidence to Support Argumentative Writing",
+          "source_section": "Snapshot 7.7 (p. 773–774)",
+          "source_page": 773,
+          "source_page_end": 774,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "To support students to use knowledge of language and literacy to learn content in ELA and other subjects, design units that integrate multiple disciplines (e.g., ELA and history) and require students to read, discuss, and write about complex texts from multiple perspectives.",
+          "framework_anchor": "Content Knowledge, Grades 11–12",
+          "source_section": "Content Knowledge (Grades 11–12, p. 783)",
+          "source_page": 783,
+          "grade_band": "9-12",
+          "source_chapter": 7
+        }
+      ]
+    }
+  }
+}

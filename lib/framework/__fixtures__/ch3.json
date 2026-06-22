@@ -1,0 +1,34 @@
+{
+  "_meta": {
+    "source": "CA ELA/ELD Framework, Chapter 3 (TK–Grade 1)",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter3.pdf",
+    "coverage": ["TK-1"]
+  },
+  "writing_moves": {
+    "K": {
+      "2": [
+        {
+          "theme": "foundational_skills",
+          "eld_mode": "designated",
+          "move": "Co-construct a sentence aloud during shared writing while naming each sound-letter correspondence.",
+          "language_target": "initial and final phonemes",
+          "framework_anchor": "Foundational Literacy Skills strand",
+          "grade_band": "TK-1",
+          "source_chapter": 3
+        }
+      ]
+    },
+    "1-2": {
+      "2": [
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Use the student's own sentence as a mentor text to add one detail sentence.",
+          "framework_anchor": "Effective Expression theme",
+          "grade_band": "TK-1",
+          "source_chapter": 3
+        }
+      ]
+    }
+  }
+}

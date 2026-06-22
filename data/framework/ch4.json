@@ -1,0 +1,799 @@
+{
+  "_meta": {
+    "source": "California ELA/ELD Framework, Chapter 4: Content and Pedagogy: Grades Two and Three",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter4.pdf",
+    "coverage": [
+      "Grade 2 instructional moves",
+      "Grade 3 instructional moves",
+      "Grades 2–3 span overview",
+      "Meaning Making",
+      "Language Development",
+      "Effective Expression",
+      "Content Knowledge",
+      "Foundational Skills",
+      "Integrated and Designated ELD",
+      "Snapshots of practice",
+      "Vignettes"
+    ],
+    "scope_note": "Exhaustive extraction of writing-focused instructional moves from Chapter 4, including all snapshots, vignettes, thematic guidance sections, and explicit teacher actions related to writing development in grades 2 and 3.",
+    "pdf_page_offset": 281
+  },
+  "writing_moves": {
+    "1-2": {
+      "1": [
+        {
+          "theme": "foundational_skills",
+          "eld_mode": "integrated",
+          "move": "During shared writing, dictate a sentence slowly while pointing to each word, then invite the student to re-read by pointing left to right.",
+          "framework_anchor": "Foundational Skills",
+          "source_section": "Grade 2, p. 289–332",
+          "source_page": 289,
+          "source_page_end": 332,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide a graphic organizer with labeled diagrams and sentence starters (e.g., 'I think ___.', 'Erosion is when ___.') to scaffold a student's participation in writing after a hands-on science activity.",
+          "language_target": "Sentence starters; domain-specific vocabulary (erosion, runoff, deposition)",
+          "framework_anchor": "English Language Development in Grade Three",
+          "source_section": "Grade 3, p. 373",
+          "source_page": 373,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After a student draws and labels a diagram in their science journal, prompt them to add one or two more details by asking, 'What else did you see happen to the sand?'",
+          "framework_anchor": "Snapshot 4.1: Understanding Erosion",
+          "source_section": "Grade 2, p. 331",
+          "source_page": 331,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Teach a general academic word (e.g., 'courageous') by providing a student-friendly definition, modeling multiple examples, then asking the student to complete an open sentence frame ('At school, I'm courageous when ___.') and share with a partner.",
+          "language_target": "General academic vocabulary (courageous)",
+          "framework_anchor": "Snapshot 4.4: Academic Vocabulary Used in Biographies",
+          "source_section": "Grade 2, p. 337",
+          "source_page": 337,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        }
+      ],
+      "2": [
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Have the student write notes and draw sketches with labels in their journal after a hands-on science investigation, then ask them to check with a peer to see if their entries make sense.",
+          "framework_anchor": "Snapshot 4.1: Understanding Erosion",
+          "source_section": "Grade 2, p. 331",
+          "source_page": 331,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Model writing a quickwrite in response to a read-aloud or content lesson, then invite the student to compose their own quickwrite on a relevant topic.",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 321",
+          "source_page": 321,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Guide the student to add descriptive details to their writing by circulating during independent writing time and prompting, 'Can you add a word that tells more about how it looked or felt?'",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 321",
+          "source_page": 321,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Ask the student to revise a draft by responding to one specific piece of peer or adult feedback, such as 'Add a sentence that explains why you think that.'",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 321",
+          "source_page": 321,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After a student writes a first draft of an opinion or narrative, confer with them individually and point to one place where they can add a linking word (e.g., 'because,' 'and,' 'so') to connect their ideas.",
+          "language_target": "Linking words (because, and, so)",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 299",
+          "source_page": 299,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Provide a chart with text connectives (first, then, next) and subordinating conjunctions (because, when, so), then ask the student to explain in writing how they solved a math word problem using at least two connectives from the chart.",
+          "language_target": "Text connectives (first, then, next); subordinating conjunctions (because, when, so)",
+          "framework_anchor": "Snapshot 4.5: Mathematical Word Problems",
+          "source_section": "Grade 2, p. 338",
+          "source_page": 338,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During a writing conference, read one sentence aloud with the student and ask, 'Does this sentence have a capital letter at the beginning and punctuation at the end?' Then guide them to add or correct as needed.",
+          "framework_anchor": "Using Language Conventions",
+          "source_section": "Grade 2, p. 323",
+          "source_page": 323,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "During designated ELD, have the student work with a partner to write a concise explanation of a science observation, requiring both to write the same thing so they must negotiate and justify their language choices.",
+          "framework_anchor": "Snapshot 4.3: Language Used in Informational Text",
+          "source_section": "Grade 2, p. 335",
+          "source_page": 335,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "After a hands-on investigation, ask the student to write one question they still have about the topic in their lab notebook, then provide time to research the answer using texts or digital resources.",
+          "framework_anchor": "Snapshot 4.2: Mystery Bags",
+          "source_section": "Grade 2, p. 332",
+          "source_page": 332,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Create a rubric for a digital presentation with the class, post it visibly, and have students refer to it as they draft and revise their slides, checking off each criterion as they meet it.",
+          "framework_anchor": "Snapshot 4.1: Understanding Erosion",
+          "source_section": "Grade 2, p. 331",
+          "source_page": 331,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        }
+      ],
+      "3": [
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide a model opinion piece, then guide the student to write their own opinion by following the same structure: state an opinion, give one reason with a linking word, and write a concluding sentence.",
+          "language_target": "Linking words (because, and, also)",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 321",
+          "source_page": 321,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During a writing unit on informational text, have the student select a topic they researched, then draft one paragraph with a topic sentence and two supporting details, using a graphic organizer for structure.",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 321",
+          "source_page": 321,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Model how to write a narrative by thinking aloud about sequencing events, then have the student draft a short personal narrative about a recent experience, using temporal words (first, next, then, finally).",
+          "language_target": "Temporal words (first, next, then, finally)",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 321",
+          "source_page": 321,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After reading an informational text, ask the student to write two sentences summarizing what they learned, then share their summary with a partner for feedback on clarity.",
+          "framework_anchor": "Meaning Making",
+          "source_section": "Grade 2, p. 289–291",
+          "source_page": 289,
+          "source_page_end": 291,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Guide the student to add descriptive details to a narrative draft by asking, 'What did you see, hear, or feel at that moment?' and underlining one place where they can insert a sensory detail.",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 321",
+          "source_page": 321,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Facilitate a discussion about the language used in informational science texts, then have the student practice writing one sentence using a prepositional phrase (e.g., 'with its proboscis,' 'underneath the leaf') from a posted chart.",
+          "language_target": "Prepositional phrases (with its proboscis, underneath the leaf, on the stem)",
+          "framework_anchor": "Snapshot 4.3: Language Used in Informational Text",
+          "source_section": "Grade 2, p. 335",
+          "source_page": 335,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During writing workshop, confer with the student and ask them to read one sentence aloud, then together identify whether it is a complete sentence with a subject and predicate.",
+          "framework_anchor": "Using Language Conventions",
+          "source_section": "Grade 2, p. 323",
+          "source_page": 323,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide a chart of adjectives and adverbs, then ask the student to revise one sentence in their draft by adding an adjective or adverb that makes their meaning clearer or more interesting.",
+          "language_target": "Adjectives and adverbs",
+          "framework_anchor": "Using Language Conventions",
+          "source_section": "Grade 2, p. 323",
+          "source_page": 323,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "After a social studies lesson, ask the student to write a short entry in their learning journal responding to the prompt, 'One new thing I learned today is ___,' and share it with a partner.",
+          "framework_anchor": "Content Knowledge",
+          "source_section": "Grade 2, p. 302",
+          "source_page": 302,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Collaboratively create a class rubric for opinion essays, then have the student use the rubric to self-assess one aspect of their draft before revising.",
+          "framework_anchor": "Snapshot 4.9: Creating a Classroom Constitution",
+          "source_section": "Grade 3, p. 371",
+          "source_page": 371,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "Show the student how different stages of a narrative use different linking words (orientation: 'once upon a time'; complication: 'suddenly'; resolution: 'finally'), then have them retell a story in writing using words from each category.",
+          "language_target": "Linking words and transitional phrases by story stage",
+          "framework_anchor": "Snapshot 4.10: Retelling Stories",
+          "source_section": "Grade 3, p. 374",
+          "source_page": 374,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        }
+      ],
+      "4": [
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After the student drafts an opinion piece, guide them to revise by adding one more reason and a linking word, then have them edit for capitalization, punctuation, and spelling using a checklist.",
+          "language_target": "Linking words (because, and, also); capitalization and punctuation conventions",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 321",
+          "source_page": 321,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Model how to write an extended response to a text by stating an opinion, providing evidence from the text, and explaining the reasoning, then have the student draft their own response using the same structure.",
+          "framework_anchor": "Meaning Making",
+          "source_section": "Grade 2, p. 289–291",
+          "source_page": 289,
+          "source_page_end": 291,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During a writing unit on narratives, have the student draft a story with a clear beginning, middle, and end, then revise to add dialogue or descriptive details based on peer feedback.",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 2, p. 299",
+          "source_page": 299,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After a science investigation, ask the student to write a summary in their journal, then have them check their summary against a partner's and add any important details they missed.",
+          "framework_anchor": "Snapshot 4.1: Understanding Erosion",
+          "source_section": "Grade 2, p. 331",
+          "source_page": 331,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Highlight complex sentences with long noun phrases in a science text (e.g., 'As they feed in dense groups on the stems of plants, aphids transmit diseases.'), guide the student to unpack the meaning, then have them write a similar sentence about their own science observation.",
+          "language_target": "Complex sentences with long noun phrases; subordinating conjunctions",
+          "framework_anchor": "Snapshot 4.3: Language Used in Informational Text",
+          "source_section": "Grade 2, p. 335",
+          "source_page": 335,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "In a writing conference, show the student how to use a beginning dictionary to confirm or correct the spelling of one word, then have them check two more words independently.",
+          "framework_anchor": "Using Language Conventions",
+          "source_section": "Grade 2, p. 323",
+          "source_page": 323,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After reading multiple biographies, have the student select a hero and write an opinion essay about why that person is important, using evidence from the texts and linking words to connect ideas.",
+          "language_target": "Linking words; general academic vocabulary (courageous, protested, rights)",
+          "framework_anchor": "Snapshot 4.4: Academic Vocabulary Used in Biographies",
+          "source_section": "Grade 2, p. 337",
+          "source_page": 337,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Following a collaborative research project, ask the student to write a short informational text about one aspect of the research, organizing ideas into a clear sequence and adding domain-specific vocabulary from the project.",
+          "language_target": "Domain-specific vocabulary",
+          "framework_anchor": "Content Knowledge",
+          "source_section": "Grade 2, p. 302",
+          "source_page": 302,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide sentence stems and a chart of general academic vocabulary, then have the student write a paragraph explaining a science concept, combining at least two ideas with a conjunction.",
+          "language_target": "General academic vocabulary; conjunctions (because, when, so)",
+          "framework_anchor": "Snapshot 4.3: Language Used in Informational Text",
+          "source_section": "Grade 2, p. 335",
+          "source_page": 335,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During a social studies unit, guide the student to write a script for a short video, then have them revise the script based on peer feedback and record it using a rubric to self-assess quality.",
+          "framework_anchor": "Snapshot 4.8: Research to Create a Bird Nesting Environment",
+          "source_section": "Grade 3, p. 369",
+          "source_page": 369,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        }
+      ]
+    },
+    "3-12": {
+      "1": [
+        {
+          "theme": "foundational_skills",
+          "eld_mode": "integrated",
+          "move": "During shared writing, dictate a sentence slowly while pointing to each word, then invite the student to re-read by pointing left to right.",
+          "framework_anchor": "Foundational Skills",
+          "source_section": "Grade 3, p. 353–372",
+          "source_page": 353,
+          "source_page_end": 372,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide a graphic organizer with labeled diagrams and sentence starters (e.g., 'I think ___.', 'The main character learned ___.') to scaffold a student's writing after reading a narrative text.",
+          "language_target": "Sentence starters",
+          "framework_anchor": "English Language Development in Grade Three",
+          "source_section": "Grade 3, p. 373",
+          "source_page": 373,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After a student draws a picture of a science observation, prompt them to write one label or one short sentence describing what they see.",
+          "framework_anchor": "Snapshot 4.8: Research to Create a Bird Nesting Environment",
+          "source_section": "Grade 3, p. 368",
+          "source_page": 368,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Teach a general academic word (e.g., 'determined') by providing a student-friendly definition, modeling multiple examples, then asking the student to complete an open sentence frame ('A time I was determined was when ___.') and share orally before writing.",
+          "language_target": "General academic vocabulary (determined)",
+          "framework_anchor": "Language Development",
+          "source_section": "Grade 3, p. 353",
+          "source_page": 353,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        }
+      ],
+      "2": [
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Have the student write notes in their science journal after a hands-on investigation, then ask them to check with a peer to see if their writing makes sense.",
+          "framework_anchor": "Snapshot 4.8: Research to Create a Bird Nesting Environment",
+          "source_section": "Grade 3, p. 368",
+          "source_page": 368,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Model writing a quickwrite in response to a read-aloud, then invite the student to compose their own quickwrite on the same or a related topic.",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Guide the student to add dialogue to a narrative draft by modeling one example of dialogue with quotation marks, then asking them to add their own dialogue in one place.",
+          "language_target": "Dialogue; quotation marks",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Ask the student to revise a draft by responding to one specific piece of peer feedback, such as 'Add a detail that shows how the character felt.'",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After a student writes a first draft of a narrative, confer with them and point to one place where they can add a temporal phrase (e.g., 'later that day,' 'a few minutes later') to signal event order.",
+          "language_target": "Temporal phrases",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Provide a chart with linking words (first, then, next) and subordinating conjunctions (because, when, so), then ask the student to write a short explanation of how they solved a problem, using at least two connectives from the chart.",
+          "language_target": "Linking words (first, then, next); subordinating conjunctions (because, when, so)",
+          "framework_anchor": "Language Development",
+          "source_section": "Grade 3, p. 353",
+          "source_page": 353,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During a writing conference, read one sentence aloud with the student and ask, 'Does this sentence start with a capital letter and end with the right punctuation?' Then guide them to correct as needed.",
+          "framework_anchor": "Using Language Conventions",
+          "source_section": "Grade 3, p. 356",
+          "source_page": 356,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "During designated ELD, have the student work with a partner to write a short summary of a text, requiring both to write the same thing so they must negotiate and justify their language choices.",
+          "framework_anchor": "English Language Development in Grade Three",
+          "source_section": "Grade 3, p. 373",
+          "source_page": 373,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "After a hands-on investigation, ask the student to write one question they still have about the topic in their lab notebook, then provide time to research the answer using texts or digital resources.",
+          "framework_anchor": "Snapshot 4.8: Research to Create a Bird Nesting Environment",
+          "source_section": "Grade 3, p. 368",
+          "source_page": 368,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Create a rubric for a writing task with the class, post it visibly, and have students refer to it as they draft and revise, checking off each criterion as they meet it.",
+          "framework_anchor": "Snapshot 4.9: Creating a Classroom Constitution",
+          "source_section": "Grade 3, p. 370",
+          "source_page": 370,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        }
+      ],
+      "3": [
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide a model opinion piece with a clear introduction, reasons supported by evidence, and a conclusion, then guide the student to write their own opinion following the same structure.",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During a writing unit on informational text, have the student select a topic they researched, then draft two paragraphs with topic sentences and supporting details, using a graphic organizer for structure.",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Model how to write a narrative with descriptive details and dialogue by thinking aloud, then have the student draft a short story using temporal phrases (later that day, a few minutes later) and at least one line of dialogue.",
+          "language_target": "Temporal phrases; dialogue with quotation marks",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After reading an informational text, ask the student to write a summary identifying the main idea and key supporting details, then share their summary with a partner for feedback.",
+          "framework_anchor": "Meaning Making",
+          "source_section": "Grade 3, p. 353",
+          "source_page": 353,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Guide the student to distinguish literal from nonliteral language in a text, then have them write a sentence using nonliteral language (e.g., 'The wind whispered through the trees.') in their own narrative.",
+          "language_target": "Nonliteral language; figurative expressions",
+          "framework_anchor": "Language Development",
+          "source_section": "Grade 3, p. 353",
+          "source_page": 353,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Show the student how informational texts use language patterns (e.g., 'most aphids,' 'some aphids,' 'many aphids'), then have them write one sentence using a similar pattern about a topic they are studying.",
+          "language_target": "Quantifying language patterns (most, some, many)",
+          "framework_anchor": "Snapshot 4.3: Language Used in Informational Text",
+          "source_section": "Grade 2, p. 335 (applicable to Grade 3)",
+          "source_page": 335,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During writing workshop, confer with the student and ask them to read two sentences aloud, then together combine them using a conjunction to create one more complex sentence.",
+          "language_target": "Conjunctions (and, but, because, so)",
+          "framework_anchor": "Using Language Conventions",
+          "source_section": "Grade 3, p. 356",
+          "source_page": 356,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide a word bank of literary general academic vocabulary (e.g., replied, scoffed, yelled, gasped; wicked, courageous, mischievous), then ask the student to revise their narrative by replacing at least two common words with more precise vocabulary from the bank.",
+          "language_target": "Literary general academic vocabulary (dialogue verbs, character adjectives)",
+          "framework_anchor": "Snapshot 4.10: Retelling Stories",
+          "source_section": "Grade 3, p. 374",
+          "source_page": 374,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "After a social studies lesson, ask the student to write a short entry in their learning journal responding to the prompt, 'One important idea I learned today is ___,' and share it with a partner.",
+          "framework_anchor": "Content Knowledge",
+          "source_section": "Grade 3, p. 361",
+          "source_page": 361,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Collaboratively create a rubric for informational writing, then have the student use the rubric to self-assess one aspect of their draft (e.g., clear topic sentence, supporting details) before revising.",
+          "framework_anchor": "Snapshot 4.9: Creating a Classroom Constitution",
+          "source_section": "Grade 3, p. 370",
+          "source_page": 370,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "Create a chart categorizing linking words and transitional phrases by narrative stage (orientation: 'once upon a time,' 'one summer's day'; complication: 'suddenly,' 'without warning'; resolution: 'finally,' 'in the end'), then have the student write a short story using words from each category.",
+          "language_target": "Linking words and transitional phrases by narrative stage",
+          "framework_anchor": "Snapshot 4.10: Retelling Stories",
+          "source_section": "Grade 3, p. 374",
+          "source_page": 374,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        }
+      ],
+      "4": [
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After the student drafts an opinion essay, guide them to revise by adding two more reasons with supporting evidence and linking words, then have them edit for capitalization, punctuation, and spelling using a checklist.",
+          "language_target": "Linking words (because, and, also, furthermore); conventions",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Model how to write an extended response to a text by stating a claim, providing text evidence with page numbers, and explaining the reasoning, then have the student draft their own response using the same structure.",
+          "framework_anchor": "Meaning Making",
+          "source_section": "Grade 3, p. 353",
+          "source_page": 353,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During a writing unit on narratives, have the student draft a story with a clear beginning, middle, and end, dialogue, and descriptive details, then revise based on peer feedback and a rubric.",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After a science investigation, ask the student to write a detailed explanation in their journal, then have them compare their explanation with a partner's and add any important reasoning or evidence they missed.",
+          "framework_anchor": "Snapshot 4.8: Research to Create a Bird Nesting Environment",
+          "source_section": "Grade 3, p. 368",
+          "source_page": 368,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Highlight complex sentences with multiple clauses in an informational text (e.g., 'Although birds build nests in many places, they prefer sheltered locations with nearby food sources.'), guide the student to unpack the meaning, then have them write a similar complex sentence about their own research topic.",
+          "language_target": "Complex sentences with subordinating conjunctions (although, because, when)",
+          "framework_anchor": "Language Development",
+          "source_section": "Grade 3, p. 353",
+          "source_page": 353,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "In a writing conference, show the student how to use a dictionary to check the meaning of a word and select the definition that fits the context, then have them apply this strategy to two more words in their draft.",
+          "framework_anchor": "Language Development",
+          "source_section": "Grade 3, p. 353",
+          "source_page": 353,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After reading multiple texts on a social studies topic, have the student write a well-organized informative/explanatory essay with an introduction, main ideas with supporting details, and a strong conclusion, using domain-specific vocabulary.",
+          "language_target": "Domain-specific vocabulary; text structure (introduction, body, conclusion)",
+          "framework_anchor": "Writing",
+          "source_section": "Grade 3, p. 354",
+          "source_page": 354,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Following a collaborative research project, ask the student to write an informational text about their findings, organizing ideas around major points, following a logical sequence, and including domain-specific vocabulary and a bibliography.",
+          "language_target": "Domain-specific vocabulary; text organization",
+          "framework_anchor": "Content Knowledge",
+          "source_section": "Grade 3, p. 361",
+          "source_page": 361,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide a chart of general academic vocabulary and sentence structures, then have the student write a persuasive paragraph about a classroom issue, combining at least three ideas with varied conjunctions and transitions.",
+          "language_target": "General academic vocabulary; varied sentence structures; transitions",
+          "framework_anchor": "Language Development",
+          "source_section": "Grade 3, p. 353",
+          "source_page": 353,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During a social studies unit, guide the student to write a script for a video presentation, then have them revise the script based on a rubric and peer feedback, record it, and evaluate the final product using the rubric.",
+          "framework_anchor": "Snapshot 4.8: Research to Create a Bird Nesting Environment",
+          "source_section": "Grade 3, p. 369",
+          "source_page": 369,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "After a close reading of a complex text, ask the student to write a literary analysis identifying how the author's word choice (literal vs. nonliteral language) creates meaning, supporting their interpretation with text evidence.",
+          "language_target": "Literary analysis vocabulary; text evidence citation",
+          "framework_anchor": "Meaning Making",
+          "source_section": "Grade 3, p. 353",
+          "source_page": 353,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "Facilitate a discussion analyzing how authors use different words with similar meanings to create different effects on the reader (e.g., 'said' vs. 'whispered' vs. 'shouted'), then have the student revise a narrative by replacing three dialogue tags with more precise verbs from a word bank.",
+          "language_target": "Synonyms; shades of meaning; dialogue verbs",
+          "framework_anchor": "Snapshot 4.10: Retelling Stories",
+          "source_section": "Grade 3, p. 374",
+          "source_page": 374,
+          "grade_band": "2-3",
+          "source_chapter": 4
+        }
+      ]
+    }
+  }
+}

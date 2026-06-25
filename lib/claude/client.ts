@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { buildSystemPrompt } from "@/lib/elpac/prompt";
 import {
   formatScaffoldSourceLabel,
+  getScaffoldSourceAnchors,
   resolveScaffoldSourcesFromIds,
 } from "@/lib/framework/sources";
 import {
@@ -142,14 +143,15 @@ export interface AnalyzeArtifactInput {
   providedLevel?: number | null;
 }
 
-export async function analyzeArtifact(
-  input: AnalyzeArtifactInput,
-): Promise<Insight> {
+export interface AnalyzeArtifactStreamOptions {
+  onSnapshot?: (snapshot: Partial<Insight>) => void;
+}
+
+function buildAnalyzeArtifactRequest(input: AnalyzeArtifactInput) {
   if (input.images.length === 0) {
     throw new ClaudeParseError("At least one image is required");
   }
 
-  const client = getClient();
   const { systemPrompt, citableMoves } = buildSystemPrompt(
     input.gradeSpan,
     input.exactGrade,
@@ -166,34 +168,42 @@ export async function analyzeArtifact(
     );
   }
 
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 1500,
-    temperature: 0.2,
-    system: systemPrompt,
-    tools: [INSIGHT_TOOL],
-    tool_choice: { type: "tool", name: INSIGHT_TOOL_NAME },
-    messages: [
-      {
-        role: "user",
-        content: [
-          ...input.images.map((image) => ({
-            type: "image" as const,
-            source: {
-              type: "base64" as const,
-              media_type: image.mediaType,
-              data: image.imageBase64,
+  return {
+    citableMoves,
+    params: {
+      model: MODEL,
+      max_tokens: 1500,
+      temperature: 0.2,
+      system: systemPrompt,
+      tools: [INSIGHT_TOOL],
+      tool_choice: { type: "tool" as const, name: INSIGHT_TOOL_NAME },
+      messages: [
+        {
+          role: "user" as const,
+          content: [
+            ...input.images.map((image) => ({
+              type: "image" as const,
+              source: {
+                type: "base64" as const,
+                media_type: image.mediaType,
+                data: image.imageBase64,
+              },
+            })),
+            {
+              type: "text" as const,
+              text: contextParts.join("\n"),
             },
-          })),
-          {
-            type: "text" as const,
-            text: contextParts.join("\n"),
-          },
-        ],
-      },
-    ],
-  });
+          ],
+        },
+      ],
+    },
+  };
+}
 
+function parseInsightToolResponse(
+  response: Anthropic.Message,
+  citableMoves: ReturnType<typeof buildSystemPrompt>["citableMoves"],
+): Insight {
   const toolBlock = response.content.find((block) => block.type === "tool_use");
 
   if (!toolBlock || toolBlock.type !== "tool_use") {
@@ -234,6 +244,60 @@ export async function analyzeArtifact(
   return insightValidated.data;
 }
 
+function snapshotToPartialInsight(snapshot: unknown): Partial<Insight> {
+  if (!snapshot || typeof snapshot !== "object") {
+    return {};
+  }
+
+  const record = snapshot as Record<string, unknown>;
+  const partial: Partial<Insight> = {};
+
+  if (typeof record.strengths === "string") {
+    partial.strengths = record.strengths;
+  }
+  if (
+    typeof record.estimated_level === "number" &&
+    Number.isInteger(record.estimated_level) &&
+    record.estimated_level >= 1 &&
+    record.estimated_level <= 4
+  ) {
+    partial.estimated_level = record.estimated_level;
+  }
+  if (typeof record.level_reasoning === "string") {
+    partial.level_reasoning = record.level_reasoning;
+  }
+  if (typeof record.gap_to_next === "string") {
+    partial.gap_to_next = record.gap_to_next;
+  }
+  if (typeof record.scaffold === "string") {
+    partial.scaffold = record.scaffold;
+  }
+
+  return partial;
+}
+
+export async function analyzeArtifactStream(
+  input: AnalyzeArtifactInput,
+  options: AnalyzeArtifactStreamOptions = {},
+): Promise<Insight> {
+  const client = getClient();
+  const { citableMoves, params } = buildAnalyzeArtifactRequest(input);
+  const stream = client.messages.stream(params);
+
+  stream.on("inputJson", (_partialJson, snapshot) => {
+    options.onSnapshot?.(snapshotToPartialInsight(snapshot));
+  });
+
+  const response = await stream.finalMessage();
+  return parseInsightToolResponse(response, citableMoves);
+}
+
+export async function analyzeArtifact(
+  input: AnalyzeArtifactInput,
+): Promise<Insight> {
+  return analyzeArtifactStream(input);
+}
+
 export interface RemixScaffoldInput {
   gradeSpan: GradeSpan;
   exactGrade?: ExactGrade | null;
@@ -243,6 +307,7 @@ export interface RemixScaffoldInput {
   gapToNext: string;
   originalScaffold: string;
   originalSources?: ScaffoldSource[];
+  priorRemixTexts?: string[];
 }
 
 export interface RemixItemInput extends RemixScaffoldInput {
@@ -259,13 +324,159 @@ function formatOriginalSources(sources: ScaffoldSource[] | undefined): string {
     .join("\n");
 }
 
+function formatAvoidedFrameworkMoves(sources: ScaffoldSource[] | undefined): string {
+  if (!sources?.length) {
+    return "";
+  }
+
+  const lines = sources.map((source) => {
+    const label = formatScaffoldSourceLabel(source);
+    const anchor = source.anchor ? ` — ${source.anchor}` : "";
+    return `- ${label}${anchor}`;
+  });
+
+  return `
+FRAMEWORK MOVES ALREADY USED (do not reuse these):
+${lines.join("\n")}
+Choose a different [F#] move from the suggested moves above.`;
+}
+
+function formatPriorRemixTexts(priorRemixTexts: string[] | undefined): string {
+  if (!priorRemixTexts?.length) {
+    return "";
+  }
+
+  const lines = priorRemixTexts.map(
+    (text, index) => `${index + 1}. ${text}`,
+  );
+
+  return `
+PREVIOUS ALTERNATIVES (do not repeat or closely paraphrase):
+${lines.join("\n")}`;
+}
+
+function sourcesOverlapOriginals(
+  sources: ScaffoldSource[],
+  originalAnchors: Set<string>,
+): boolean {
+  if (originalAnchors.size === 0) {
+    return false;
+  }
+
+  return sources.some(
+    (source) => source.anchor != null && originalAnchors.has(source.anchor),
+  );
+}
+
+function formatOverlapRetryInstruction(
+  sources: ScaffoldSource[],
+  originalAnchors: Set<string>,
+): string {
+  const reused = sources
+    .filter((source) => source.anchor != null && originalAnchors.has(source.anchor))
+    .map((source) => source.anchor)
+    .filter((anchor): anchor is string => anchor != null);
+
+  if (reused.length === 0) {
+    return "Your previous response reused a framework move that was already used. Choose a completely different [F#] move from the suggested moves above.";
+  }
+
+  return `Your previous response reused framework move(s) already used: ${reused.join(", ")}. You MUST choose a completely different [F#] move from the suggested moves above.`;
+}
+
+interface RemixGenerationResult {
+  scaffold: string;
+  scaffoldSources: ScaffoldSource[];
+}
+
+async function generateRemixWithRetry(
+  client: Anthropic,
+  options: {
+    systemPrompt: string;
+    citableMoves: ReturnType<typeof buildSystemPrompt>["citableMoves"];
+    userMessage: string;
+    tool: Anthropic.Tool;
+    toolName: string;
+    maxTokens: number;
+    originalAnchors: Set<string>;
+  },
+): Promise<RemixGenerationResult> {
+  async function callModel(
+    extraInstruction: string,
+    temperature: number,
+  ): Promise<RemixGenerationResult> {
+    const message =
+      extraInstruction.length > 0
+        ? `${options.userMessage}\n\n${extraInstruction}`
+        : options.userMessage;
+
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: options.maxTokens,
+      temperature,
+      system: options.systemPrompt,
+      tools: [options.tool],
+      tool_choice: { type: "tool", name: options.toolName },
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "text", text: message }],
+        },
+      ],
+    });
+
+    const toolBlock = response.content.find((block) => block.type === "tool_use");
+
+    if (!toolBlock || toolBlock.type !== "tool_use") {
+      console.error("[claude] No tool_use block in remix response");
+      throw new ClaudeParseError("Remix response was empty");
+    }
+
+    if (toolBlock.name !== options.toolName) {
+      console.error("[claude] Unexpected tool name in remix response");
+      throw new ClaudeParseError("Remix response used an unexpected tool");
+    }
+
+    const parsed: unknown = toolBlock.input;
+
+    const validated = RemixScaffoldToolSchema.safeParse(parsed);
+    if (!validated.success) {
+      console.error("[claude] Remix schema validation failed");
+      throw new ClaudeParseError("Remix response did not match expected format");
+    }
+
+    const { scaffold_source_ids, scaffold } = validated.data;
+    const scaffoldSources = resolveScaffoldSourcesFromIds(
+      scaffold_source_ids,
+      options.citableMoves,
+    );
+
+    return { scaffold, scaffoldSources };
+  }
+
+  const first = await callModel("", 0.7);
+
+  if (!sourcesOverlapOriginals(first.scaffoldSources, options.originalAnchors)) {
+    return first;
+  }
+
+  const retryInstruction = formatOverlapRetryInstruction(
+    first.scaffoldSources,
+    options.originalAnchors,
+  );
+
+  return callModel(retryInstruction, 0.9);
+}
+
 export async function remixScaffold(
   input: RemixScaffoldInput,
 ): Promise<RemixScaffoldResult> {
   const client = getClient();
+  const originalAnchors = getScaffoldSourceAnchors(input.originalSources);
   const { systemPrompt, citableMoves } = buildSystemPrompt(
     input.gradeSpan,
     input.exactGrade,
+    originalAnchors.size > 0 ? { excludeAnchors: originalAnchors } : undefined,
   );
 
   const userMessage = `ORIGINAL ANALYSIS CONTEXT (do not regenerate these fields):
@@ -279,6 +490,7 @@ ${input.originalScaffold}
 
 ORIGINAL SCAFFOLD FRAMEWORK SOURCES:
 ${formatOriginalSources(input.originalSources)}
+${formatAvoidedFrameworkMoves(input.originalSources)}${formatPriorRemixTexts(input.priorRemixTexts)}
 
 REMIX TASK:
 Produce a NEW asset-based scaffold that targets the SAME proficiency gap and
@@ -293,46 +505,15 @@ wording, and examples. Do NOT copy the original scaffold verbatim.
   student's strengths and gap described above — not a generic strategy.
 - In scaffold_source_ids, list the [F#] id(s) you used. Use only ids shown above.`;
 
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 700,
-    temperature: 0.7,
-    system: systemPrompt,
-    tools: [REMIX_TOOL],
-    tool_choice: { type: "tool", name: REMIX_TOOL_NAME },
-    messages: [
-      {
-        role: "user",
-        content: [{ type: "text", text: userMessage }],
-      },
-    ],
-  });
-
-  const toolBlock = response.content.find((block) => block.type === "tool_use");
-
-  if (!toolBlock || toolBlock.type !== "tool_use") {
-    console.error("[claude] No tool_use block in remix response");
-    throw new ClaudeParseError("Remix response was empty");
-  }
-
-  if (toolBlock.name !== REMIX_TOOL_NAME) {
-    console.error("[claude] Unexpected tool name in remix response");
-    throw new ClaudeParseError("Remix response used an unexpected tool");
-  }
-
-  const parsed: unknown = toolBlock.input;
-
-  const validated = RemixScaffoldToolSchema.safeParse(parsed);
-  if (!validated.success) {
-    console.error("[claude] Remix schema validation failed");
-    throw new ClaudeParseError("Remix response did not match expected format");
-  }
-
-  const { scaffold_source_ids, scaffold } = validated.data;
-  const scaffoldSources = resolveScaffoldSourcesFromIds(
-    scaffold_source_ids,
+  const { scaffold, scaffoldSources } = await generateRemixWithRetry(client, {
+    systemPrompt,
     citableMoves,
-  );
+    userMessage,
+    tool: REMIX_TOOL,
+    toolName: REMIX_TOOL_NAME,
+    maxTokens: 700,
+    originalAnchors,
+  });
 
   return {
     scaffold,
@@ -344,9 +525,11 @@ export async function remixScaffoldItem(
   input: RemixItemInput,
 ): Promise<RemixScaffoldResult> {
   const client = getClient();
+  const originalAnchors = getScaffoldSourceAnchors(input.originalItemSources);
   const { systemPrompt, citableMoves } = buildSystemPrompt(
     input.gradeSpan,
     input.exactGrade,
+    originalAnchors.size > 0 ? { excludeAnchors: originalAnchors } : undefined,
   );
 
   const userMessage = `ORIGINAL ANALYSIS CONTEXT (do not regenerate these fields):
@@ -363,6 +546,7 @@ ${input.originalItem}
 
 ORIGINAL ITEM FRAMEWORK SOURCES:
 ${formatOriginalSources(input.originalItemSources)}
+${formatAvoidedFrameworkMoves(input.originalItemSources)}${formatPriorRemixTexts(input.priorRemixTexts)}
 
 REMIX TASK:
 Produce a NEW single scaffold move that targets the SAME proficiency gap and
@@ -378,46 +562,15 @@ item verbatim.
   student's strengths and gap described above — not a generic strategy.
 - In scaffold_source_ids, list the [F#] id(s) you used. Use only ids shown above.`;
 
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: 500,
-    temperature: 0.7,
-    system: systemPrompt,
-    tools: [REMIX_ITEM_TOOL],
-    tool_choice: { type: "tool", name: REMIX_ITEM_TOOL_NAME },
-    messages: [
-      {
-        role: "user",
-        content: [{ type: "text", text: userMessage }],
-      },
-    ],
-  });
-
-  const toolBlock = response.content.find((block) => block.type === "tool_use");
-
-  if (!toolBlock || toolBlock.type !== "tool_use") {
-    console.error("[claude] No tool_use block in remix item response");
-    throw new ClaudeParseError("Remix response was empty");
-  }
-
-  if (toolBlock.name !== REMIX_ITEM_TOOL_NAME) {
-    console.error("[claude] Unexpected tool name in remix item response");
-    throw new ClaudeParseError("Remix response used an unexpected tool");
-  }
-
-  const parsed: unknown = toolBlock.input;
-
-  const validated = RemixScaffoldToolSchema.safeParse(parsed);
-  if (!validated.success) {
-    console.error("[claude] Remix item schema validation failed");
-    throw new ClaudeParseError("Remix response did not match expected format");
-  }
-
-  const { scaffold_source_ids, scaffold } = validated.data;
-  const scaffoldSources = resolveScaffoldSourcesFromIds(
-    scaffold_source_ids,
+  const { scaffold, scaffoldSources } = await generateRemixWithRetry(client, {
+    systemPrompt,
     citableMoves,
-  );
+    userMessage,
+    tool: REMIX_ITEM_TOOL,
+    toolName: REMIX_ITEM_TOOL_NAME,
+    maxTokens: 500,
+    originalAnchors,
+  });
 
   return {
     scaffold,

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { withDbGuard } from "@/lib/api/with-db-guard";
-import { analyzeArtifact, ClaudeParseError } from "@/lib/claude/client";
+import {
+  analyzeArtifactStream,
+  ClaudeParseError,
+} from "@/lib/claude/client";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import {
   databaseWakingResponse,
@@ -15,7 +18,7 @@ import {
   bufferToBase64Image,
   rasterizePdfFirstPage,
 } from "@/lib/pdf/rasterize";
-import { GradeSpanSchema } from "@/lib/types";
+import { GradeSpanSchema, type Insight } from "@/lib/types";
 import {
   MAX_PAGES_PER_ANALYSIS,
   MAX_UPLOAD_BYTES,
@@ -48,6 +51,21 @@ async function fileToImagePayload(file: File): Promise<ImagePayload> {
   }
 
   throw new Error("Unsupported file type");
+}
+
+type AnalyzeStreamEvent =
+  | { type: "snapshot"; insight: Partial<Insight> }
+  | { type: "complete"; sessionId: string; insight: Insight }
+  | { type: "error"; message: string };
+
+function analyzeErrorMessage(error: unknown): string {
+  if (error instanceof ClaudeParseError) {
+    return "We could not analyze this artifact. Please try again with a clearer image.";
+  }
+  if (isDatabaseWakingError(error)) {
+    return "The database is starting up after sleeping. Please try again in a moment.";
+  }
+  return "Analysis failed. Please try again.";
 }
 
 async function postHandler(req: Request) {
@@ -148,47 +166,73 @@ async function postHandler(req: Request) {
       }
     }
 
-    const insight = await analyzeArtifact({
-      images: images.map((image) => ({
-        imageBase64: image.base64,
-        mediaType: image.mediaType,
-      })),
-      gradeSpan,
-      exactGrade,
-      providedLevel,
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const enqueue = (event: AnalyzeStreamEvent) => {
+          controller.enqueue(
+            encoder.encode(`${JSON.stringify(event)}\n`),
+          );
+        };
+
+        try {
+          const insight = await analyzeArtifactStream(
+            {
+              images: images.map((image) => ({
+                imageBase64: image.base64,
+                mediaType: image.mediaType,
+              })),
+              gradeSpan,
+              exactGrade,
+              providedLevel,
+            },
+            {
+              onSnapshot: (snapshot) => {
+                enqueue({ type: "snapshot", insight: snapshot });
+              },
+            },
+          );
+
+          const { sessionId } = await insertSessionAndInsight({
+            teacherId: teacher.id,
+            studentUuid,
+            gradeSpan,
+            exactGrade,
+            providedElpacLevel: providedLevel,
+            insight,
+          });
+
+          await recordAudit({
+            actorId: teacher.id,
+            action: "analysis.create",
+            resourceType: "analysis_session",
+            resourceId: sessionId,
+            req,
+          });
+
+          enqueue({ type: "complete", sessionId, insight });
+          controller.close();
+        } catch (error) {
+          if (error instanceof ClaudeParseError) {
+            console.error("[api/analyze] Claude parse error");
+          } else if (!isDatabaseWakingError(error)) {
+            console.error("[api/analyze]", error);
+          }
+          enqueue({ type: "error", message: analyzeErrorMessage(error) });
+          controller.close();
+        }
+      },
     });
 
-    const { sessionId } = await insertSessionAndInsight({
-      teacherId: teacher.id,
-      studentUuid,
-      gradeSpan,
-      exactGrade,
-      providedElpacLevel: providedLevel,
-      insight,
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "application/x-ndjson",
+        "Cache-Control": "no-store",
+      },
     });
-
-    await recordAudit({
-      actorId: teacher.id,
-      action: "analysis.create",
-      resourceType: "analysis_session",
-      resourceId: sessionId,
-      req,
-    });
-
-    return NextResponse.json({ sessionId, insight });
   } catch (error) {
     if (isDatabaseWakingError(error)) {
       return databaseWakingResponse();
-    }
-    if (error instanceof ClaudeParseError) {
-      console.error("[api/analyze] Claude parse error");
-      return NextResponse.json(
-        {
-          error:
-            "We could not analyze this artifact. Please try again with a clearer image.",
-        },
-        { status: 502 },
-      );
     }
 
     console.error("[api/analyze]", error);

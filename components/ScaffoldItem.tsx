@@ -59,6 +59,7 @@ export function ScaffoldItem({
   const [view, setView] = useState<ItemView>("original");
   const [remixText, setRemixText] = useState<string | null>(null);
   const [remixSources, setRemixSources] = useState<ScaffoldSource[]>([]);
+  const [priorRemixes, setPriorRemixes] = useState<string[]>([]);
   const [isRemixing, setIsRemixing] = useState(false);
   const [remixError, setRemixError] = useState<string | null>(null);
 
@@ -82,7 +83,11 @@ export function ScaffoldItem({
       const response = await fetch("/api/insights/remix", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, itemIndex }),
+        body: JSON.stringify({
+          sessionId,
+          itemIndex,
+          ...(priorRemixes.length > 0 ? { priorRemixTexts: priorRemixes } : {}),
+        }),
       });
 
       const data = (await response.json()) as RemixScaffoldResult & {
@@ -98,6 +103,7 @@ export function ScaffoldItem({
 
       setRemixText(data.scaffold);
       setRemixSources(data.scaffold_sources ?? []);
+      setPriorRemixes((current) => [...current, data.scaffold]);
       setView("remixed");
     } catch {
       setRemixError("Failed to generate an alternative insight.");

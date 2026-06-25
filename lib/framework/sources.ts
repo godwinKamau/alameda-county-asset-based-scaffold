@@ -67,6 +67,23 @@ export function buildScaffoldSource(
   };
 }
 
+export function getScaffoldSourceAnchors(
+  sources: ScaffoldSource[] | undefined,
+): Set<string> {
+  const anchors = new Set<string>();
+  if (!sources?.length) {
+    return anchors;
+  }
+
+  for (const source of sources) {
+    if (source.anchor) {
+      anchors.add(source.anchor);
+    }
+  }
+
+  return anchors;
+}
+
 export function dedupeScaffoldSources(sources: ScaffoldSource[]): ScaffoldSource[] {
   const seen = new Set<string>();
   const result: ScaffoldSource[] = [];

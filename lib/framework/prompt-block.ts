@@ -27,10 +27,15 @@ export interface FrameworkBlockResult {
   citableMoves: FrameworkMove[];
 }
 
-export function buildFrameworkBlockFromMoves(
+export interface BuildFrameworkBlockOptions {
+  excludeAnchors?: ReadonlySet<string>;
+}
+
+function buildFrameworkBlockInternal(
   moves: FrameworkLevelMoves | null,
   gradeSpan: GradeSpan,
-  exactGrade?: ExactGrade | null,
+  exactGrade: ExactGrade | null | undefined,
+  excludeAnchors: ReadonlySet<string> | undefined,
 ): FrameworkBlockResult {
   if (!moves) {
     return { block: "", citableMoves: [] };
@@ -55,7 +60,15 @@ export function buildFrameworkBlockFromMoves(
         return null;
       }
 
-      const formatted = filtered.map((move) => {
+      const eligible = excludeAnchors?.size
+        ? filtered.filter((move) => !excludeAnchors.has(move.framework_anchor))
+        : filtered;
+
+      if (eligible.length === 0) {
+        return null;
+      }
+
+      const formatted = eligible.map((move) => {
         const id = nextId++;
         citableMoves.push(move);
         return formatFrameworkMove(move, id);
@@ -83,4 +96,30 @@ ${levelBlocks}
 `;
 
   return { block, citableMoves };
+}
+
+export function buildFrameworkBlockFromMoves(
+  moves: FrameworkLevelMoves | null,
+  gradeSpan: GradeSpan,
+  exactGrade?: ExactGrade | null,
+  options?: BuildFrameworkBlockOptions,
+): FrameworkBlockResult {
+  const excludeAnchors = options?.excludeAnchors;
+
+  if (!excludeAnchors?.size) {
+    return buildFrameworkBlockInternal(moves, gradeSpan, exactGrade, undefined);
+  }
+
+  const filtered = buildFrameworkBlockInternal(
+    moves,
+    gradeSpan,
+    exactGrade,
+    excludeAnchors,
+  );
+
+  if (filtered.citableMoves.length > 0) {
+    return filtered;
+  }
+
+  return buildFrameworkBlockInternal(moves, gradeSpan, exactGrade, undefined);
 }

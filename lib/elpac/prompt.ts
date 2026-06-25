@@ -19,9 +19,14 @@ export interface SystemPromptResult {
   citableMoves: FrameworkMove[];
 }
 
+export interface BuildSystemPromptOptions {
+  excludeAnchors?: ReadonlySet<string>;
+}
+
 export function buildSystemPrompt(
   gradeSpan: GradeSpan,
   exactGrade?: ExactGrade | null,
+  options?: BuildSystemPromptOptions,
 ): SystemPromptResult {
   const plds = getWritingPldsForGradeSpan(gradeSpan);
 
@@ -38,6 +43,9 @@ export function buildSystemPrompt(
     getFrameworkMovesForGradeSpan(gradeSpan),
     gradeSpan,
     exactGrade,
+    options?.excludeAnchors?.size
+      ? { excludeAnchors: options.excludeAnchors }
+      : undefined,
   );
 
   const scaffoldFrameworkClause = frameworkBlock

@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import type { Insight } from "@/lib/types";
-import { getCaEldLevelLabel, getElpacPerformanceLevelLabel } from "@/lib/elpac/labels";
+import {
+  getCaEldLevelLabel,
+  getElpacPerformanceLevelLabel,
+} from "@/lib/elpac/labels";
+import { LevelSkeleton, SectionSkeleton } from "./InsightSkeletons";
 import { Panel } from "./Panel";
 import { RichSentenceList } from "./RichSentenceList";
 import { ScaffoldContent } from "./ScaffoldContent";
@@ -50,18 +54,43 @@ const TABS: {
   },
 ];
 
+function isCompleteInsight(
+  insight: Insight | Partial<Insight>,
+): insight is Insight {
+  return (
+    typeof insight.strengths === "string" &&
+    insight.strengths.length > 0 &&
+    typeof insight.estimated_level === "number" &&
+    typeof insight.level_reasoning === "string" &&
+    insight.level_reasoning.length > 0 &&
+    typeof insight.gap_to_next === "string" &&
+    insight.gap_to_next.length > 0 &&
+    typeof insight.scaffold === "string" &&
+    insight.scaffold.length > 0
+  );
+}
+
 interface InsightCardProps {
-  insight: Insight;
+  insight: Insight | Partial<Insight>;
   sessionId?: string;
   savedScaffoldIndices?: number[];
+  streaming?: boolean;
 }
 
 export function InsightCard({
   insight,
   sessionId,
   savedScaffoldIndices,
+  streaming = false,
 }: InsightCardProps) {
   const [activeTab, setActiveTab] = useState<InsightTab>("scaffold");
+
+  const hasScaffold = Boolean(insight.scaffold?.trim());
+  const hasLevel = insight.estimated_level != null;
+  const hasLevelReasoning = Boolean(insight.level_reasoning?.trim());
+  const hasStrengths = Boolean(insight.strengths?.trim());
+  const hasGap = Boolean(insight.gap_to_next?.trim());
+  const fullInsight = !streaming && isCompleteInsight(insight) ? insight : null;
 
   return (
     <div>
@@ -113,12 +142,20 @@ export function InsightCard({
             showTitle={false}
             className="p-6 shadow-md ring-1 ring-brand-soft"
           >
-            <ScaffoldContent
-              text={insight.scaffold}
-              sources={insight.scaffold_sources}
-              sessionId={sessionId}
-              savedIndices={savedScaffoldIndices}
-            />
+            {fullInsight ? (
+              <ScaffoldContent
+                text={fullInsight.scaffold}
+                sources={fullInsight.scaffold_sources}
+                sessionId={sessionId}
+                savedIndices={savedScaffoldIndices}
+              />
+            ) : hasScaffold ? (
+              <div className="leading-relaxed text-brand-dark/90">
+                <RichSentenceList text={insight.scaffold!} />
+              </div>
+            ) : (
+              <SectionSkeleton lines={4} />
+            )}
           </Panel>
         </div>
 
@@ -134,32 +171,40 @@ export function InsightCard({
           }
         >
           <Panel title="Estimated Level" variant="level" showTitle={false}>
-            <div className="flex items-start gap-4">
-              <div
-                aria-hidden="true"
-                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-brand-soft ring-1 ring-brand-soft"
-              >
-                <span className="text-3xl font-bold tabular-nums text-brand-dark">
-                  {insight.estimated_level}
-                </span>
+            {hasLevel ? (
+              <div className="flex items-start gap-4">
+                <div
+                  aria-hidden="true"
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-brand-soft ring-1 ring-brand-soft"
+                >
+                  <span className="text-3xl font-bold tabular-nums text-brand-dark">
+                    {insight.estimated_level}
+                  </span>
+                </div>
+                <div className="min-w-0 pt-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                    ELPAC Level {insight.estimated_level}
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold leading-tight text-brand-dark">
+                    {getCaEldLevelLabel(insight.estimated_level!)}
+                  </p>
+                  <p className="mt-1 text-sm text-muted">
+                    {getElpacPerformanceLevelLabel(insight.estimated_level!)}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0 pt-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-                  ELPAC Level {insight.estimated_level}
-                </p>
-                <p className="mt-1 text-2xl font-semibold leading-tight text-brand-dark">
-                  {getCaEldLevelLabel(insight.estimated_level)}
-                </p>
-                <p className="mt-1 text-sm text-muted">
-                  {getElpacPerformanceLevelLabel(insight.estimated_level)}
-                </p>
-              </div>
-            </div>
+            ) : (
+              <LevelSkeleton />
+            )}
             <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted">
               Evidence from artifact
             </p>
             <div className="mt-2 text-brand-dark/90">
-              <RichSentenceList text={insight.level_reasoning} />
+              {hasLevelReasoning ? (
+                <RichSentenceList text={insight.level_reasoning!} />
+              ) : (
+                <SectionSkeleton lines={2} />
+              )}
             </div>
           </Panel>
         </div>
@@ -176,7 +221,11 @@ export function InsightCard({
           }
         >
           <Panel title="Observed Strengths" variant="strengths" showTitle={false}>
-            <RichSentenceList text={insight.strengths} />
+            {hasStrengths ? (
+              <RichSentenceList text={insight.strengths!} />
+            ) : (
+              <SectionSkeleton />
+            )}
           </Panel>
         </div>
 
@@ -192,7 +241,11 @@ export function InsightCard({
           }
         >
           <Panel title="Gap to Next Level" variant="gap" showTitle={false}>
-            <RichSentenceList text={insight.gap_to_next} />
+            {hasGap ? (
+              <RichSentenceList text={insight.gap_to_next!} />
+            ) : (
+              <SectionSkeleton />
+            )}
           </Panel>
         </div>
       </div>

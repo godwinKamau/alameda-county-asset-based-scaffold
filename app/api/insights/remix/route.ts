@@ -21,6 +21,7 @@ export const dynamic = "force-dynamic";
 const RemixBodySchema = z.object({
   sessionId: z.string().uuid(),
   itemIndex: z.number().int().min(0).optional(),
+  priorRemixTexts: z.array(z.string().min(1)).max(5).optional(),
 });
 
 async function postHandler(req: Request) {
@@ -49,6 +50,7 @@ async function postHandler(req: Request) {
       gapToNext: session.insight.gap_to_next,
       originalScaffold: session.insight.scaffold,
       originalSources: session.insight.scaffold_sources,
+      priorRemixTexts: body.priorRemixTexts,
     };
 
     let result;

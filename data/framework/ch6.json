@@ -1,0 +1,517 @@
+{
+  "_meta": {
+    "source": "California ELA/ELD Framework, Chapter 6: Content and Pedagogy: Grades Six Through Eight",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter6.pdf",
+    "coverage": [
+      "Chapter 6 (Grades 6-8), including Overview of the Span, Grade 6, Grade 7, Grade 8, Integrated and Designated ELD guidance, Snapshots, and Vignettes"
+    ],
+    "scope_note": "Comprehensive extraction covering all five themes (Meaning Making, Language Development, Effective Expression, Content Knowledge, Foundational Skills) across grades 6-8, including integrated and designated ELD moves from snapshots, vignettes, and thematic guidance sections.",
+    "pdf_page_offset": 501
+  },
+  "writing_moves": {
+    "3-12": {
+      "1": [
+        {
+          "theme": "foundational_skills",
+          "eld_mode": "designated",
+          "move": "During shared writing with newcomer ELs, dictate a sentence slowly while pointing to each word, then invite the student to re-read pointing left to right to build directionality and print concepts.",
+          "language_target": "Print directionality, one-to-one word correspondence",
+          "framework_anchor": "Foundational Skills: Print Concepts",
+          "source_section": "Foundational Skills (Overview of the Span), p. 539–540",
+          "source_page": 539,
+          "source_page_end": 540,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "foundational_skills",
+          "eld_mode": "designated",
+          "move": "Review phonological awareness skills as needed with ELs whose native language alphabet differs from the Latin alphabet, explicitly comparing letters and sounds across languages.",
+          "language_target": "Phoneme awareness, letter-sound correspondence",
+          "framework_anchor": "Foundational Skills: Considerations for Foundational Literacy Skills Instruction",
+          "source_section": "Foundational Skills table, p. 540",
+          "source_page": 540,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Co-construct word banks with general academic vocabulary (e.g., synonyms for 'think': believe, interpret, propose) and have students use a bilingual dictionary to add translations and cognates, then practice using the words in sentence frames.",
+          "language_target": "General academic vocabulary, cognates",
+          "framework_anchor": "Snapshot 6.1: Summary and Analysis of Stories",
+          "source_section": "Grade 6, Snapshot 6.1, p. 549–550",
+          "source_page": 549,
+          "source_page_end": 550,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        }
+      ],
+      "2": [
+        {
+          "theme": "meaning_making",
+          "eld_mode": "designated",
+          "move": "After students read a narrative, show them how linking words and transitional phrases (e.g., 'one day in late summer,' 'unexpectedly,' 'ultimately') guide readers through the stages of a story, then have students locate examples in texts they read and use them in their own retellings.",
+          "language_target": "Linking words, transitional phrases (temporal, causal)",
+          "framework_anchor": "Snapshot 6.1: Summary and Analysis of Stories",
+          "source_section": "Grade 6, Snapshot 6.1, p. 549–550",
+          "source_page": 549,
+          "source_page_end": 550,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Build students' vocabulary for expressing ideas and opinions by creating co-constructed word banks (e.g., for 'says': suggests that, indicates, demonstrates) and explicitly teaching general academic vocabulary so students can refer back during discussions and writing.",
+          "language_target": "General academic vocabulary for analytical writing",
+          "framework_anchor": "Snapshot 6.1: Summary and Analysis of Stories",
+          "source_section": "Grade 6, Snapshot 6.1, p. 549–550",
+          "source_page": 549,
+          "source_page_end": 550,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Fold a piece of paper into thirds and model summarizing a history textbook passage by recording the main idea in the top third, key details in the middle, and supporting evidence in the bottom; in partners, students each write a summary sentence from the top third and compare, revising based on peer feedback.",
+          "language_target": "Summary sentence structure",
+          "framework_anchor": "Meaning Making: Summarizing",
+          "source_section": "Grade 6, Meaning Making, p. 549",
+          "source_page": 549,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "During designated ELD, show students models of arguments and point out specific vocabulary and grammatical structures (e.g., 'Depending on the way slaves were captured, ___') they may want to adopt; provide sentence frames for collaborative conversations so students practice new grammatical structures in meaningful ways.",
+          "language_target": "Sentence frames for argument (dependent clauses, prepositional phrases)",
+          "framework_anchor": "Snapshot 6.2: Reading Complex Texts About Slavery in Ancient History",
+          "source_section": "Grade 6, Snapshot 6.2, p. 551–552",
+          "source_page": 551,
+          "source_page_end": 552,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Explicitly teach important vocabulary for a content unit (e.g., 'slave/slavery/enslave,' 'emancipate/emancipation') and provide sentence frames, then give extended opportunities for students to discuss their claims using the vocabulary and grammatical structures so they feel more confident using them in independent writing.",
+          "language_target": "Domain-specific vocabulary, sentence frames for explanation",
+          "framework_anchor": "Snapshot 6.2: Reading Complex Texts About Slavery in Ancient History",
+          "source_section": "Grade 6, Snapshot 6.2, p. 551–552",
+          "source_page": 551,
+          "source_page_end": 552,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Teach students specific roles for small-group discussions (e.g., Discussion Director, Literary Luminary, Vocabulary Enricher, Connector, Illustrator) with clear responsibilities for each role, so they can work independently when they break into small groups.",
+          "language_target": "Academic discussion roles and vocabulary",
+          "framework_anchor": "Discussing: Small-group roles",
+          "source_section": "Grade 6, Discussing, p. 556; Figure 6.12",
+          "source_page": 556,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "designated",
+          "move": "Highlight morphology in informational texts by showing how shifts in word structure (e.g., suffixes) change a word's part of speech and where it can be used in a sentence (e.g., 'converge/convergent'), deepening understanding of syntax.",
+          "language_target": "Morphology (suffixes), syntax",
+          "framework_anchor": "Snapshot 6.6: Analyzing and Discussing the Use of Language in Science Texts",
+          "source_section": "Grade 7, Snapshot 6.6, p. 589",
+          "source_page": 589,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "designated",
+          "move": "Strategically select challenging sentences (e.g., complex sentences or those with long noun phrases), model unpacking them using think-alouds, then engage students in deciphering meanings before identifying grammatical boundaries (noun phrases, dependent clauses).",
+          "language_target": "Complex sentence structures, noun phrases, dependent clauses",
+          "framework_anchor": "Snapshot 6.6: Analyzing and Discussing the Use of Language in Science Texts",
+          "source_section": "Grade 7, Snapshot 6.6, p. 589",
+          "source_page": 589,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        }
+      ],
+      "3": [
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Use text-dependent questions at increasingly deeper levels to promote close reading; have students craft their own questions to strengthen comprehension and write about the ideas from the text using textual evidence.",
+          "language_target": "Academic question stems, evidence-based responses",
+          "framework_anchor": "Meaning Making: Text-dependent questions",
+          "source_section": "Grade 6, Meaning Making, p. 550",
+          "source_page": 550,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "During a data analysis task in mathematics, have students determine the most appropriate measure of central tendency, write a draft argument defending their choice using data from the scenario, review drafts with partners using a rubric, then create and present a poster as a final draft.",
+          "language_target": "Mathematical argumentation language, data-based claims",
+          "framework_anchor": "Snapshot 6.3: Choosing and Defending a Unit of Data Analysis",
+          "source_section": "Grade 6, Snapshot 6.3, p. 553–555",
+          "source_page": 553,
+          "source_page_end": 555,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "After presenting a multimedia lesson on river systems in early civilizations, have students work in small groups to complete a graphic organizer with columns for advantages/challenges of river systems, how they led to civilization, textual evidence, and source citation; conclude with a whole-class discussion citing textual evidence.",
+          "language_target": "Textual citation, causal language (led to, resulted in)",
+          "framework_anchor": "Snapshot 6.4: River Systems in Egypt, Mesopotamia, and India",
+          "source_section": "Grade 6, Snapshot 6.4, p. 563",
+          "source_page": 563,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Model reading a paragraph of informational text aloud and thinking aloud using phrases like 'I predict the next part will…,' 'I am not sure of…,' 'I got confused when…' to demonstrate sorting through understanding and sources of confusion, then have students apply the process to their own reading.",
+          "language_target": "Metacognitive language (predict, infer, clarify)",
+          "framework_anchor": "Meaning Making: Teacher think-alouds",
+          "source_section": "Grade 7, Meaning Making, p. 583–584",
+          "source_page": 583,
+          "source_page_end": 584,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Use the SQRQCQ strategy (Survey, Question, Predict, Read, Respond, Summarize): have students survey a text selection, pose questions they think will be answered, make predictions, read the text, confirm predictions and answer questions posed earlier in small groups, then summarize orally or in writing.",
+          "language_target": "Question formation, prediction language, summary statements",
+          "framework_anchor": "Meaning Making: SQRQCQ strategy",
+          "source_section": "Grade 7, Meaning Making, p. 584",
+          "source_page": 584,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "After a chemistry demonstration, guide students to work in pairs to make inferences using a three-column graphic organizer (The Demonstration Showed / I Know from texts and background knowledge / Inference), then share and validate inferences as a whole class.",
+          "language_target": "Inference language (conclude, infer, based on evidence)",
+          "framework_anchor": "Snapshot 6.5: Making Inferences Using a Graphic Organizer",
+          "source_section": "Grade 7, Snapshot 6.5, p. 585–588",
+          "source_page": 585,
+          "source_page_end": 588,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Draw students' attention to domain-specific vocabulary (e.g., 'mantle,' 'lithosphere'), general academic vocabulary (e.g., 'distribution,' 'movement'), and adverbials (e.g., 'along breaks in the crust') in science texts, discussing their meanings and how they are used to convey precise scientific ideas.",
+          "language_target": "Domain-specific vocabulary, general academic vocabulary, adverbials of place/manner",
+          "framework_anchor": "Snapshot 6.6: Analyzing and Discussing the Use of Language in Science Texts",
+          "source_section": "Grade 7, Snapshot 6.6, p. 589",
+          "source_page": 589,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide sentence starters (e.g., 'I'd like to add…,' 'Building on ___'s idea…,' 'I agree/disagree because…') to scaffold student discussions, and model how to pose questions that elicit elaboration and bring discussions back on topic.",
+          "language_target": "Discussion sentence starters, question stems",
+          "framework_anchor": "Discussing: Sentence starters",
+          "source_section": "Grade 7, Discussing, p. 591; Figure 6.20",
+          "source_page": 591,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "In a spoken word poetry project, have students analyze how poets combine language, gestures, facial expressions, intonation, and rhythm to create rhetorical effects, then channel their own experiences into writing and performing poetry, using word banks co-constructed with the teacher and poet-mentors.",
+          "language_target": "Expressive language for poetry, rhetorical devices",
+          "framework_anchor": "Snapshot 6.7: Poets in Society – Spoken Word Poetry and Youth Literacy",
+          "source_section": "Grade 7, Snapshot 6.7, p. 593–595",
+          "source_page": 593,
+          "source_page_end": 595,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "During designated ELD, provide structured opportunities for ELs to practice using introductory adverbial phrases (e.g., 'In this case,' 'As shown previously') and cause/effect sentence structures (e.g., 'Due to ___, I expect/conclude that ___') for making sound mathematical arguments.",
+          "language_target": "Introductory adverbial phrases, cause/effect structures",
+          "framework_anchor": "Snapshot 6.8: Constructing and Critiquing Arguments in Math",
+          "source_section": "Grade 7, Snapshot 6.8, p. 598",
+          "source_page": 598,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Use the Five Word Summary strategy: students individually list the five most important words from a reading, then in pairs synthesize their lists, then in groups of four synthesize again, and finally write a summary paragraph using the final five key words underlined.",
+          "language_target": "Summary writing, key vocabulary selection",
+          "framework_anchor": "Meaning Making: Five Word Summary Strategy",
+          "source_section": "Grade 7, Meaning Making, p. 583; Figure 6.18",
+          "source_page": 583,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Use the 'This Is About / This Is Really About' activity: have students write what a text is literally about, then what it is really about (the theme or big idea), guiding them to be more precise when writing summaries by inferring unstated main ideas.",
+          "language_target": "Literal vs. inferential meaning, theme statements",
+          "framework_anchor": "Meaning Making: This Is About/This Is Really About",
+          "source_section": "Grade 8, Meaning Making, p. 617; Figure 6.26",
+          "source_page": 617,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Invite students to nominate confusing sentences or passages; write them on a display and alternate with students identifying punctuation, transition words, referents, and phrases that are sources of confusion or help illuminate meaning, facilitating a discussion with metacognitive and metalinguistic strategies (Sentence Detective Practice).",
+          "language_target": "Metalanguage for grammar, metacognitive language",
+          "framework_anchor": "Language Development: Sentence Detective Practice",
+          "source_section": "Grade 8, Language Development, p. 619; Figure 6.27",
+          "source_page": 619,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "After students read an article on cyberbullying, have them work in table groups to identify arguments for and against a position, record evidence in a notetaking guide, then engage in structured debate where each student presents a reason and later defends the opposing team's position before writing an individual paragraph with evidence.",
+          "language_target": "Argument structures, evidence-based claims, transition words for argument",
+          "framework_anchor": "Snapshot 6.9: Developing and Defending an Argument",
+          "source_section": "Grade 8, Snapshot 6.9, p. 620–622",
+          "source_page": 620,
+          "source_page_end": 622,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Collaboratively deconstruct complicated sentences with students by breaking them into clauses, identifying each clause type (dependent/independent) and how they know, then restating each clause's meaning in their own words using a table organizer.",
+          "language_target": "Clause types (dependent/independent), complex sentence structures",
+          "framework_anchor": "Snapshot 6.9: Developing and Defending an Argument",
+          "source_section": "Grade 8, Snapshot 6.9, p. 620–622",
+          "source_page": 620,
+          "source_page_end": 622,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "When teaching students to engage in metacognitive conversations with a text, model annotating a text with your thinking before having students work in pairs to practice; have students share their annotations and strategies with classmates to engage in problem solving.",
+          "language_target": "Annotation language, metacognitive vocabulary",
+          "framework_anchor": "Discussing: Annotating texts",
+          "source_section": "Grade 8, Discussing, p. 624",
+          "source_page": 624,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Use Socratic seminar to invite student inquiry and deeper understanding of a text: require students to read and understand a text, respond to open-ended questions from the leader, listen carefully to peers, think critically, pull together evidence, articulate their own responses, and respond to others' comments, continually referring to textual evidence.",
+          "language_target": "Academic discussion language, question formation, evidence-based responses",
+          "framework_anchor": "Discussing: Socratic seminar",
+          "source_section": "Grade 8, Discussing, p. 624",
+          "source_page": 624,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "During designated ELD, guide students in reading primary sources by identifying unfamiliar, abstract, or confusing words in pairs, then charting the words the class has identified, offering student-friendly explanations prepared in advance, and calling attention to cognates for bilingual students.",
+          "language_target": "Domain-specific vocabulary, cognates, abstract vocabulary",
+          "framework_anchor": "Snapshot 6.10: Analysis of Primary Texts by Frederick Douglass",
+          "source_section": "Grade 8, Snapshot 6.10, p. 627–630",
+          "source_page": 627,
+          "source_page_end": 630,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Guide students through a detailed sentence deconstruction activity: model how to code words and phrases according to how they function to make meaning, identify reference devices (pronouns, substitutes) that refer to people, concepts, and events, then have students practice in pairs and draw arrows to connect referring words to their antecedents.",
+          "language_target": "Reference devices (pronouns, substitutes), antecedents, cohesion",
+          "framework_anchor": "Snapshot 6.10: Analysis of Primary Texts by Frederick Douglass",
+          "source_section": "Grade 8, Snapshot 6.10, p. 627–630",
+          "source_page": 627,
+          "source_page_end": 630,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Collaborate across ELA, ELD, and science to design tasks that support all students in achieving a performance task (e.g., writing a science argument): tasks include reading many texts, conducting collaborative research in notebooks, using mentor argumentative texts to identify claims and persuasive language, unpacking sentences to identify language resources, weighing competing positions, and orally debating positions before writing collaboratively.",
+          "language_target": "Science argument language, claim structures, evidence-based reasoning",
+          "framework_anchor": "Snapshot 6.11: Debating About the Effects of Human Activity on the Health of the Earth",
+          "source_section": "Grade 8, Snapshot 6.11, p. 631–634",
+          "source_page": 631,
+          "source_page_end": 634,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Use templates to organize ideas and jointly construct short arguments for different audiences; have students role-play making arguments for intended audiences, provide feedback to peers on language and evidence, and adjust language and content based on feedback received.",
+          "language_target": "Audience awareness, argument structures, persuasive language",
+          "framework_anchor": "Snapshot 6.11: Debating About the Effects of Human Activity on the Health of the Earth",
+          "source_section": "Grade 8, Snapshot 6.11, p. 631–634",
+          "source_page": 631,
+          "source_page_end": 634,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        }
+      ],
+      "4": [
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Share mentor texts that are excellent examples of the focus of instruction (e.g., organization, vocabulary for precision, transitional phrases); discuss the authors' craft and, as appropriate to the purpose, have students emulate it in their own writing.",
+          "language_target": "Transitional phrases, precise vocabulary, organizational structures",
+          "framework_anchor": "Effective Expression: Mentor texts",
+          "source_section": "Overview of the Span, Effective Expression: Writing, p. 525",
+          "source_page": 525,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "integrated",
+          "move": "Facilitate active dialogue about how language works by contextualizing language learning in the rich content students are engaged with throughout the curricula, rather than teaching language in isolation (e.g., having students silently complete grammar worksheets).",
+          "language_target": "Metalanguage for discussing language (e.g., noun phrase, text connective, pronoun reference)",
+          "framework_anchor": "Language Development: Metalanguage",
+          "source_section": "Overview of the Span, Language Development, p. 521",
+          "source_page": 521,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Provide repeated opportunities to practice writing and speaking while also providing novel ways to learn and promoting positive peer collaboration; use enthusiasm to challenge students' increasing capacity to learn new information, perceive new connections and perspectives, and experience the pleasure of creating new knowledge.",
+          "language_target": "Varied sentence structures, academic vocabulary across disciplines",
+          "framework_anchor": "Overview of the Span: Motivation and engagement",
+          "source_section": "Overview of the Span, p. 505",
+          "source_page": 505,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "content_knowledge",
+          "eld_mode": "integrated",
+          "move": "Plan a program of wide reading that encompasses literature, literary nonfiction, and nonfiction; ensure students have access to a variety of print and digital texts in the classroom and school library and have opportunities to read widely as an organized part of the curriculum and independently.",
+          "language_target": "Disciplinary vocabulary, varied text structures",
+          "framework_anchor": "Content Knowledge: Wide reading",
+          "source_section": "Overview of the Span, Content Knowledge, p. 531; Grade 6, Content Knowledge, p. 564",
+          "source_page": 531,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "During designated ELD, provide structured opportunities for students to practice analyzing and discussing the language in content-area texts they are reading and to talk about their ideas using new language, so that they will be better able to use the language more confidently during content-based speaking and writing tasks and enhance their awareness of how English works to make meaning in different disciplines.",
+          "language_target": "Disciplinary language structures, content-specific vocabulary",
+          "framework_anchor": "Snapshot 6.6: Analyzing and Discussing the Use of Language in Science Texts",
+          "source_section": "Grade 7, Snapshot 6.6, p. 589",
+          "source_page": 589,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "In designated ELD time connected to mathematics, provide EL students opportunities to practice using words, phrasing, and discourse conventions useful for discussing mathematical content and making sound mathematical arguments (e.g., question openers like 'Could you clarify what you mean by ___?'), pulling small groups of ELs at similar proficiency levels while the rest of the class works independently.",
+          "language_target": "Mathematical discourse markers, question openers and extenders",
+          "framework_anchor": "Snapshot 6.8: Constructing and Critiquing Arguments in Math",
+          "source_section": "Grade 7, Snapshot 6.8, p. 598",
+          "source_page": 598,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Unpacking claims in mentor argumentative texts, determine what types of evidence and warrants are expected; unpack paragraphs and sentences to identify language resources used and discuss why the writer used them, modeling thought processes using strategies like think-alouds before engaging students in deciphering meanings.",
+          "language_target": "Claim structures, warrants, evidence language",
+          "framework_anchor": "Snapshot 6.11: Debating About the Effects of Human Activity on the Health of the Earth",
+          "source_section": "Grade 8, Snapshot 6.11, p. 631–634",
+          "source_page": 631,
+          "source_page_end": 634,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "After providing many opportunities to read, view media, conduct collaborative research, use mentor texts, and orally debate positions, have students collaboratively write arguments for a peer audience, adopting an academic stance while envisioning a clear purpose and persuading peers using sound arguments with credible and convincing evidence; evaluate using class-generated criteria.",
+          "language_target": "Argument structures, persuasive language, audience awareness",
+          "framework_anchor": "Snapshot 6.11: Debating About the Effects of Human Activity on the Health of the Earth",
+          "source_section": "Grade 8, Snapshot 6.11, p. 631–634",
+          "source_page": 631,
+          "source_page_end": 634,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "During designated ELD, engage ELs in partner reading of complex texts with 'Careful Reading Tips' bookmarks that prompt them to think about what a section means, summarize what it says, and use stems like 'I'm not completely clear about what this part is about, but I think it might mean…' and 'What I understand about this section so far is ___'; debrief to clarify understandings and terms.",
+          "language_target": "Reading comprehension stems, summary language",
+          "framework_anchor": "Vignette 6.6: Becoming Skillful Debaters",
+          "source_section": "Grade 8, Vignette 6.6, p. 650–653",
+          "source_page": 650,
+          "source_page_end": 653,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "Establish guidelines for debates, randomly assign positions, provide guidelines (e.g., 'To justify my perspective…,' 'The evidence I have to support this position is…'), have students debate, observe and take notes, switch roles to defend the other team's position adding at least one additional reason, then deliberate as a group before writing an individual paragraph explaining their position with evidence.",
+          "language_target": "Debate language, justification stems, counterargument structures",
+          "framework_anchor": "Vignette 6.6: Becoming Skillful Debaters",
+          "source_section": "Grade 8, Vignette 6.6, p. 650–653",
+          "source_page": 650,
+          "source_page_end": 653,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "integrated",
+          "move": "Analyze students' writing using a framework developed based on the CA ELD Standards to determine language areas needing more intensive focus (e.g., combining ideas in sentences, expanding ideas using adjectives or prepositional phrases), then design targeted lessons addressing those areas.",
+          "language_target": "Sentence combining, adjectives, prepositional phrases",
+          "framework_anchor": "Vignette 6.6: Becoming Skillful Debaters",
+          "source_section": "Grade 8, Vignette 6.6, p. 650–653",
+          "source_page": 650,
+          "source_page_end": 653,
+          "grade_band": "6-8",
+          "source_chapter": 6
+        }
+      ]
+    }
+  }
+}

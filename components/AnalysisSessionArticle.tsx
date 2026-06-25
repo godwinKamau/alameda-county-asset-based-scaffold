@@ -57,7 +57,7 @@ export function AnalysisSessionArticle({ session }: AnalysisSessionArticleProps)
 
       {isExpanded && (
         <div className="mt-4 border-t border-brand-soft/80 pt-4">
-          <InsightCard insight={session.insight} />
+          <InsightCard insight={session.insight} sessionId={session.id} />
         </div>
       )}
     </article>

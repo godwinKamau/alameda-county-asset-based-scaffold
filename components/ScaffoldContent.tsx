@@ -1,48 +1,49 @@
-import {
-  parseInlineEmphasis,
-  parseScaffoldItems,
-  type TextSegment,
-} from "@/lib/scaffold/format";
+import type { ScaffoldSource } from "@/lib/types";
+import { distributeScaffoldSources } from "@/lib/framework/sources";
+import { parseScaffoldItems } from "@/lib/scaffold/format";
+import { ScaffoldItem } from "./ScaffoldItem";
 
 interface ScaffoldContentProps {
   text: string;
+  sources?: ScaffoldSource[];
+  sessionId?: string;
+  savedIndices?: number[];
 }
 
-function renderSegments(segments: TextSegment[]) {
-  return segments.map((segment, index) =>
-    segment.type === "strong" ? (
-      <strong
-        key={index}
-        className="font-semibold text-slate-900"
-      >
-        {segment.value}
-      </strong>
-    ) : (
-      <span key={index}>{segment.value}</span>
-    ),
-  );
-}
-
-export function ScaffoldContent({ text }: ScaffoldContentProps) {
+export function ScaffoldContent({
+  text,
+  sources = [],
+  sessionId,
+  savedIndices,
+}: ScaffoldContentProps) {
   const items = parseScaffoldItems(text);
+  const sourcesByItem = distributeScaffoldSources(items.length, sources);
 
   if (items.length <= 1 && !/^\d+\.\s/.test(text.trim())) {
     return (
-      <p className="leading-relaxed">{renderSegments(parseInlineEmphasis(text))}</p>
+      <ScaffoldItem
+        itemText={text}
+        itemIndex={0}
+        itemSources={sources}
+        sessionId={sessionId}
+        savedIndices={savedIndices}
+      />
     );
   }
 
   return (
     <ol className="list-none space-y-4">
       {items.map((item, index) => (
-        <li key={index} className="flex gap-3 leading-relaxed">
-          <span className="w-5 shrink-0 pt-0.5 text-right text-sm font-semibold text-blue-600">
-            {index + 1}.
-          </span>
-          <div className="min-w-0 border-l-2 border-slate-100 pl-4">
-            {renderSegments(parseInlineEmphasis(item))}
-          </div>
-        </li>
+        <ScaffoldItem
+          key={index}
+          itemText={item}
+          itemIndex={index}
+          itemSources={sourcesByItem[index] ?? []}
+          sessionId={sessionId}
+          savedIndices={savedIndices}
+          number={index + 1}
+          bordered
+        />
       ))}
     </ol>
   );

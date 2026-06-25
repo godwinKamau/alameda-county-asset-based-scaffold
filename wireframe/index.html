@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELPAC Writing Analysis — Wireframe Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#0466c8', dark: '#023e7d', soft: '#d0e4f9' },
+            accent: { orange: '#F99132', yellow: '#F9CB32', green: '#3ECD88' },
+            muted: { DEFAULT: '#979dac' },
+            error: { DEFAULT: '#CE1821' },
+          },
+          boxShadow: {
+            card: '0 4px 24px -4px rgba(0, 18, 51, 0.08)',
+          },
+        },
+      },
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    :root {
+      --background: #f1f5f9;
+      --foreground: #001233;
+      --brand: #0466c8;
+      --brand-dark: #023e7d;
+      --brand-soft: #d0e4f9;
+      --input-fill: #e8f0fb;
+      --input-border: #000;
+    }
+    body { color: var(--foreground); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .ui-card { border-radius: 1rem; border: 1px solid rgba(226,232,240,0.8); background: #fff; box-shadow: 0 4px 24px -4px rgba(0,18,51,0.08); }
+    .ui-input { margin-top: 0.25rem; display: block; width: 100%; border-radius: 0.75rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: var(--brand-dark); background-color: var(--input-fill); border: 1px solid var(--input-border); }
+    .ui-input:focus { outline: none; background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.12); }
+    select.ui-input { cursor: pointer; appearance: none; padding-right: 2.5rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23000'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: 1.25rem; background-position: right 0.75rem center; }
+    .ui-btn-primary { display: inline-flex; align-items: center; justify-content: center; border-radius: 0.75rem; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; background: var(--brand); color: #fff; }
+    .ui-btn-dashboard-action { display: inline-flex; align-items: center; justify-content: center; border-radius: 1rem; border: 2px solid var(--brand-dark); padding: 0.75rem 1.5rem; font-size: 0.875rem; font-weight: 600; background: var(--brand); color: #fff; }
+    .ui-btn-secondary { display: inline-flex; align-items: center; justify-content: center; border-radius: 0.75rem; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; background: var(--brand-soft); border: 1px solid var(--brand); color: var(--brand-dark); }
+    .ui-btn-upload-csv { display: inline-flex; align-items: center; justify-content: center; border-radius: 1rem; border: 2px solid #000; padding: 0.75rem 1.5rem; font-size: 0.875rem; font-weight: 600; background: #fff; color: #000; }
+    .ui-link { color: var(--brand); font-weight: 500; }
+    .tab-list { display: inline-flex; border-radius: 1rem; background: rgba(2,62,125,0.1); padding: 0.25rem; box-shadow: inset 0 2px 6px rgba(0,18,51,0.12); ring: 1px solid rgba(2,62,125,0.1); }
+    .tab-list-slide { position: relative; display: inline-flex; width: 100%; max-width: 24rem; border-radius: 1rem; background: rgba(2,62,125,0.1); padding: 0.25rem; box-shadow: inset 0 2px 6px rgba(0,18,51,0.12); }
+    .tab-slide-indicator { position: absolute; top: 0.25rem; bottom: 0.25rem; border-radius: 0.75rem; background: #fff; box-shadow: 0 1px 3px rgba(0,18,51,0.14); transition: left 300ms cubic-bezier(0.4, 0, 0.2, 1), width 300ms cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+    .tab-slide-btn { position: relative; z-index: 1; flex: 1 1 0; border: none; background: transparent; cursor: pointer; border-radius: 0.75rem; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; color: rgba(2,62,125,0.55); transition: color 200ms ease; white-space: nowrap; }
+    .tab-slide-btn.is-active { font-weight: 600; color: var(--brand-dark); }
+    .dashboard-panels { overflow: hidden; }
+    .dashboard-panels-track { display: flex; width: 200%; transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+    .dashboard-panels-track.is-manage { transform: translateX(-50%); }
+    .dashboard-panel { width: 50%; flex-shrink: 0; }
+    .tab-active { border-radius: 0.75rem; background: #fff; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; color: var(--brand-dark); box-shadow: 0 1px 3px rgba(0,18,51,0.14); }
+    .tab-inactive { border-radius: 0.75rem; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; color: rgba(2,62,125,0.55); }
+    .btn-row { height: 2rem; border-radius: 1rem; padding: 0 0.75rem; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; }
+    .screen-picker { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: #1e293b; color: #fff; padding: 0.5rem 1rem; display: flex; flex-wrap: wrap; gap: 0.375rem; align-items: center; font-size: 0.75rem; }
+    .screen-picker button { padding: 0.25rem 0.625rem; border-radius: 0.375rem; background: #334155; color: #e2e8f0; white-space: nowrap; }
+    .screen-picker button.active { background: var(--brand); color: #fff; }
+    .app-shell { padding-top: 2.75rem; }
+    .nav-active { background: rgba(208, 228, 249, 0.28); color: #fff; box-shadow: inset 0 0 0 1px rgba(208, 228, 249, 0.45); }
+    .nav-inactive { color: var(--brand-soft); }
+    .nav-inactive:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .badge-l4 { background: #ecfdf5; color: #3ECD88; }
+    .badge-l3 { background: #eff6ff; color: #0466c8; }
+    .source-pill { display: inline-flex; align-items: center; border-radius: 9999px; background: #f1f5f9; padding: 0.125rem 0.5rem; font-size: 0.6875rem; color: #64748b; margin-left: 0.25rem; }
+    .nav-btn { border: none; cursor: pointer; font: inherit; background: transparent; }
+    button.ui-link { border: none; background: transparent; cursor: pointer; padding: 0; }
+    [x-cloak] { display: none !important; }
+    .nav-col-expand { display: flex; width: 2.75rem; flex-shrink: 0; align-self: stretch; flex-direction: column; align-items: center; overflow: hidden; transition: width 300ms ease-out; }
+    .nav-col-expand:hover { width: 11rem; }
+    .nav-col-action { display: inline-flex; width: 100%; max-width: 100%; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 0.5rem; padding: 0.5rem; transition: color 150ms, background-color 150ms; border: none; background: transparent; cursor: pointer; font: inherit; }
+    .nav-col-expand:hover .nav-col-action { justify-content: flex-start; }
+    .nav-col-action:hover { background: var(--brand-soft); }
+    .nav-col-label { max-width: 0; overflow: hidden; white-space: nowrap; padding-left: 0; font-size: 0.6875rem; line-height: 1.25; color: #979dac; opacity: 0; transition: max-width 300ms ease-out, padding-left 300ms ease-out, opacity 300ms ease-out; }
+    .nav-col-expand:hover .nav-col-label { max-width: 9.5rem; padding-left: 0.375rem; opacity: 1; }
+    .progress-chart { display: block; width: 100%; min-width: 28rem; height: auto; }
+    .progress-chart-grid { stroke: rgba(2,62,125,0.08); stroke-width: 1; }
+    .progress-chart-axis { fill: #979dac; font-size: 11px; }
+    .progress-chart-line { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .progress-chart-dot { stroke: #fff; stroke-width: 2; }
+    .progress-legend-dot { display: inline-block; width: 0.625rem; height: 0.625rem; border-radius: 9999px; }
+  </style>
+</head>
+<body class="bg-slate-100 antialiased" x-data="{ screen: 'dashboard-today', dashboardTab: 'today' }">
+
+  <!-- Screen picker -->
+  <nav class="screen-picker" aria-label="Wireframe screen picker">
+    <span class="font-semibold mr-2 text-slate-300">Screens:</span>
+    <template x-for="s in [
+      ['login','Login'],
+      ['dashboard-today','Dashboard — Today'],
+      ['dashboard-manage','Dashboard — Manage'],
+      ['students','Students'],
+      ['student-history','Student History'],
+      ['analyze-empty','New Analysis (empty)'],
+      ['analyze-pdf','New Analysis (PDF)'],
+      ['analysis-results','Analysis Results'],
+      ['saved','Saved Insights'],
+      ['progress','Progress'],
+      ['admin','Admin']
+    ]" :key="s[0]">
+      <button type="button" @click="if (s[0] === 'dashboard-manage') { screen = 'dashboard-today'; dashboardTab = 'manage'; } else if (s[0] === 'dashboard-today') { screen = 'dashboard-today'; dashboardTab = 'today'; } else { screen = s[0]; }" :class="(s[0] === 'dashboard-today' && screen === 'dashboard-today' && dashboardTab === 'today') || (s[0] === 'dashboard-manage' && screen === 'dashboard-today' && dashboardTab === 'manage') || (s[0] !== 'dashboard-today' && s[0] !== 'dashboard-manage' && screen === s[0]) ? 'active' : ''" x-text="s[1]"></button>
+    </template>
+  </nav>
+
+  <!-- ========== SCREEN 1: LOGIN ========== -->
+  <div x-show="screen === 'login'" class="app-shell">
+    <main class="flex min-h-screen items-center justify-center bg-slate-100 px-4">
+      <div class="w-full max-w-md">
+        <div class="mb-8 text-center">
+          <p class="text-xs font-semibold uppercase tracking-wide text-muted">ELPAC Writing Analysis</p>
+          <h1 class="mt-2 text-2xl font-semibold text-brand-dark">Teacher sign in</h1>
+          <p class="mt-2 text-sm text-muted">Sign in to analyze student writing artifacts</p>
+        </div>
+        <div class="ui-card p-6">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-brand-dark">Email address</label>
+              <input type="email" class="ui-input" placeholder="you@school.edu" />
+            </div>
+            <button type="button" @click="screen = 'dashboard-today'" class="ui-btn-primary w-full py-2.5">Continue</button>
+            <p class="text-center text-sm text-muted">No account? <span class="ui-link cursor-pointer">Sign up</span></p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ========== AUTHENTICATED SHELL TEMPLATE (used per screen below) ========== -->
+
+  <!-- SCREEN 2: DASHBOARD TODAY -->
+  <div x-show="screen === 'dashboard-today'" x-cloak class="app-shell">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside class="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark pt-[2.75rem]">
+        <div class="border-b border-white/10 px-5 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">ELPAC Writing Analysis</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-400 text-lg font-semibold text-white ring-2 ring-white/20">G</div>
+            <div><p class="font-semibold text-white">Godwin Kamau</p><p class="text-sm text-brand-soft/80">Teacher</p></div>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button type="button" @click="screen = 'dashboard-today'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-active text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Dashboard
+          </button>
+          <button type="button" @click="screen = 'students'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Students
+          </button>
+          <button type="button" @click="screen = 'progress'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Progress
+          </button>
+          <button type="button" @click="screen = 'saved'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            Saved Insights
+          </button>
+          <button type="button" @click="screen = 'admin'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Admin
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-3 py-4">
+          <button type="button" @click="screen = 'login'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft hover:bg-white/10 hover:text-white text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Log out
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <div class="ml-[280px] flex flex-1 flex-col min-h-screen">
+        <header class="sticky top-[2.75rem] z-20 flex items-center justify-between border-b border-slate-200/80 bg-white px-8 py-4">
+          <h1 class="text-2xl font-semibold text-brand-dark">Dashboard</h1>
+          <div class="flex items-center gap-3">
+            <button type="button" @click="dashboardTab = 'manage'" class="ui-btn-dashboard-action">+ Add Student</button>
+            <button class="ui-btn-dashboard-action">Upload Roster</button>
+            <button type="button" @click="screen = 'analyze-empty'" class="ui-btn-upload-csv gap-2">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              New Analysis
+            </button>
+          </div>
+        </header>
+        <main class="flex-1 bg-brand-soft p-8">
+          <div class="mx-auto max-w-6xl space-y-8">
+            <!-- Stat cards -->
+            <div class="grid gap-4 sm:grid-cols-3">
+              <div class="ui-card relative overflow-hidden p-5">
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-brand"></div>
+                <div class="flex items-start gap-4">
+                  <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-muted">Students in roster</p>
+                    <p class="mt-1 text-3xl font-bold tabular-nums text-brand-dark">7</p>
+                    <p class="mt-1 text-xs text-muted">across 3 subjects</p>
+                  </div>
+                </div>
+              </div>
+              <div class="ui-card relative overflow-hidden p-5">
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-accent-green"></div>
+                <div class="flex items-start gap-4">
+                  <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-accent-green">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-muted">Analyzed this month</p>
+                    <p class="mt-1 text-3xl font-bold tabular-nums text-brand-dark">6</p>
+                    <p class="mt-1 text-xs text-muted">last analysis today</p>
+                  </div>
+                </div>
+              </div>
+              <div class="ui-card relative overflow-hidden p-5">
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-accent-orange"></div>
+                <div class="flex items-start gap-4">
+                  <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-accent-orange">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-muted">Never analyzed</p>
+                    <p class="mt-1 text-3xl font-bold tabular-nums text-accent-orange">0</p>
+                    <p class="mt-1 text-xs text-muted">no artifact submitted yet</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-list-slide" role="tablist" aria-label="Dashboard views">
+              <div class="tab-slide-indicator" aria-hidden="true" :style="dashboardTab === 'today' ? 'left: 0.25rem; width: calc(50% - 0.375rem)' : 'left: calc(50% + 0.125rem); width: calc(50% - 0.375rem)'"></div>
+              <button type="button" role="tab" :aria-selected="dashboardTab === 'today'" @click="dashboardTab = 'today'" class="tab-slide-btn" :class="dashboardTab === 'today' ? 'is-active' : ''">Today's work</button>
+              <button type="button" role="tab" :aria-selected="dashboardTab === 'manage'" @click="dashboardTab = 'manage'" class="tab-slide-btn" :class="dashboardTab === 'manage' ? 'is-active' : ''">Manage roster</button>
+            </div>
+
+            <div class="dashboard-panels">
+              <div class="dashboard-panels-track" :class="dashboardTab === 'manage' ? 'is-manage' : ''">
+                <div class="dashboard-panel space-y-8" role="tabpanel" :aria-hidden="dashboardTab !== 'today'">
+            <!-- Needs attention -->
+            <section>
+              <h2 class="text-xs font-semibold uppercase tracking-wide text-muted">Needs attention — never analyzed</h2>
+              <p class="mt-3 text-sm text-muted">All students in your roster have at least one analysis.</p>
+            </section>
+
+            <!-- Recently analyzed -->
+            <section>
+              <h2 class="text-xs font-semibold uppercase tracking-wide text-muted mb-3">Recently analyzed</h2>
+              <div class="space-y-3">
+                <div class="ui-card flex items-center gap-4 border-l-[3px] border-l-accent-green p-4">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-sm font-semibold text-brand-dark">NS</div>
+                  <div class="min-w-0 flex-1">
+                    <p class="font-semibold text-brand-dark">New Student</p>
+                    <p class="text-xs text-muted">Reading-Period 1 · Grade 2 (Grades 1–2 PLD)</p>
+                    <p class="mt-0.5 text-xs"><span class="font-medium text-brand">Level 3 · Expanding–Bridging</span> · today</p>
+                  </div>
+                  <div class="flex gap-2">
+                    <button type="button" @click="screen = 'student-history'" class="btn-row ui-btn-secondary">History</button>
+                    <button type="button" @click="screen = 'analyze-empty'" class="btn-row ui-btn-primary">Analyze</button>
+                  </div>
+                </div>
+                <div class="ui-card flex items-center gap-4 border-l-[3px] border-l-accent-green p-4">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-sm font-semibold text-brand-dark">PP</div>
+                  <div class="min-w-0 flex-1">
+                    <p class="font-semibold text-brand-dark">Pop pop</p>
+                    <p class="text-xs text-muted">Reading-Period 1 · Grade 2 (Grades 1–2 PLD)</p>
+                    <p class="mt-0.5 text-xs"><span class="font-medium text-brand">Level 3 · Expanding–Bridging</span> · today</p>
+                  </div>
+                  <div class="flex gap-2">
+                    <button type="button" @click="screen = 'student-history'" class="btn-row ui-btn-secondary">History</button>
+                    <button type="button" @click="screen = 'analyze-empty'" class="btn-row ui-btn-primary">Analyze</button>
+                  </div>
+                </div>
+                <div class="ui-card flex items-center gap-4 border-l-[3px] border-l-accent-green p-4">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-sm font-semibold text-brand-dark">GO</div>
+                  <div class="min-w-0 flex-1">
+                    <p class="font-semibold text-brand-dark">Godwin</p>
+                    <p class="text-xs text-muted">Reading-Period 2 · Grade K (K PLD)</p>
+                    <p class="mt-0.5 text-xs"><span class="font-medium text-accent-green">Level 4 · Bridging</span> · 1 day ago</p>
+                  </div>
+                  <div class="flex gap-2">
+                    <button type="button" @click="screen = 'student-history'" class="btn-row ui-btn-secondary">History</button>
+                    <button type="button" @click="screen = 'analyze-empty'" class="btn-row ui-btn-primary">Analyze</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+                </div>
+                <div class="dashboard-panel space-y-8" role="tabpanel" :aria-hidden="dashboardTab !== 'manage'">
+            <div class="ui-card p-6 space-y-8">
+              <div>
+                <h2 class="text-lg font-semibold text-brand-dark">Add student</h2>
+                <p class="mt-1 text-xs text-muted">Use a nickname only — never a legal name (FERPA).</p>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div class="sm:col-span-2"><label class="block text-sm font-medium text-brand-dark">Student label</label><input class="ui-input" placeholder="e.g. Maria G." /></div>
+                  <div><label class="block text-sm font-medium text-brand-dark">Subject</label><select class="ui-input"><option>Reading-Period 1</option></select></div>
+                  <div><label class="block text-sm font-medium text-brand-dark">Exact grade</label><select class="ui-input"><option>2</option></select></div>
+                  <div><label class="block text-sm font-medium text-brand-dark">Grade span</label><select class="ui-input"><option>1-2</option></select></div>
+                  <div><label class="block text-sm font-medium text-brand-dark">Known ELPAC level (optional)</label><select class="ui-input"><option>Not specified</option></select></div>
+                </div>
+                <button class="ui-btn-primary mt-4">Add to roster</button>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-brand-dark">Your roster</h2>
+                <div class="mt-4 rounded-xl border border-brand-soft/80">
+                  <button class="flex w-full items-center justify-between px-4 py-3 text-left font-semibold text-brand">Reading-Period 1 (4) <span>▾</span></button>
+                  <div class="divide-y divide-brand-soft/60 border-t border-brand-soft/80">
+                    <div class="flex items-center justify-between px-4 py-3"><div><p class="font-medium text-brand-dark">Mario</p><p class="text-xs text-muted">Grade 2 · Grades 1–2 PLD</p></div><div class="flex gap-2"><button class="btn-row ui-btn-secondary">Analyze</button><button class="text-xs text-error">Delete</button></div></div>
+                    <div class="flex items-center justify-between px-4 py-3"><div><p class="font-medium text-brand-dark">New Student</p><p class="text-xs text-muted">Grade 2 · Grades 1–2 PLD</p></div><div class="flex gap-2"><button class="btn-row ui-btn-secondary">Analyze</button><button class="text-xs text-error">Delete</button></div></div>
+                    <div class="flex items-center justify-between px-4 py-3"><div><p class="font-medium text-brand-dark">Pop pop</p><p class="text-xs text-muted">Grade 2 · Grades 1–2 PLD</p></div><div class="flex gap-2"><button class="btn-row ui-btn-secondary">Analyze</button><button class="text-xs text-error">Delete</button></div></div>
+                    <div class="flex items-center justify-between px-4 py-3"><div><p class="font-medium text-brand-dark">Goku</p><p class="text-xs text-muted">Grade 2 · Grades 1–2 PLD</p></div><div class="flex gap-2"><button class="btn-row ui-btn-secondary">Analyze</button><button class="text-xs text-error">Delete</button></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: STUDENTS -->
+  <div x-show="screen === 'students'" x-cloak class="app-shell">
+    <div class="flex min-h-screen">
+      <aside class="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark pt-[2.75rem]">
+        <div class="border-b border-white/10 px-5 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">ELPAC Writing Analysis</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-400 text-lg font-semibold text-white ring-2 ring-white/20">G</div>
+            <div><p class="font-semibold text-white">Godwin Kamau</p><p class="text-sm text-brand-soft/80">Teacher</p></div>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button type="button" @click="screen = 'dashboard-today'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Dashboard
+          </button>
+          <button type="button" @click="screen = 'students'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-active text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Students
+          </button>
+          <button type="button" @click="screen = 'progress'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Progress
+          </button>
+          <button type="button" @click="screen = 'saved'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            Saved Insights
+          </button>
+          <button type="button" @click="screen = 'admin'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Admin
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-3 py-4"><button type="button" @click="screen = 'login'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft hover:bg-white/10 hover:text-white text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Log out
+          </button></div>
+      </aside>
+      <div class="ml-[280px] flex flex-1 flex-col min-h-screen">
+        <header class="sticky top-[2.75rem] z-20 border-b border-slate-200/80 bg-white px-8 py-4">
+          <h1 class="text-2xl font-semibold text-brand-dark">Students</h1>
+        </header>
+        <main class="flex-1 bg-brand-soft p-8">
+          <div class="mx-auto max-w-6xl">
+            <div class="ui-card p-6">
+              <p class="text-sm text-muted">Browse and filter your roster. Students are grouped by subject by default.</p>
+              <div class="mt-4 flex items-center gap-3">
+                <label class="text-sm font-medium text-brand-dark shrink-0">Search:</label>
+                <input class="ui-input mt-0 flex-1" placeholder="Search by name..." />
+              </div>
+              <button class="mt-3 text-sm font-medium text-brand">Advanced filters ▾</button>
+              <p class="mt-3 text-xs text-muted">Showing 7 of 7 students</p>
+              <div class="mt-6 space-y-4">
+                <div class="rounded-xl border border-brand-soft/80">
+                  <button class="flex w-full items-center justify-between px-4 py-3 text-left font-semibold text-brand">Reading-Period 1 (4) <span>▾</span></button>
+                  <div class="divide-y divide-brand-soft/60 border-t border-brand-soft/80">
+                    <div class="flex items-center justify-between px-4 py-4"><div><p class="font-semibold text-brand-dark">Mario</p><p class="text-xs text-muted">Grades 1–2 PLD</p><p class="text-xs text-muted">4 analyses · Avg level 3 (Expanding–Bridging)</p></div><div class="flex gap-2"><button type="button" @click="screen = 'student-history'" class="btn-row ui-btn-secondary">View history</button><button type="button" @click="screen = 'analyze-empty'" class="btn-row ui-btn-primary">Analyze</button></div></div>
+                    <div class="flex items-center justify-between px-4 py-4"><div><p class="font-semibold text-brand-dark">New Student</p><p class="text-xs text-muted">Grades 1–2 PLD</p><p class="text-xs text-muted">4 analyses · Avg level 3 (Expanding–Bridging)</p></div><div class="flex gap-2"><button type="button" @click="screen = 'student-history'" class="btn-row ui-btn-secondary">View history</button><button type="button" @click="screen = 'analyze-empty'" class="btn-row ui-btn-primary">Analyze</button></div></div>
+                    <div class="flex items-center justify-between px-4 py-4"><div><p class="font-semibold text-brand-dark">Pop pop</p><p class="text-xs text-muted">Grades 1–2 PLD</p><p class="text-xs text-muted">4 analyses · Avg level 3 (Expanding–Bridging)</p></div><div class="flex gap-2"><button type="button" @click="screen = 'student-history'" class="btn-row ui-btn-secondary">View history</button><button type="button" @click="screen = 'analyze-empty'" class="btn-row ui-btn-primary">Analyze</button></div></div>
+                    <div class="flex items-center justify-between px-4 py-4"><div><p class="font-semibold text-brand-dark">Goku</p><p class="text-xs text-muted">Grades 1–2 PLD</p><p class="text-xs text-muted">4 analyses · Avg level 3 (Expanding–Bridging)</p></div><div class="flex gap-2"><button type="button" @click="screen = 'student-history'" class="btn-row ui-btn-secondary">View history</button><button type="button" @click="screen = 'analyze-empty'" class="btn-row ui-btn-primary">Analyze</button></div></div>
+                  </div>
+                </div>
+                <div class="rounded-xl border border-brand-soft/80">
+                  <button class="flex w-full items-center justify-between px-4 py-3 text-left font-semibold text-brand">Reading-Period 2 (2) <span>▾</span></button>
+                  <div class="divide-y divide-brand-soft/60 border-t border-brand-soft/80">
+                    <div class="flex items-center justify-between px-4 py-4"><div><p class="font-semibold text-brand-dark">Emmo</p><p class="text-xs text-muted">Grade K (K PLD)</p><p class="text-xs text-muted">5 analyses · Avg level 3.8 (Bridging)</p></div><div class="flex gap-2"><button type="button" @click="screen = 'student-history'" class="btn-row ui-btn-secondary">View history</button><button type="button" @click="screen = 'analyze-empty'" class="btn-row ui-btn-primary">Analyze</button></div></div>
+                    <div class="flex items-center justify-between px-4 py-4"><div><p class="font-semibold text-brand-dark">Godwin</p><p class="text-xs text-muted">Grade K (K PLD)</p><p class="text-xs text-muted">5 analyses · Avg level 3.8 (Bridging)</p></div><div class="flex gap-2"><button type="button" @click="screen = 'student-history'" class="btn-row ui-btn-secondary">View history</button><button type="button" @click="screen = 'analyze-empty'" class="btn-row ui-btn-primary">Analyze</button></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: STUDENT HISTORY -->
+  <div x-show="screen === 'student-history'" x-cloak class="app-shell">
+    <div class="flex min-h-screen">
+      <aside class="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark pt-[2.75rem]">
+        <div class="border-b border-white/10 px-5 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">ELPAC Writing Analysis</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-400 text-lg font-semibold text-white ring-2 ring-white/20">G</div>
+            <div><p class="font-semibold text-white">Godwin Kamau</p><p class="text-sm text-brand-soft/80">Teacher</p></div>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button type="button" @click="screen = 'dashboard-today'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Dashboard
+          </button>
+          <button type="button" @click="screen = 'students'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-active text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Students
+          </button>
+          <button type="button" @click="screen = 'progress'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Progress
+          </button>
+          <button type="button" @click="screen = 'saved'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            Saved Insights
+          </button>
+          <button type="button" @click="screen = 'admin'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Admin
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-3 py-4"><button type="button" @click="screen = 'login'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft hover:bg-white/10 hover:text-white text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Log out
+          </button></div>
+      </aside>
+      <div class="ml-[280px] flex flex-1 flex-col min-h-screen">
+        <header class="sticky top-[2.75rem] z-20 border-b border-slate-200/80 bg-white px-8 py-4">
+          <h1 class="text-2xl font-semibold text-brand-dark">Student History</h1>
+        </header>
+        <main class="flex-1 bg-brand-soft p-8">
+          <div class="mx-auto max-w-5xl space-y-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-bold text-brand-dark">New Student</h2>
+              <button type="button" @click="screen = 'analyze-empty'" class="ui-btn-primary">New analysis</button>
+            </div>
+            <div class="ui-card p-6">
+              <p class="text-xs font-semibold uppercase tracking-wide text-muted">Average estimated level</p>
+              <div class="mt-4 flex items-center gap-6">
+                <div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-brand-soft text-3xl font-bold text-brand-dark">2.8</div>
+                <div>
+                  <p class="text-xs text-muted">ELPAC LEVEL 3</p>
+                  <p class="text-lg font-bold text-brand-dark">Expanding–Bridging</p>
+                  <p class="text-sm text-muted">Moderately Developed</p>
+                  <p class="mt-1 text-xs text-muted">Based on 4 analyses</p>
+                </div>
+              </div>
+            </div>
+            <div class="ui-card p-6">
+              <p class="text-xs font-semibold uppercase tracking-wide text-muted">Estimated levels by domain</p>
+              <div class="mt-4 grid grid-cols-4 gap-4">
+                <div class="text-center"><div class="flex h-32 items-center justify-center rounded-xl bg-brand-soft/60 text-xs text-muted">No data yet</div><p class="mt-2 text-sm font-medium text-brand-dark">Listening</p><p class="text-xs text-muted">—</p></div>
+                <div class="text-center"><div class="flex h-32 items-center justify-center rounded-xl bg-brand-soft/60 text-xs text-muted">No data yet</div><p class="mt-2 text-sm font-medium text-brand-dark">Speaking</p><p class="text-xs text-muted">—</p></div>
+                <div class="text-center"><div class="flex h-32 items-center justify-center rounded-xl bg-brand-soft/60 text-xs text-muted">No data yet</div><p class="mt-2 text-sm font-medium text-brand-dark">Reading</p><p class="text-xs text-muted">—</p></div>
+                <div class="text-center">
+                  <div class="flex h-32 items-end justify-center rounded-xl bg-brand-soft/60 px-4 pb-2"><div class="w-12 rounded-t-lg bg-brand" style="height:70%"></div></div>
+                  <p class="mt-2 text-sm font-medium text-brand-dark">Writing</p>
+                  <p class="text-lg font-bold text-brand-dark">2.8</p>
+                  <p class="text-xs text-muted">Expanding–Bridging</p>
+                  <p class="text-xs text-muted">Moderately Developed</p>
+                  <p class="text-xs text-muted">4 sessions</p>
+                </div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="ui-card overflow-hidden" x-data="{ open: false }">
+                <button type="button" @click="open = !open" class="flex w-full items-start gap-3 p-4 text-left">
+                  <span class="mt-0.5 text-muted transition-transform duration-200" :class="open ? 'rotate-90' : ''">›</span>
+                  <div><p class="text-xs text-muted">5/29/2026, 12:45:22 PM · Domain: writing · Grade span: 1-2</p><p class="font-semibold text-brand-dark">Level 3 - Expanding–Bridging</p></div>
+                </button>
+                <div x-show="open" x-cloak class="border-t border-slate-100 px-4 pb-4 pt-3">
+                  <div class="rounded-xl border border-brand-soft bg-brand-soft/30 p-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium badge-l3">Level 3 - Expanding–Bridging</span>
+                      <span class="text-sm text-muted">Grade span: 1-2</span>
+                    </div>
+                    <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">Observed Strengths</p>
+                    <ul class="mt-1 list-disc space-y-1 pl-5 text-sm text-brand-dark/90">
+                      <li>Writes simple connected sentences with basic sequencing.</li>
+                      <li>Uses familiar vocabulary to describe everyday events.</li>
+                    </ul>
+                    <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">Gap to Next Level</p>
+                    <p class="mt-1 text-sm text-brand-dark/90">Add more descriptive detail and varied sentence openings to move toward Level 4.</p>
+                    <div class="mt-3 flex gap-3 rounded-lg border border-brand-soft/80 bg-white/60 p-3">
+                      <span class="shrink-0 text-sm font-semibold text-blue-600">1.</span>
+                      <p class="text-sm leading-relaxed text-brand-dark/90"><strong class="font-semibold text-slate-900">Expand sentences with sensory details</strong> — Ask the student to name what they saw or heard in each part of the story.<span class="source-pill">Ch. 3 • p. 192</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ui-card overflow-hidden" x-data="{ open: false }">
+                <button type="button" @click="open = !open" class="flex w-full items-start gap-3 p-4 text-left">
+                  <span class="mt-0.5 text-muted transition-transform duration-200" :class="open ? 'rotate-90' : ''">›</span>
+                  <div><p class="text-xs text-muted">5/29/2026, 12:44:58 PM · Domain: writing · Grade span: 1-2</p><p class="font-semibold text-brand-dark">Level 4 - Bridging</p></div>
+                </button>
+                <div x-show="open" x-cloak class="border-t border-slate-100 px-4 pb-4 pt-3">
+                  <div class="rounded-xl border border-brand-soft bg-brand-soft/30 p-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium badge-l4">Level 4 - Bridging</span>
+                      <span class="text-sm text-muted">Grade span: 1-2</span>
+                    </div>
+                    <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">Observed Strengths</p>
+                    <ul class="mt-1 list-disc space-y-1 pl-5 text-sm text-brand-dark/90">
+                      <li>Uses complete sentences with clear narrative flow.</li>
+                      <li>Includes temporal connectives to link events.</li>
+                      <li>Demonstrates emerging control of spelling patterns.</li>
+                    </ul>
+                    <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">Gap to Next Level</p>
+                    <p class="mt-1 text-sm text-brand-dark/90">Consistent use of complex sentences and academic vocabulary would support sustained Level 4 performance.</p>
+                    <div class="mt-3 flex gap-3 rounded-lg border border-brand-soft/80 bg-white/60 p-3">
+                      <span class="shrink-0 text-sm font-semibold text-blue-600">1.</span>
+                      <p class="text-sm leading-relaxed text-brand-dark/90"><strong class="font-semibold text-slate-900">Use a story-stage template to expand the narrative</strong> — Invite the student to add one sentence to each section using sentence frames.<span class="source-pill">Ch. 3 • p. 193</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ui-card overflow-hidden" x-data="{ open: false }">
+                <button type="button" @click="open = !open" class="flex w-full items-start gap-3 p-4 text-left">
+                  <span class="mt-0.5 text-muted transition-transform duration-200" :class="open ? 'rotate-90' : ''">›</span>
+                  <div><p class="text-xs text-muted">5/29/2026, 12:44:32 PM · Domain: writing · Grade span: 1-2</p><p class="font-semibold text-brand-dark">Level 3 - Expanding–Bridging</p></div>
+                </button>
+                <div x-show="open" x-cloak class="border-t border-slate-100 px-4 pb-4 pt-3">
+                  <div class="rounded-xl border border-brand-soft bg-brand-soft/30 p-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium badge-l3">Level 3 - Expanding–Bridging</span>
+                      <span class="text-sm text-muted">Grade span: 1-2</span>
+                    </div>
+                    <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">Observed Strengths</p>
+                    <ul class="mt-1 list-disc space-y-1 pl-5 text-sm text-brand-dark/90">
+                      <li>Attempts multi-sentence responses with a clear topic.</li>
+                      <li>Uses high-frequency words accurately in context.</li>
+                    </ul>
+                    <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">Gap to Next Level</p>
+                    <p class="mt-1 text-sm text-brand-dark/90">More consistent punctuation and richer word choice would strengthen bridging-level writing.</p>
+                    <div class="mt-3 flex gap-3 rounded-lg border border-brand-soft/80 bg-white/60 p-3">
+                      <span class="shrink-0 text-sm font-semibold text-blue-600">1.</span>
+                      <p class="text-sm leading-relaxed text-brand-dark/90"><strong class="font-semibold text-slate-900">Co-create a word bank for vivid verbs</strong> — Replace plain verbs in the student's draft during a shared revision.<span class="source-pill">Ch. 4 • p. 210</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ui-card overflow-hidden" x-data="{ open: false }">
+                <button type="button" @click="open = !open" class="flex w-full items-start gap-3 p-4 text-left">
+                  <span class="mt-0.5 text-muted transition-transform duration-200" :class="open ? 'rotate-90' : ''">›</span>
+                  <div><p class="text-xs text-muted">5/29/2026, 12:44:08 PM · Domain: writing · Grade span: 1-2</p><p class="font-semibold text-brand-dark">Level 2 - Expanding</p></div>
+                </button>
+                <div x-show="open" x-cloak class="border-t border-slate-100 px-4 pb-4 pt-3">
+                  <div class="rounded-xl border border-brand-soft bg-brand-soft/30 p-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-orange-50 text-accent-orange">Level 2 - Expanding</span>
+                      <span class="text-sm text-muted">Grade span: 1-2</span>
+                    </div>
+                    <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">Observed Strengths</p>
+                    <ul class="mt-1 list-disc space-y-1 pl-5 text-sm text-brand-dark/90">
+                      <li>Produces short phrases and emerging sentences.</li>
+                      <li>Communicates a basic idea with picture support.</li>
+                    </ul>
+                    <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-muted">Gap to Next Level</p>
+                    <p class="mt-1 text-sm text-brand-dark/90">Building toward complete sentences and simple connectors would support movement to Level 3.</p>
+                    <div class="mt-3 flex gap-3 rounded-lg border border-brand-soft/80 bg-white/60 p-3">
+                      <span class="shrink-0 text-sm font-semibold text-blue-600">1.</span>
+                      <p class="text-sm leading-relaxed text-brand-dark/90"><strong class="font-semibold text-slate-900">Model sentence frames for retelling</strong> — Provide "First ___, then ___" frames during oral rehearsal before writing.<span class="source-pill">Ch. 2 • p. 148</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 6: NEW ANALYSIS (EMPTY) -->
+  <div x-show="screen === 'analyze-empty'" x-cloak class="app-shell">
+    <div class="flex min-h-screen">
+      <aside class="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark pt-[2.75rem]">
+        <div class="border-b border-white/10 px-5 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">ELPAC Writing Analysis</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-400 text-lg font-semibold text-white ring-2 ring-white/20">G</div>
+            <div><p class="font-semibold text-white">Godwin Kamau</p><p class="text-sm text-brand-soft/80">Teacher</p></div>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button type="button" @click="screen = 'dashboard-today'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Dashboard
+          </button>
+          <button type="button" @click="screen = 'students'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Students
+          </button>
+          <button type="button" @click="screen = 'progress'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Progress
+          </button>
+          <button type="button" @click="screen = 'saved'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            Saved Insights
+          </button>
+          <button type="button" @click="screen = 'admin'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Admin
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-3 py-4"><button type="button" @click="screen = 'login'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft hover:bg-white/10 hover:text-white text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Log out
+          </button></div>
+      </aside>
+      <div class="ml-[280px] flex flex-1 flex-col min-h-screen">
+        <header class="sticky top-[2.75rem] z-20 border-b border-slate-200/80 bg-white px-8 py-4">
+          <h1 class="text-2xl font-semibold text-brand-dark">New Analysis</h1>
+        </header>
+        <main class="flex-1 bg-brand-soft p-8">
+          <div class="mx-auto max-w-5xl space-y-4">
+            <button type="button" @click="screen = 'dashboard-today'" class="ui-btn-secondary">← Back to Dashboard</button>
+            <div class="ui-card p-6">
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div><label class="block text-sm font-medium text-brand-dark">Subject</label><select class="ui-input"><option>All subjects</option><option>Reading-Period 1</option><option>Reading-Period 2</option></select></div>
+                <div><label class="block text-sm font-medium text-brand-dark">Student</label><select class="ui-input"><option>Select a student</option><option>Mario</option><option>New Student</option><option>Pop pop</option><option>Goku</option><option>Emmo</option><option>Godwin</option></select></div>
+              </div>
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-brand-dark">Writing Artifact</label>
+                <div class="mt-1 flex items-center gap-3">
+                  <button type="button" @click="screen = 'analyze-pdf'" class="ui-btn-primary">Choose File</button>
+                  <span class="text-sm text-muted">No file chosen</span>
+                </div>
+                <p class="mt-1 text-xs text-muted">JPG, PNG, GIF, WEBP, HEIC, or PDF — up to 100 MB. Files are optimized automatically before upload.</p>
+              </div>
+              <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div><label class="block text-sm font-medium text-brand-dark">Grade Span</label><select class="ui-input"><option>3-12</option></select></div>
+                <div><label class="block text-sm font-medium text-brand-dark">Known ELPAC Level (optional)</label><select class="ui-input"><option>Not specified</option></select></div>
+              </div>
+              <button type="button" @click="screen = 'analysis-results'" class="ui-btn-primary mt-6">Analyze Artifact</button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 7: NEW ANALYSIS (PDF) -->
+  <div x-show="screen === 'analyze-pdf'" x-cloak class="app-shell">
+    <div class="flex min-h-screen">
+      <aside class="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark pt-[2.75rem]">
+        <div class="border-b border-white/10 px-5 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">ELPAC Writing Analysis</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-400 text-lg font-semibold text-white ring-2 ring-white/20">G</div>
+            <div><p class="font-semibold text-white">Godwin Kamau</p><p class="text-sm text-brand-soft/80">Teacher</p></div>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button type="button" @click="screen = 'dashboard-today'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Dashboard
+          </button>
+          <button type="button" @click="screen = 'students'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Students
+          </button>
+          <button type="button" @click="screen = 'progress'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Progress
+          </button>
+          <button type="button" @click="screen = 'saved'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            Saved Insights
+          </button>
+          <button type="button" @click="screen = 'admin'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Admin
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-3 py-4"><button type="button" @click="screen = 'login'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft hover:bg-white/10 hover:text-white text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Log out
+          </button></div>
+      </aside>
+      <div class="ml-[280px] flex flex-1 flex-col min-h-screen">
+        <header class="sticky top-[2.75rem] z-20 border-b border-slate-200/80 bg-white px-8 py-4">
+          <h1 class="text-2xl font-semibold text-brand-dark">New Analysis</h1>
+        </header>
+        <main class="flex-1 bg-brand-soft p-8">
+          <div class="mx-auto max-w-5xl space-y-4">
+            <button type="button" @click="screen = 'dashboard-today'" class="ui-btn-secondary">← Back to Dashboard</button>
+            <div class="ui-card p-6">
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div><label class="block text-sm font-medium text-brand-dark">Subject</label><select class="ui-input"><option>All subjects</option><option>Reading-Period 1</option><option>Reading-Period 2</option></select></div>
+                <div><label class="block text-sm font-medium text-brand-dark">Student</label><select class="ui-input"><option>Select a student</option><option>Mario</option><option>New Student</option><option>Pop pop</option><option>Goku</option><option>Emmo</option><option>Godwin</option></select></div>
+              </div>
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-brand-dark">Writing Artifact</label>
+                <div class="mt-1 flex items-center gap-3">
+                  <button class="ui-btn-primary">Choose File</button>
+                  <span class="text-sm text-brand-dark">Student C.pdf</span>
+                </div>
+                <p class="mt-1 text-xs text-muted">JPG, PNG, GIF, WEBP, HEIC, or PDF — up to 100 MB. Files are optimized automatically before upload.</p>
+                <p class="mt-1 text-xs text-brand-dark">Selected: Student C.pdf (96403 KB)</p>
+              </div>
+              <div class="mt-4 rounded-xl bg-brand-soft/50 p-4 ring-1 ring-brand-soft" x-data="{ pages: [true, false, false, false] }">
+                <p class="font-semibold text-brand-dark">Select page(s) with student writing</p>
+                <p class="mt-1 text-xs text-muted">Check every page that contains handwriting. When multiple pages are selected, analysis will focus on writing and ignore cover images or prompts.</p>
+                <div class="mt-4 grid grid-cols-4 gap-3">
+                  <template x-for="(selected, i) in pages" :key="i">
+                    <button type="button" @click="pages[i] = !pages[i]" class="relative rounded-lg bg-white p-2 text-left transition-colors" :class="pages[i] ? 'border-2 border-brand' : 'border border-slate-300'">
+                      <div class="flex h-28 items-center justify-center rounded bg-slate-100 text-xs text-muted">Page preview</div>
+                      <p class="mt-1 text-center text-xs font-medium" x-text="'Page ' + (i + 1)"></p>
+                      <div x-show="pages[i]" class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-xs text-white">✓</div>
+                    </button>
+                  </template>
+                </div>
+                <p class="mt-3 text-xs text-muted">Selected: <span x-text="pages.filter(Boolean).length"></span></p>
+              </div>
+              <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div><label class="block text-sm font-medium text-brand-dark">Grade Span</label><select class="ui-input"><option>3-12</option></select></div>
+                <div><label class="block text-sm font-medium text-brand-dark">Known ELPAC Level (optional)</label><select class="ui-input"><option>Not specified</option></select></div>
+              </div>
+              <button type="button" @click="screen = 'analysis-results'" class="ui-btn-primary mt-6">Analyze Artifact</button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 8: ANALYSIS RESULTS -->
+  <div x-show="screen === 'analysis-results'" x-cloak class="app-shell" x-data="{ insightTab: 'scaffold' }">
+    <div class="flex min-h-screen">
+      <aside class="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark pt-[2.75rem]">
+        <div class="border-b border-white/10 px-5 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">ELPAC Writing Analysis</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-400 text-lg font-semibold text-white ring-2 ring-white/20">G</div>
+            <div><p class="font-semibold text-white">Godwin Kamau</p><p class="text-sm text-brand-soft/80">Teacher</p></div>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button type="button" @click="screen = 'dashboard-today'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Dashboard
+          </button>
+          <button type="button" @click="screen = 'students'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Students
+          </button>
+          <button type="button" @click="screen = 'progress'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Progress
+          </button>
+          <button type="button" @click="screen = 'saved'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            Saved Insights
+          </button>
+          <button type="button" @click="screen = 'admin'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Admin
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-3 py-4"><button type="button" @click="screen = 'login'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft hover:bg-white/10 hover:text-white text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Log out
+          </button></div>
+      </aside>
+      <div class="ml-[280px] flex flex-1 flex-col min-h-screen">
+        <header class="sticky top-[2.75rem] z-20 border-b border-slate-200/80 bg-white px-8 py-4">
+          <h1 class="text-2xl font-semibold text-brand-dark">Analysis Results</h1>
+        </header>
+        <main class="flex-1 bg-brand-soft p-8">
+          <div class="mx-auto max-w-5xl space-y-4">
+            <div class="flex items-center justify-between">
+              <button type="button" @click="screen = 'analyze-empty'" class="ui-btn-secondary">← Back to analysis</button>
+              <span class="text-xs text-muted">6/19/2026, 12:14:32 PM</span>
+            </div>
+            <div class="ui-card p-6">
+              <p class="text-xs font-semibold uppercase tracking-wide text-muted">Analysis results</p>
+              <h2 class="mt-1 text-xl font-bold text-brand-dark">Emmo</h2>
+              <div class="mt-2 flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium badge-l4">Level 4 - Bridging</span>
+                <span class="text-sm text-muted">Grade span: K</span>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2 border-b border-brand-soft pb-3">
+                <button type="button" @click="insightTab = 'scaffold'" :class="insightTab === 'scaffold' ? 'rounded-t-md border-b-2 border-brand bg-brand-soft px-4 py-2 text-sm font-medium text-brand-dark' : 'rounded-t-md border-b-2 border-transparent px-4 py-2 text-sm font-medium text-muted'">Asset-Based Scaffold</button>
+                <button type="button" @click="insightTab = 'level'" :class="insightTab === 'level' ? 'rounded-t-md border-b-2 border-brand bg-brand-soft px-4 py-2 text-sm font-medium text-brand-dark' : 'rounded-t-md border-b-2 border-transparent px-4 py-2 text-sm font-medium text-muted'">Estimated Level</button>
+                <button type="button" @click="insightTab = 'strengths'" :class="insightTab === 'strengths' ? 'rounded-t-md border-b-2 border-accent-green bg-emerald-50 px-4 py-2 text-sm font-medium text-brand-dark' : 'rounded-t-md border-b-2 border-transparent px-4 py-2 text-sm font-medium text-muted'">Observed Strengths</button>
+                <button type="button" @click="insightTab = 'gap'" :class="insightTab === 'gap' ? 'rounded-t-md border-b-2 border-accent-orange bg-orange-50 px-4 py-2 text-sm font-medium text-brand-dark' : 'rounded-t-md border-b-2 border-transparent px-4 py-2 text-sm font-medium text-muted'">Gap to Next Level</button>
+              </div>
+              <div x-show="insightTab === 'scaffold'" class="mt-4 rounded-xl border border-brand-soft bg-brand-soft/30 p-6 shadow-md ring-1 ring-brand-soft">
+                <div class="flex items-stretch gap-3 border-b border-brand-soft/80 pb-4">
+                  <div class="nav-col-expand">
+                    <span class="shrink-0 pt-0.5 text-sm font-semibold leading-none text-blue-600">1.</span>
+                    <div class="flex min-h-0 w-full flex-1 flex-col items-stretch justify-evenly py-2">
+                      <button type="button" class="nav-col-action text-slate-300 hover:text-amber-400" aria-label="Save insight">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-7 w-7 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+                        <span aria-hidden="true" class="nav-col-label">Save insight</span>
+                      </button>
+                      <button type="button" class="nav-col-action text-slate-400 hover:text-brand" aria-label="Find More Insights">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-7 w-7 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                        <span aria-hidden="true" class="nav-col-label">Find More Insights</span>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="min-w-0 flex-1 leading-relaxed text-brand-dark/90">
+                    <strong class="font-semibold text-slate-900">Enrich sentences with vivid verbs and adjectives</strong> (integrated ELD) — During a shared writing session under a document camera, return to the student's own line "then thatha fell ofe the stoole" and ask: "What kind of stool was it? How did Thatha fall — did he tumble, crash, slip?" Scribe the student's richer wording (e.g., "Suddenly, Thatha slipped off the tall stool") and add it to the class chart of vivid words, just as the class replaces plain verbs like "knocked" with "destroyed" or "demolished" during story reconstruction.
+                    <span class="source-pill">Ch. 3 • p. 192–194</span>
+                  </p>
+                </div>
+                <div class="flex items-stretch gap-3 pt-4">
+                  <div class="nav-col-expand">
+                    <span class="shrink-0 pt-0.5 text-sm font-semibold leading-none text-blue-600">2.</span>
+                    <div class="flex min-h-0 w-full flex-1 flex-col items-stretch justify-evenly py-2">
+                      <button type="button" class="nav-col-action text-slate-300 hover:text-amber-400" aria-label="Save insight">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-7 w-7 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+                        <span aria-hidden="true" class="nav-col-label">Save insight</span>
+                      </button>
+                      <button type="button" class="nav-col-action text-slate-400 hover:text-brand" aria-label="Find More Insights">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-7 w-7 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                        <span aria-hidden="true" class="nav-col-label">Find More Insights</span>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="min-w-0 flex-1 leading-relaxed text-brand-dark/90">
+                    <strong class="font-semibold text-slate-900">Use a story-stage template to expand the narrative</strong> (integrated ELD) — Provide a 'Story Rewriting Template' with the three labeled stages the student already knows — <strong class="font-semibold text-slate-900">orientation, complication, resolution</strong>— and invite the student to add one more sentence to each section, using the sentence frame <strong class="font-semibold text-slate-900">"Suddenly, ___ because ___"</strong> for the complication and <strong class="font-semibold text-slate-900">"In the end, ___ felt ___ because ___"</strong> for the resolution, then share the expanded version with a partner and add details based on their questions.
+                    <span class="source-pill">Ch. 3 • p. 193</span>
+                  </p>
+                </div>
+              </div>
+              <div x-show="insightTab === 'level'" class="mt-4 rounded-xl border-l-4 border-brand bg-brand-soft/30 p-6">
+                <p class="text-5xl font-bold text-brand-dark">4</p>
+                <p class="mt-2 text-lg font-semibold text-brand-dark">Bridging</p>
+                <p class="text-sm text-muted">Well Developed — Student demonstrates strong control of grade-level writing conventions with minor gaps.</p>
+              </div>
+              <div x-show="insightTab === 'strengths'" class="mt-4 rounded-xl border-l-4 border-accent-green bg-emerald-50/60 p-6">
+                <ul class="list-disc space-y-2 pl-5 text-sm text-brand-dark/90">
+                  <li>Uses complete sentences with clear subject-verb agreement.</li>
+                  <li>Demonstrates narrative sequencing with temporal connectives.</li>
+                  <li>Includes descriptive details that support the main idea.</li>
+                </ul>
+              </div>
+              <div x-show="insightTab === 'gap'" class="mt-4 rounded-xl border-l-4 border-accent-orange bg-orange-50/60 p-6">
+                <p class="text-sm text-brand-dark/90">To reach Level 4 consistently, Emmo could expand use of complex sentence structures and academic vocabulary across multiple writing samples.</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 9: SAVED INSIGHTS -->
+  <div x-show="screen === 'saved'" x-cloak class="app-shell">
+    <div class="flex min-h-screen">
+      <aside class="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark pt-[2.75rem]">
+        <div class="border-b border-white/10 px-5 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">ELPAC Writing Analysis</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-400 text-lg font-semibold text-white ring-2 ring-white/20">G</div>
+            <div><p class="font-semibold text-white">Godwin Kamau</p><p class="text-sm text-brand-soft/80">Teacher</p></div>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button type="button" @click="screen = 'dashboard-today'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Dashboard
+          </button>
+          <button type="button" @click="screen = 'students'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Students
+          </button>
+          <button type="button" @click="screen = 'progress'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Progress
+          </button>
+          <button type="button" @click="screen = 'saved'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-active text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            Saved Insights
+          </button>
+          <button type="button" @click="screen = 'admin'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Admin
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-3 py-4"><button type="button" @click="screen = 'login'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft hover:bg-white/10 hover:text-white text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Log out
+          </button></div>
+      </aside>
+      <div class="ml-[280px] flex flex-1 flex-col min-h-screen">
+        <header class="sticky top-[2.75rem] z-20 border-b border-slate-200/80 bg-white px-8 py-4">
+          <h1 class="text-2xl font-semibold text-brand-dark">Saved Insights</h1>
+        </header>
+        <main class="flex-1 bg-brand-soft p-8">
+          <div class="mx-auto max-w-3xl space-y-4">
+            <article class="ui-card p-6">
+              <div class="flex gap-3">
+                <span class="text-lg text-amber-500">★</span>
+                <div class="min-w-0 flex-1">
+                  <p class="leading-relaxed text-brand-dark/90"><strong class="font-semibold text-slate-900">Enrich sentences with vivid verbs and adjectives</strong> (integrated ELD) — Have Emmo reread their writing and replace generic verbs.<span class="source-pill">Ch. 3 • p. 192–194</span></p>
+                  <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-brand-soft pt-4 text-sm text-muted">
+                    <span class="font-medium text-brand-dark">Emmo</span>
+                    <span>Level 4 · Bridging</span>
+                    <span>Grade span: K</span>
+                    <span>Analysis: 6/19/2026</span>
+                    <span>Saved: 6/19/2026</span>
+                    <button type="button" @click="screen = 'analysis-results'" class="ui-link text-sm">View analysis</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+            <article class="ui-card p-6">
+              <div class="flex gap-3">
+                <span class="text-lg text-amber-500">★</span>
+                <div class="min-w-0 flex-1">
+                  <p class="leading-relaxed text-brand-dark/90"><strong class="font-semibold text-slate-900">Use a story-stage template to expand the narrative</strong> (integrated ELD) — Provide a frame with orientation, complication, resolution.<span class="source-pill">Ch. 3 • p. 193</span></p>
+                  <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-brand-soft pt-4 text-sm text-muted">
+                    <span class="font-medium text-brand-dark">Mario</span>
+                    <span>Level 3 · Expanding–Bridging</span>
+                    <span>Grade span: 1-2</span>
+                    <span>Analysis: 5/29/2026</span>
+                    <span>Saved: 5/30/2026</span>
+                    <button type="button" @click="screen = 'analysis-results'" class="ui-link text-sm">View analysis</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 10: PROGRESS -->
+  <div x-show="screen === 'progress'" x-cloak class="app-shell">
+    <div class="flex min-h-screen">
+      <aside class="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark pt-[2.75rem]">
+        <div class="border-b border-white/10 px-5 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">ELPAC Writing Analysis</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-400 text-lg font-semibold text-white ring-2 ring-white/20">G</div>
+            <div><p class="font-semibold text-white">Godwin Kamau</p><p class="text-sm text-brand-soft/80">Teacher</p></div>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button type="button" @click="screen = 'dashboard-today'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Dashboard
+          </button>
+          <button type="button" @click="screen = 'students'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Students
+          </button>
+          <button type="button" @click="screen = 'progress'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-active text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Progress
+          </button>
+          <button type="button" @click="screen = 'saved'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            Saved Insights
+          </button>
+          <button type="button" @click="screen = 'admin'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Admin
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-3 py-4"><button type="button" @click="screen = 'login'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft hover:bg-white/10 hover:text-white text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Log out
+          </button></div>
+      </aside>
+      <div class="ml-[280px] flex flex-1 flex-col min-h-screen">
+        <header class="sticky top-[2.75rem] z-20 border-b border-slate-200/80 bg-white px-8 py-4">
+          <h1 class="text-2xl font-semibold text-brand-dark">Progress</h1>
+        </header>
+        <main class="flex-1 bg-brand-soft p-8">
+          <div class="mx-auto max-w-5xl space-y-6">
+            <div class="ui-card p-6">
+              <div class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-muted">Class writing progress</p>
+                  <h2 class="mt-1 text-lg font-semibold text-brand-dark">Estimated levels over time</h2>
+                  <p class="mt-1 text-sm text-muted">Each line tracks a student's writing assessment level across analyses this semester.</p>
+                </div>
+                <div class="w-full sm:w-auto">
+                  <label class="block text-xs font-medium text-brand-dark">Subject</label>
+                  <select class="ui-input mt-1 w-full sm:w-48"><option>All subjects</option><option>Reading-Period 1</option><option>Reading-Period 2</option></select>
+                </div>
+              </div>
+
+              <div class="mt-6 overflow-x-auto rounded-xl bg-brand-soft/30 p-4 ring-1 ring-brand-soft">
+                <svg class="progress-chart" viewBox="0 0 640 280" role="img" aria-label="Line chart showing estimated ELPAC writing levels for New Student, Pop pop, Godwin, and Emmo from January through June">
+                  <defs>
+                    <linearGradient id="progress-area-new-student" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#0466c8" stop-opacity="0.12" />
+                      <stop offset="100%" stop-color="#0466c8" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+
+                  <!-- Y-axis grid + labels (ELPAC levels 1–4) -->
+                  <line x1="48" y1="16" x2="608" y2="16" class="progress-chart-grid" />
+                  <text x="40" y="20" text-anchor="end" class="progress-chart-axis">4</text>
+                  <line x1="48" y1="82.7" x2="608" y2="82.7" class="progress-chart-grid" />
+                  <text x="40" y="86.7" text-anchor="end" class="progress-chart-axis">3</text>
+                  <line x1="48" y1="149.3" x2="608" y2="149.3" class="progress-chart-grid" />
+                  <text x="40" y="153.3" text-anchor="end" class="progress-chart-axis">2</text>
+                  <line x1="48" y1="216" x2="608" y2="216" class="progress-chart-grid" />
+                  <text x="40" y="220" text-anchor="end" class="progress-chart-axis">1</text>
+
+                  <!-- X-axis labels -->
+                  <text x="48" y="248" text-anchor="middle" class="progress-chart-axis">Jan</text>
+                  <text x="160" y="248" text-anchor="middle" class="progress-chart-axis">Feb</text>
+                  <text x="272" y="248" text-anchor="middle" class="progress-chart-axis">Mar</text>
+                  <text x="384" y="248" text-anchor="middle" class="progress-chart-axis">Apr</text>
+                  <text x="496" y="248" text-anchor="middle" class="progress-chart-axis">May</text>
+                  <text x="608" y="248" text-anchor="middle" class="progress-chart-axis">Jun</text>
+
+                  <!-- New Student: 2 → 2 → 2.5 → 3 → 3 → 3 -->
+                  <path d="M48 149.3 L160 149.3 L272 116 L384 82.7 L496 82.7 L608 82.7" class="progress-chart-line" stroke="#0466c8" />
+                  <circle cx="48" cy="149.3" r="4" class="progress-chart-dot" fill="#0466c8" />
+                  <circle cx="160" cy="149.3" r="4" class="progress-chart-dot" fill="#0466c8" />
+                  <circle cx="272" cy="116" r="4" class="progress-chart-dot" fill="#0466c8" />
+                  <circle cx="384" cy="82.7" r="4" class="progress-chart-dot" fill="#0466c8" />
+                  <circle cx="496" cy="82.7" r="4" class="progress-chart-dot" fill="#0466c8" />
+                  <circle cx="608" cy="82.7" r="4" class="progress-chart-dot" fill="#0466c8" />
+
+                  <!-- Pop pop: 2.5 → 2.5 → 3 → 3 → 3 → 3.5 -->
+                  <path d="M48 116 L160 116 L272 82.7 L384 82.7 L496 82.7 L608 49.3" class="progress-chart-line" stroke="#3ECD88" />
+                  <circle cx="48" cy="116" r="4" class="progress-chart-dot" fill="#3ECD88" />
+                  <circle cx="160" cy="116" r="4" class="progress-chart-dot" fill="#3ECD88" />
+                  <circle cx="272" cy="82.7" r="4" class="progress-chart-dot" fill="#3ECD88" />
+                  <circle cx="384" cy="82.7" r="4" class="progress-chart-dot" fill="#3ECD88" />
+                  <circle cx="496" cy="82.7" r="4" class="progress-chart-dot" fill="#3ECD88" />
+                  <circle cx="608" cy="49.3" r="4" class="progress-chart-dot" fill="#3ECD88" />
+
+                  <!-- Godwin: 3 → 3 → 3.5 → 3.5 → 4 → 4 -->
+                  <path d="M48 82.7 L160 82.7 L272 49.3 L384 49.3 L496 16 L608 16" class="progress-chart-line" stroke="#F99132" />
+                  <circle cx="48" cy="82.7" r="4" class="progress-chart-dot" fill="#F99132" />
+                  <circle cx="160" cy="82.7" r="4" class="progress-chart-dot" fill="#F99132" />
+                  <circle cx="272" cy="49.3" r="4" class="progress-chart-dot" fill="#F99132" />
+                  <circle cx="384" cy="49.3" r="4" class="progress-chart-dot" fill="#F99132" />
+                  <circle cx="496" cy="16" r="4" class="progress-chart-dot" fill="#F99132" />
+                  <circle cx="608" cy="16" r="4" class="progress-chart-dot" fill="#F99132" />
+
+                  <!-- Emmo: 2 → 2.5 → 3 → 3.5 → 4 → 4 -->
+                  <path d="M48 149.3 L160 116 L272 82.7 L384 49.3 L496 16 L608 16" class="progress-chart-line" stroke="#9333ea" />
+                  <circle cx="48" cy="149.3" r="4" class="progress-chart-dot" fill="#9333ea" />
+                  <circle cx="160" cy="116" r="4" class="progress-chart-dot" fill="#9333ea" />
+                  <circle cx="272" cy="82.7" r="4" class="progress-chart-dot" fill="#9333ea" />
+                  <circle cx="384" cy="49.3" r="4" class="progress-chart-dot" fill="#9333ea" />
+                  <circle cx="496" cy="16" r="4" class="progress-chart-dot" fill="#9333ea" />
+                  <circle cx="608" cy="16" r="4" class="progress-chart-dot" fill="#9333ea" />
+
+                  <!-- Class average (dashed) -->
+                  <path d="M48 132.7 L160 124 L272 99.3 L384 82.7 L496 74 L608 66" class="progress-chart-line" stroke="#64748b" stroke-dasharray="6 4" stroke-width="2" opacity="0.7" />
+                </svg>
+              </div>
+
+              <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-brand-dark">
+                <span class="inline-flex items-center gap-2"><span class="progress-legend-dot bg-brand"></span>New Student</span>
+                <span class="inline-flex items-center gap-2"><span class="progress-legend-dot bg-accent-green"></span>Pop pop</span>
+                <span class="inline-flex items-center gap-2"><span class="progress-legend-dot bg-accent-orange"></span>Godwin</span>
+                <span class="inline-flex items-center gap-2"><span class="progress-legend-dot" style="background:#9333ea"></span>Emmo</span>
+                <span class="inline-flex items-center gap-2 text-muted"><span class="inline-block h-0 w-4 border-t-2 border-dashed border-slate-400"></span>Class average</span>
+              </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-3">
+              <div class="ui-card p-5">
+                <p class="text-xs font-semibold uppercase tracking-wide text-muted">Class average</p>
+                <p class="mt-2 text-3xl font-bold tabular-nums text-brand-dark">3.1</p>
+                <p class="mt-1 text-xs text-accent-green">+0.4 since January</p>
+              </div>
+              <div class="ui-card p-5">
+                <p class="text-xs font-semibold uppercase tracking-wide text-muted">Analyses this semester</p>
+                <p class="mt-2 text-3xl font-bold tabular-nums text-brand-dark">24</p>
+                <p class="mt-1 text-xs text-muted">across 7 students</p>
+              </div>
+              <div class="ui-card p-5">
+                <p class="text-xs font-semibold uppercase tracking-wide text-muted">Students improving</p>
+                <p class="mt-2 text-3xl font-bold tabular-nums text-brand-dark">5</p>
+                <p class="mt-1 text-xs text-muted">of 6 with 2+ analyses</p>
+              </div>
+            </div>
+
+            <div class="ui-card p-6">
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-muted">Latest assessment scores</h3>
+              <div class="mt-4 divide-y divide-brand-soft/80">
+                <div class="flex items-center justify-between py-3">
+                  <div><p class="font-medium text-brand-dark">Emmo</p><p class="text-xs text-muted">Jun 19 · Reading-Period 2</p></div>
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium badge-l4">Level 4</span>
+                </div>
+                <div class="flex items-center justify-between py-3">
+                  <div><p class="font-medium text-brand-dark">Godwin</p><p class="text-xs text-muted">Jun 18 · Reading-Period 2</p></div>
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium badge-l4">Level 4</span>
+                </div>
+                <div class="flex items-center justify-between py-3">
+                  <div><p class="font-medium text-brand-dark">New Student</p><p class="text-xs text-muted">May 29 · Reading-Period 1</p></div>
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium badge-l3">Level 3</span>
+                </div>
+                <div class="flex items-center justify-between py-3">
+                  <div><p class="font-medium text-brand-dark">Pop pop</p><p class="text-xs text-muted">May 29 · Reading-Period 1</p></div>
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium badge-l3">Level 3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 11: ADMIN -->
+  <div x-show="screen === 'admin'" x-cloak class="app-shell">
+    <div class="flex min-h-screen">
+      <aside class="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col border-r border-white/10 bg-brand-dark pt-[2.75rem]">
+        <div class="border-b border-white/10 px-5 py-6">
+          <p class="text-xs font-semibold uppercase tracking-wide text-brand-soft/70">ELPAC Writing Analysis</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-400 text-lg font-semibold text-white ring-2 ring-white/20">G</div>
+            <div><p class="font-semibold text-white">Godwin Kamau</p><p class="text-sm text-brand-soft/80">Teacher</p></div>
+          </div>
+        </div>
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button type="button" @click="screen = 'dashboard-today'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Dashboard
+          </button>
+          <button type="button" @click="screen = 'students'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            Students
+          </button>
+          <button type="button" @click="screen = 'progress'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Progress
+          </button>
+          <button type="button" @click="screen = 'saved'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-inactive text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            Saved Insights
+          </button>
+          <button type="button" @click="screen = 'admin'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium nav-active text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Admin
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-3 py-4"><button type="button" @click="screen = 'login'" class="nav-btn flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-brand-soft hover:bg-white/10 hover:text-white text-left">
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Log out
+          </button></div>
+      </aside>
+      <div class="ml-[280px] flex flex-1 flex-col min-h-screen">
+        <header class="sticky top-[2.75rem] z-20 border-b border-slate-200/80 bg-white px-8 py-4">
+          <h1 class="text-2xl font-semibold text-brand-dark">Admin — School Access</h1>
+        </header>
+        <main class="flex-1 bg-brand-soft p-8">
+          <div class="mx-auto max-w-5xl">
+            <section class="ui-card p-6">
+              <h2 class="text-lg font-semibold text-brand-dark">Your School Access</h2>
+              <div class="mt-4 overflow-x-auto rounded-xl border border-brand-soft/80">
+                <table class="w-full min-w-[480px] text-left text-sm">
+                  <thead>
+                    <tr class="border-b border-brand-soft bg-brand-soft/40 text-muted">
+                      <th class="px-4 py-3 font-medium">School</th>
+                      <th class="px-4 py-3 font-medium">Access</th>
+                      <th class="px-4 py-3 font-medium">Granted</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b border-brand-soft/60 text-brand-dark">
+                      <td class="px-4 py-3">Lincoln Elementary</td>
+                      <td class="px-4 py-3"><span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-accent-green">write</span></td>
+                      <td class="px-4 py-3 text-muted">3/15/2026</td>
+                    </tr>
+                    <tr class="text-brand-dark">
+                      <td class="px-4 py-3">Washington Middle School</td>
+                      <td class="px-4 py-3"><span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-brand">read</span></td>
+                      <td class="px-4 py-3 text-muted">1/8/2026</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

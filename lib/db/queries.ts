@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createHash } from "crypto";
 import type { PoolClient } from "pg";
 import { getPool, withTransaction } from "./pool";
 import type {
@@ -10,12 +11,23 @@ import type {
   Insight,
   RosterEntry,
   RosterEntryWithStats,
+  SavedInsight,
   SchoolAccessRow,
+  ScaffoldSource,
   TeacherAccount,
 } from "@/lib/types";
 import { decrypt, encrypt } from "@/lib/encryption/aes";
+import { distributeScaffoldSources } from "@/lib/framework/sources";
+import { parseScaffoldItems } from "@/lib/scaffold/format";
 
 const DEFAULT_SCHOOL_ID = "00000000-0000-4000-8000-000000000002";
+
+function parseScaffoldSources(value: unknown): ScaffoldSource[] | undefined {
+  if (!value || !Array.isArray(value) || value.length === 0) {
+    return undefined;
+  }
+  return value as ScaffoldSource[];
+}
 
 export async function findTeacherByEmailHash(
   emailHash: string,
@@ -288,8 +300,9 @@ export async function insertSessionAndInsight(
          estimated_level,
          level_reasoning_encrypted, level_reasoning_iv,
          gap_to_next_encrypted, gap_to_next_iv,
-         scaffold_encrypted, scaffold_iv
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+         scaffold_encrypted, scaffold_iv,
+         scaffold_sources
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         sessionId,
         strengthsEnc.ciphertext,
@@ -301,6 +314,9 @@ export async function insertSessionAndInsight(
         gapEnc.iv,
         scaffoldEnc.ciphertext,
         scaffoldEnc.iv,
+        input.insight.scaffold_sources?.length
+          ? JSON.stringify(input.insight.scaffold_sources)
+          : null,
       ],
     );
 
@@ -318,7 +334,9 @@ function decryptInsightRow(row: {
   gap_to_next_iv: string;
   scaffold_encrypted: string;
   scaffold_iv: string;
+  scaffold_sources?: unknown;
 }): Insight {
+  const scaffoldSources = parseScaffoldSources(row.scaffold_sources);
   return {
     strengths: decrypt({
       ciphertext: row.strengths_encrypted,
@@ -337,6 +355,7 @@ function decryptInsightRow(row: {
       ciphertext: row.scaffold_encrypted,
       iv: row.scaffold_iv,
     }),
+    ...(scaffoldSources ? { scaffold_sources: scaffoldSources } : {}),
   };
 }
 
@@ -373,7 +392,8 @@ export async function listSessionsForStudent(
        i.gap_to_next_encrypted,
        i.gap_to_next_iv,
        i.scaffold_encrypted,
-       i.scaffold_iv
+       i.scaffold_iv,
+       i.scaffold_sources
      FROM analysis_sessions s
      JOIN insights i ON i.session_id = s.id
      WHERE s.teacher_id = $1 AND s.student_uuid = $2
@@ -429,7 +449,8 @@ export async function getSessionWithInsight(
        i.gap_to_next_encrypted,
        i.gap_to_next_iv,
        i.scaffold_encrypted,
-       i.scaffold_iv
+       i.scaffold_iv,
+       i.scaffold_sources
      FROM analysis_sessions s
      JOIN insights i ON i.session_id = s.id
      LEFT JOIN student_roster_entries r
@@ -467,4 +488,215 @@ export async function listSchoolAccessForTeacher(
     [teacherId],
   );
   return result.rows;
+}
+
+function sha256Hex(text: string): string {
+  return createHash("sha256").update(text).digest("hex");
+}
+
+function extractScaffoldItem(
+  insight: Insight,
+  itemIndex: number,
+): { text: string; sources: ScaffoldSource[] } | null {
+  const items = parseScaffoldItems(insight.scaffold);
+  if (itemIndex < 0 || itemIndex >= items.length) {
+    return null;
+  }
+
+  const sourcesByItem = distributeScaffoldSources(
+    items.length,
+    insight.scaffold_sources ?? [],
+  );
+
+  return {
+    text: items[itemIndex],
+    sources: sourcesByItem[itemIndex] ?? [],
+  };
+}
+
+export interface SaveScaffoldInsightOverride {
+  text: string;
+  sources?: ScaffoldSource[];
+}
+
+export async function saveScaffoldInsight(
+  teacherId: string,
+  sessionId: string,
+  itemIndex: number,
+  override?: SaveScaffoldInsightOverride,
+): Promise<boolean> {
+  let text: string;
+  let sources: ScaffoldSource[];
+
+  if (override) {
+    text = override.text;
+    sources = override.sources ?? [];
+  } else {
+    const session = await getSessionWithInsight(teacherId, sessionId);
+    if (!session) {
+      return false;
+    }
+
+    const item = extractScaffoldItem(session.insight, itemIndex);
+    if (!item) {
+      return false;
+    }
+
+    text = item.text;
+    sources = item.sources;
+  }
+
+  const contentHash = sha256Hex(text);
+  const encrypted = encrypt(text);
+  const pool = getPool();
+  const result = await pool.query(
+    `INSERT INTO saved_insights (
+       teacher_id,
+       session_id,
+       item_index,
+       content_hash,
+       scaffold_text_encrypted,
+       scaffold_text_iv,
+       scaffold_sources
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT (teacher_id, session_id, content_hash) DO NOTHING`,
+    [
+      teacherId,
+      sessionId,
+      itemIndex,
+      contentHash,
+      encrypted.ciphertext,
+      encrypted.iv,
+      sources.length ? JSON.stringify(sources) : null,
+    ],
+  );
+
+  if ((result.rowCount ?? 0) > 0) {
+    return true;
+  }
+
+  const existing = await pool.query(
+    `SELECT 1 FROM saved_insights
+     WHERE teacher_id = $1 AND session_id = $2 AND content_hash = $3`,
+    [teacherId, sessionId, contentHash],
+  );
+  return (existing.rowCount ?? 0) > 0;
+}
+
+export async function deleteScaffoldInsight(
+  teacherId: string,
+  sessionId: string,
+  itemIndex: number,
+  override?: { text: string },
+): Promise<boolean> {
+  let text: string;
+
+  if (override) {
+    text = override.text;
+  } else {
+    const session = await getSessionWithInsight(teacherId, sessionId);
+    if (!session) {
+      return false;
+    }
+
+    const item = extractScaffoldItem(session.insight, itemIndex);
+    if (!item) {
+      return false;
+    }
+
+    text = item.text;
+  }
+
+  const contentHash = sha256Hex(text);
+  const pool = getPool();
+  const result = await pool.query(
+    `DELETE FROM saved_insights
+     WHERE teacher_id = $1 AND session_id = $2 AND content_hash = $3`,
+    [teacherId, sessionId, contentHash],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function listSavedItemIndicesForSession(
+  teacherId: string,
+  sessionId: string,
+): Promise<number[]> {
+  const session = await getSessionWithInsight(teacherId, sessionId);
+  if (!session) {
+    return [];
+  }
+
+  const items = parseScaffoldItems(session.insight.scaffold);
+  if (items.length === 0) {
+    return [];
+  }
+
+  const itemHashes = items.map((item) => sha256Hex(item));
+  const pool = getPool();
+  const result = await pool.query<{ content_hash: string }>(
+    `SELECT content_hash
+     FROM saved_insights
+     WHERE teacher_id = $1 AND session_id = $2`,
+    [teacherId, sessionId],
+  );
+
+  const savedHashes = new Set(result.rows.map((row) => row.content_hash));
+  return itemHashes
+    .map((hash, index) => (savedHashes.has(hash) ? index : -1))
+    .filter((index) => index >= 0);
+}
+
+export async function listSavedInsights(
+  teacherId: string,
+): Promise<SavedInsight[]> {
+  const pool = getPool();
+  const result = await pool.query<
+    SavedInsight & {
+      scaffold_text_encrypted: string;
+      scaffold_text_iv: string;
+      scaffold_sources: unknown;
+    }
+  >(
+    `SELECT
+       si.id,
+       si.item_index,
+       si.session_id,
+       si.scaffold_text_encrypted,
+       si.scaffold_text_iv,
+       si.scaffold_sources,
+       si.created_at,
+       s.student_uuid,
+       s.grade_span,
+       s.submitted_at,
+       COALESCE(r.label, '') AS student_label,
+       i.estimated_level
+     FROM saved_insights si
+     JOIN analysis_sessions s ON s.id = si.session_id
+     JOIN insights i ON i.session_id = s.id
+     LEFT JOIN student_roster_entries r
+       ON r.teacher_id = s.teacher_id AND r.student_uuid = s.student_uuid
+     WHERE si.teacher_id = $1
+     ORDER BY si.created_at DESC`,
+    [teacherId],
+  );
+
+  return result.rows.map((row) => {
+    const scaffoldSources = parseScaffoldSources(row.scaffold_sources);
+    return {
+      id: row.id,
+      scaffold_text: decrypt({
+        ciphertext: row.scaffold_text_encrypted,
+        iv: row.scaffold_text_iv,
+      }),
+      ...(scaffoldSources ? { scaffold_sources: scaffoldSources } : {}),
+      item_index: row.item_index,
+      session_id: row.session_id,
+      student_uuid: row.student_uuid,
+      student_label: row.student_label,
+      estimated_level: row.estimated_level,
+      grade_span: row.grade_span as GradeSpan,
+      submitted_at: row.submitted_at,
+      created_at: row.created_at,
+    };
+  });
 }

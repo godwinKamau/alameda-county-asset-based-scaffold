@@ -11,6 +11,7 @@ import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
   findTeacherByEmailHash,
   getSessionWithInsight,
+  listSavedItemIndicesForSession,
 } from "@/lib/db/queries";
 import { getCaEldLevelLabel } from "@/lib/elpac/labels";
 import { getStudentDisplayName } from "@/lib/roster/display";
@@ -33,12 +34,17 @@ export default async function AnalysisResultsPage({
 
   let teacher: Awaited<ReturnType<typeof findTeacherByEmailHash>>;
   let session: Awaited<ReturnType<typeof getSessionWithInsight>> = null;
+  let savedScaffoldIndices: number[] = [];
 
   try {
     teacher = await findTeacherByEmailHash(hashEmail(email));
     if (teacher) {
       session = await getSessionWithInsight(teacher.id, sessionId);
       if (session) {
+        savedScaffoldIndices = await listSavedItemIndicesForSession(
+          teacher.id,
+          sessionId,
+        );
         const headerList = await headers();
         await recordAudit({
           actorId: teacher.id,
@@ -128,7 +134,11 @@ export default async function AnalysisResultsPage({
               )}
             </div>
           </header>
-          <InsightCard insight={session.insight} />
+          <InsightCard
+            insight={session.insight}
+            sessionId={sessionId}
+            savedScaffoldIndices={savedScaffoldIndices}
+          />
         </article>
       </div>
     </DashboardShell>

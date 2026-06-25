@@ -6,7 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
 import { ArtifactDropzone } from "@/components/ArtifactDropzone";
 import { ErrorBanner } from "@/components/ErrorBanner";
-import { StudentSelector } from "@/components/StudentSelector";
+import {
+  StudentSelector,
+  type RosterOption,
+} from "@/components/StudentSelector";
 import {
   MAX_PAGES_PER_ANALYSIS,
   MAX_SOURCE_ARTIFACT_BYTES,
@@ -18,6 +21,8 @@ import {
 } from "@/lib/artifact/prepare-upload";
 import { normalizeSubject, sortSubjects } from "@/lib/roster/display";
 import { parseAnalyzePrefill } from "@/lib/analyze/url";
+import { setPendingAnalyzeRequest } from "@/lib/analyze/pending-request";
+import { getStudentDisplayName } from "@/lib/roster/display";
 import type { GradeSpan } from "@/lib/types";
 import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import {
@@ -32,6 +37,9 @@ export default function AnalyzePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [studentUuid, setStudentUuid] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState<RosterOption | null>(
+    null,
+  );
   const [subjectFilter, setSubjectFilter] = useState("All");
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
   const [gradeSpan, setGradeSpan] = useState<GradeSpan>("3-12");
@@ -80,14 +88,9 @@ export default function AnalyzePage() {
   }, []);
 
   const handleStudentChange = useCallback(
-    (
-      uuid: string,
-      option?: {
-        grade_span: GradeSpan;
-        known_elpac_level: number | null;
-      },
-    ) => {
+    (uuid: string, option?: RosterOption) => {
       setStudentUuid(uuid);
+      setSelectedStudent(option ?? null);
       if (option) {
         setGradeSpan(option.grade_span);
         setProvidedLevel(
@@ -142,14 +145,12 @@ export default function AnalyzePage() {
 
     setLoading(true);
     setLoadingMessage("Preparing artifact…");
-    let succeeded = false;
 
     try {
       const preparedFiles = await prepareArtifactForUpload(
         file,
         isPdfFile(file) ? { pdfPages: selectedPages } : undefined,
       );
-      setLoadingMessage("Analyzing artifact…");
 
       const formData = new FormData();
       preparedFiles.forEach((preparedFile) => {
@@ -162,23 +163,20 @@ export default function AnalyzePage() {
         formData.append("provided_elpac_level", providedLevel);
       }
 
-      const response = await apiFetch("/api/analyze", {
-        method: "POST",
-        body: formData,
+      setPendingAnalyzeRequest(formData, {
+        studentUuid,
+        studentLabel:
+          selectedStudent?.label ??
+          getStudentDisplayName({
+            label: "",
+            student_uuid: studentUuid,
+          }),
+        gradeSpan,
+        providedLevel: providedLevel || null,
+        subject: selectedStudent?.subject ?? "",
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error ?? "Analysis failed");
-      }
-
-      if (typeof data.sessionId !== "string" || !data.sessionId) {
-        throw new Error("Analysis completed but no session was created.");
-      }
-
-      succeeded = true;
-      router.push(`/analyze/results/${data.sessionId}`);
+      router.push("/analyze/results/streaming");
     } catch (submitError) {
       if (isDatabaseWakingError(submitError)) return;
       setError(
@@ -186,10 +184,7 @@ export default function AnalyzePage() {
           ? submitError.message
           : "Analysis failed. Please try again.",
       );
-    } finally {
-      if (!succeeded) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }
 

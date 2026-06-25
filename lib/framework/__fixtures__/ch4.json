@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "source": "CA ELA/ELD Framework, Chapter 4 (Grades 2–3)",
+    "source_url": "https://www.cde.ca.gov/ci/rl/cf/documents/elaeldfwchapter4.pdf",
+    "coverage": ["2-3"]
+  },
+  "writing_moves": {
+    "1-2": {
+      "3": [
+        {
+          "theme": "language_development",
+          "eld_mode": "designated",
+          "move": "Introduce a connecting word bank and model one sentence combining two ideas from the student's draft.",
+          "language_target": "because, so, but",
+          "framework_anchor": "Language Development theme",
+          "grade_band": "2-3",
+          "source_chapter": 4
+        }
+      ]
+    },
+    "3-12": {
+      "3": [
+        {
+          "theme": "meaning_making",
+          "eld_mode": "integrated",
+          "move": "Annotate the student's paragraph for claim and evidence, then co-write one additional supporting detail.",
+          "framework_anchor": "Meaning Making theme",
+          "grade_band": "2-3",
+          "source_chapter": 4
+        },
+        {
+          "theme": "effective_expression",
+          "eld_mode": "designated",
+          "move": "Model revising for precise verbs using the student's topic vocabulary.",
+          "framework_anchor": "Effective Expression theme",
+          "grade_band": "6-8",
+          "source_chapter": 4
+        }
+      ]
+    }
+  }
+}

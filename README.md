@@ -94,3 +94,18 @@ data/          # elpac_plds.json (static PLD reference)
 db/migrations/ # SQL migration files
 scripts/       # Migration runner
 ```
+
+## ToDo:
+
+- Remove ELPAC and Grade Level selectors on the analysis page
+- Fix 'Manage Roster' page with buttons from other pages
+- Experiment with putting observed strengths and gaps in estimated level (reduce redundancy)
+- First time users' tutorial/overlay
+
+### Big Changes
+- Algorithm for new scaffolds should take into account:
+-- Alot of times it's good to see the same scaffolds more than one time. Maybe a previously suggested scaffolds?
+- Individual student classrooms vs. planning for a class.
+- What can we track at the roster level
+- What are the gaps and strengths that can be tracked over time?
+- How can student tracking work for class (group gaps and subjects to track)?

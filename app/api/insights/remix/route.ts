@@ -13,6 +13,7 @@ import {
   getSessionWithInsight,
 } from "@/lib/db/queries";
 import { distributeScaffoldSources } from "@/lib/framework/sources";
+import { flushPendingTraces } from "@/lib/langsmith/client";
 import { parseScaffoldItems } from "@/lib/scaffold/format";
 
 export const runtime = "nodejs";
@@ -30,7 +31,6 @@ async function postHandler(req: Request) {
 
   try {
     const body = RemixBodySchema.parse(await req.json());
-
     const session = await getSessionWithInsight(teacher.id, body.sessionId);
     if (!session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
@@ -114,6 +114,8 @@ async function postHandler(req: Request) {
       { error: "Failed to generate alternative scaffold" },
       { status: 500 },
     );
+  } finally {
+    await flushPendingTraces();
   }
 }
 

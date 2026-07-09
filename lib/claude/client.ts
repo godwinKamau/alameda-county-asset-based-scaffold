@@ -1,7 +1,15 @@
 import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
+import { traceable, getCurrentRunTree } from "langsmith/traceable";
 import { buildSystemPrompt } from "@/lib/elpac/prompt";
+import {
+  attachUsage,
+  CLAUDE_MODEL,
+  describeImages,
+  extractUserTextFromAnthropicParams,
+  MODEL_METADATA,
+} from "@/lib/langsmith/tracer";
 import {
   formatScaffoldSourceLabel,
   getScaffoldSourceAnchors,
@@ -18,7 +26,7 @@ import {
   type ScaffoldSource,
 } from "@/lib/types";
 
-const MODEL = "claude-sonnet-4-6";
+const MODEL = CLAUDE_MODEL;
 const INSIGHT_TOOL_NAME = "submit_insight";
 const REMIX_TOOL_NAME = "submit_scaffold";
 const REMIX_ITEM_TOOL_NAME = "submit_scaffold_item";
@@ -276,10 +284,18 @@ function snapshotToPartialInsight(snapshot: unknown): Partial<Insight> {
   return partial;
 }
 
-export async function analyzeArtifactStream(
+async function analyzeArtifactStreamImpl(
   input: AnalyzeArtifactInput,
   options: AnalyzeArtifactStreamOptions = {},
 ): Promise<Insight> {
+  const runTree = getCurrentRunTree(true);
+  if (runTree) {
+    runTree.metadata = {
+      ...runTree.metadata,
+      image_count: input.images.length,
+    };
+  }
+
   const client = getClient();
   const { citableMoves, params } = buildAnalyzeArtifactRequest(input);
   const stream = client.messages.stream(params);
@@ -289,8 +305,36 @@ export async function analyzeArtifactStream(
   });
 
   const response = await stream.finalMessage();
+  attachUsage(response);
   return parseInsightToolResponse(response, citableMoves);
 }
+
+export const analyzeArtifactStream = traceable(analyzeArtifactStreamImpl, {
+  name: "analyze_artifact",
+  run_type: "llm",
+  metadata: {
+    ...MODEL_METADATA,
+    ls_temperature: 0.2,
+    ls_max_tokens: 1500,
+  },
+  tags: ["analyze", "streaming"],
+  processInputs: (inputs) => {
+    const [input] = inputs.args as [AnalyzeArtifactInput];
+    const { params } = buildAnalyzeArtifactRequest(input);
+
+    return {
+      model: MODEL,
+      temperature: params.temperature,
+      max_tokens: params.max_tokens,
+      grade_span: input.gradeSpan,
+      exact_grade: input.exactGrade ?? null,
+      provided_level: input.providedLevel ?? null,
+      system_prompt: params.system,
+      context_text: extractUserTextFromAnthropicParams(params),
+      images: describeImages(input.images),
+    };
+  },
+});
 
 export async function analyzeArtifact(
   input: AnalyzeArtifactInput,
@@ -389,6 +433,13 @@ interface RemixGenerationResult {
   scaffoldSources: ScaffoldSource[];
 }
 
+interface RemixCallParams {
+  extraInstruction: string;
+  temperature: number;
+  attempt: 1 | 2;
+  retryReason?: string;
+}
+
 async function generateRemixWithRetry(
   client: Anthropic,
   options: {
@@ -401,60 +452,100 @@ async function generateRemixWithRetry(
     originalAnchors: Set<string>;
   },
 ): Promise<RemixGenerationResult> {
-  async function callModel(
-    extraInstruction: string,
-    temperature: number,
-  ): Promise<RemixGenerationResult> {
-    const message =
-      extraInstruction.length > 0
-        ? `${options.userMessage}\n\n${extraInstruction}`
-        : options.userMessage;
+  const callModel = traceable(
+    async (callParams: RemixCallParams): Promise<RemixGenerationResult> => {
+      const runTree = getCurrentRunTree(true);
+      if (runTree) {
+        runTree.tags = [
+          ...(runTree.tags ?? []),
+          "remix",
+          `attempt:${callParams.attempt}`,
+        ];
+      }
 
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: options.maxTokens,
-      temperature,
-      system: options.systemPrompt,
-      tools: [options.tool],
-      tool_choice: { type: "tool", name: options.toolName },
-      messages: [
-        {
-          role: "user",
-          content: [{ type: "text", text: message }],
-        },
-      ],
-    });
+      const message =
+        callParams.extraInstruction.length > 0
+          ? `${options.userMessage}\n\n${callParams.extraInstruction}`
+          : options.userMessage;
 
-    const toolBlock = response.content.find((block) => block.type === "tool_use");
+      const response = await client.messages.create({
+        model: MODEL,
+        max_tokens: options.maxTokens,
+        temperature: callParams.temperature,
+        system: options.systemPrompt,
+        tools: [options.tool],
+        tool_choice: { type: "tool", name: options.toolName },
+        messages: [
+          {
+            role: "user",
+            content: [{ type: "text", text: message }],
+          },
+        ],
+      });
 
-    if (!toolBlock || toolBlock.type !== "tool_use") {
-      console.error("[claude] No tool_use block in remix response");
-      throw new ClaudeParseError("Remix response was empty");
-    }
+      attachUsage(response);
 
-    if (toolBlock.name !== options.toolName) {
-      console.error("[claude] Unexpected tool name in remix response");
-      throw new ClaudeParseError("Remix response used an unexpected tool");
-    }
+      const toolBlock = response.content.find((block) => block.type === "tool_use");
 
-    const parsed: unknown = toolBlock.input;
+      if (!toolBlock || toolBlock.type !== "tool_use") {
+        console.error("[claude] No tool_use block in remix response");
+        throw new ClaudeParseError("Remix response was empty");
+      }
 
-    const validated = RemixScaffoldToolSchema.safeParse(parsed);
-    if (!validated.success) {
-      console.error("[claude] Remix schema validation failed");
-      throw new ClaudeParseError("Remix response did not match expected format");
-    }
+      if (toolBlock.name !== options.toolName) {
+        console.error("[claude] Unexpected tool name in remix response");
+        throw new ClaudeParseError("Remix response used an unexpected tool");
+      }
 
-    const { scaffold_source_ids, scaffold } = validated.data;
-    const scaffoldSources = resolveScaffoldSourcesFromIds(
-      scaffold_source_ids,
-      options.citableMoves,
-    );
+      const parsed: unknown = toolBlock.input;
 
-    return { scaffold, scaffoldSources };
-  }
+      const validated = RemixScaffoldToolSchema.safeParse(parsed);
+      if (!validated.success) {
+        console.error("[claude] Remix schema validation failed");
+        throw new ClaudeParseError("Remix response did not match expected format");
+      }
 
-  const first = await callModel("", 0.7);
+      const { scaffold_source_ids, scaffold } = validated.data;
+      const scaffoldSources = resolveScaffoldSourcesFromIds(
+        scaffold_source_ids,
+        options.citableMoves,
+      );
+
+      return { scaffold, scaffoldSources };
+    },
+    {
+      name: "remix_call",
+      run_type: "llm",
+      metadata: {
+        ...MODEL_METADATA,
+        ls_max_tokens: options.maxTokens,
+      },
+      tags: ["remix"],
+      processInputs: (callParams) => {
+        const params = callParams as RemixCallParams;
+        const message =
+          params.extraInstruction.length > 0
+            ? `${options.userMessage}\n\n${params.extraInstruction}`
+            : options.userMessage;
+
+        return {
+          model: MODEL,
+          temperature: params.temperature,
+          max_tokens: options.maxTokens,
+          system_prompt: options.systemPrompt,
+          user_message: message,
+          attempt: params.attempt,
+          retry_reason: params.retryReason ?? null,
+        };
+      },
+    },
+  );
+
+  const first = await callModel({
+    extraInstruction: "",
+    temperature: 0.7,
+    attempt: 1,
+  });
 
   if (!sourcesOverlapOriginals(first.scaffoldSources, options.originalAnchors)) {
     return first;
@@ -465,10 +556,15 @@ async function generateRemixWithRetry(
     options.originalAnchors,
   );
 
-  return callModel(retryInstruction, 0.9);
+  return callModel({
+    extraInstruction: retryInstruction,
+    temperature: 0.9,
+    attempt: 2,
+    retryReason: retryInstruction,
+  });
 }
 
-export async function remixScaffold(
+async function remixScaffoldImpl(
   input: RemixScaffoldInput,
 ): Promise<RemixScaffoldResult> {
   const client = getClient();
@@ -521,7 +617,24 @@ wording, and examples. Do NOT copy the original scaffold verbatim.
   };
 }
 
-export async function remixScaffoldItem(
+export const remixScaffold = traceable(remixScaffoldImpl, {
+  name: "remix_scaffold",
+  run_type: "chain",
+  tags: ["remix", "scaffold"],
+  processInputs: (input) => {
+    const remixInput = input as RemixScaffoldInput;
+
+    return {
+      grade_span: remixInput.gradeSpan,
+      exact_grade: remixInput.exactGrade ?? null,
+      estimated_level: remixInput.estimatedLevel,
+      original_sources_count: remixInput.originalSources?.length ?? 0,
+      prior_remix_count: remixInput.priorRemixTexts?.length ?? 0,
+    };
+  },
+});
+
+async function remixScaffoldItemImpl(
   input: RemixItemInput,
 ): Promise<RemixScaffoldResult> {
   const client = getClient();
@@ -577,3 +690,20 @@ item verbatim.
     ...(scaffoldSources.length > 0 ? { scaffold_sources: scaffoldSources } : {}),
   };
 }
+
+export const remixScaffoldItem = traceable(remixScaffoldItemImpl, {
+  name: "remix_scaffold_item",
+  run_type: "chain",
+  tags: ["remix", "scaffold_item"],
+  processInputs: (input) => {
+    const remixInput = input as RemixItemInput;
+
+    return {
+      grade_span: remixInput.gradeSpan,
+      exact_grade: remixInput.exactGrade ?? null,
+      estimated_level: remixInput.estimatedLevel,
+      original_sources_count: remixInput.originalItemSources?.length ?? 0,
+      prior_remix_count: remixInput.priorRemixTexts?.length ?? 0,
+    };
+  },
+});

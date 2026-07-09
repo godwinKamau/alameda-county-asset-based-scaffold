@@ -18,6 +18,7 @@ import {
   bufferToBase64Image,
   rasterizePdfFirstPage,
 } from "@/lib/pdf/rasterize";
+import { flushPendingTraces } from "@/lib/langsmith/client";
 import { GradeSpanSchema, type Insight } from "@/lib/types";
 import {
   MAX_PAGES_PER_ANALYSIS,
@@ -220,6 +221,8 @@ async function postHandler(req: Request) {
           }
           enqueue({ type: "error", message: analyzeErrorMessage(error) });
           controller.close();
+        } finally {
+          await flushPendingTraces();
         }
       },
     });

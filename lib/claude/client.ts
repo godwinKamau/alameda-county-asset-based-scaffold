@@ -319,7 +319,14 @@ export const analyzeArtifactStream = traceable(analyzeArtifactStreamImpl, {
   },
   tags: ["analyze", "streaming"],
   processInputs: (inputs) => {
-    const [input] = inputs.args as [AnalyzeArtifactInput];
+    // LangSmith passes the single call argument through unchanged when the
+    // traceable function is invoked with exactly one object argument (as
+    // `analyzeArtifact` does), and only wraps it as `{ args: [...] }` when
+    // invoked with multiple arguments (as the streaming route does, passing
+    // `options` alongside the input). Handle both shapes.
+    const input = (
+      "args" in inputs ? (inputs.args as [AnalyzeArtifactInput])[0] : inputs
+    ) as AnalyzeArtifactInput;
     const { params } = buildAnalyzeArtifactRequest(input);
 
     return {

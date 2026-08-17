@@ -12,7 +12,7 @@ Teacher-facing English Learner proficiency analysis tool grounded in official EL
 
 ## Privacy / FERPA
 
-- No student names stored in the database
+- Student labels are encrypted at rest (AES-256-GCM, per-field IV); the app never stores plaintext names
 - Artifact images/PDFs are never persisted — only encrypted insight output
 - All insight text columns encrypted at rest with per-field IVs
 - Append-only audit log with SHA-256 hashed IPs

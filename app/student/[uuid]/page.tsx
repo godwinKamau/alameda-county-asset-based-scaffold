@@ -4,22 +4,20 @@ import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
 import { DbWakingBanner } from "@/components/DbWakingBanner";
 import { AnalysisSessionArticle } from "@/components/AnalysisSessionArticle";
-import { StudentLevelChart, computeDomainLevels } from "@/components/StudentLevelChart";
+import { StudentDomainMatrix, buildDomainMatrixRows } from "@/components/StudentDomainMatrix";
 import { StudentNameHeading } from "@/components/StudentNameHeading";
+import { getStudentAccess } from "@/lib/auth/student-access";
 import { recordAudit, hashEmail } from "@/lib/audit/log";
 import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
   findTeacherByEmailHash,
   getRosterEntryLabel,
+  listDomainLevelsByTeacherForStudent,
   listSessionsForStudent,
-  rosterEntryBelongsToTeacher,
 } from "@/lib/db/queries";
-import {
-  getCaEldLevelLabel,
-  getElpacPerformanceLevelLabel,
-} from "@/lib/elpac/labels";
+import { StudentLevelChart, computeDomainLevels } from "@/components/StudentLevelChart";
 import { headers } from "next/headers";
-import { btnPrimaryClassName, cardClassName } from "@/lib/ui/styles";
+import { cardClassName, btnPrimaryClassName } from "@/lib/ui/styles";
 
 interface StudentPageProps {
   params: Promise<{ uuid: string }>;
@@ -35,29 +33,37 @@ export default async function StudentPage({ params }: StudentPageProps) {
   if (!email) redirect("/login");
 
   let teacher: Awaited<ReturnType<typeof findTeacherByEmailHash>>;
-  let ownsStudent = false;
   let sessions: Awaited<ReturnType<typeof listSessionsForStudent>> = [];
   let label: string | null = null;
+  let access: Awaited<ReturnType<typeof getStudentAccess>> = null;
+
+  let domainMatrixRows: Awaited<ReturnType<typeof buildDomainMatrixRows>> = [];
 
   try {
     teacher = await findTeacherByEmailHash(hashEmail(email));
     if (teacher) {
-      ownsStudent = await rosterEntryBelongsToTeacher(teacher.id, uuid);
-    }
-    if (teacher && ownsStudent) {
-      [sessions, label] = await Promise.all([
-        listSessionsForStudent(teacher.id, uuid),
-        getRosterEntryLabel(teacher.id, uuid),
-      ]);
+      access = await getStudentAccess(teacher.id, uuid);
+      if (access) {
+        const [sessionList, labelValue, domainRows] = await Promise.all([
+          listSessionsForStudent(uuid),
+          getRosterEntryLabel(uuid),
+          listDomainLevelsByTeacherForStudent(uuid),
+        ]);
+        sessions = sessionList;
+        label = labelValue;
+        domainMatrixRows = await buildDomainMatrixRows(domainRows);
 
-      const headerList = await headers();
-      await recordAudit({
-        actorId: teacher.id,
-        action: "analysis.read",
-        resourceType: "student",
-        resourceId: uuid,
-        req: new Request("http://localhost", { headers: headerList }),
-      });
+        const headerList = await headers();
+        await recordAudit({
+          actorId: teacher.id,
+          action: "analysis.read",
+          resourceType: "student",
+          resourceId: uuid,
+          req: new Request("http://localhost", { headers: headerList }),
+          authorizedBy: access.grantId,
+          authorizedByType: "grade_grant",
+        });
+      }
     }
   } catch (err) {
     if (isDatabaseWakingError(err)) {
@@ -71,7 +77,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
   }
 
   if (!teacher) redirect("/dashboard");
-  if (!ownsStudent) redirect("/dashboard");
+  if (!access) redirect("/dashboard");
 
   const avgLevel =
     sessions.length > 0
@@ -95,7 +101,9 @@ export default async function StudentPage({ params }: StudentPageProps) {
     <DashboardShell title="Student History">
       <div className="mx-auto max-w-5xl space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <StudentNameHeading label={label} studentUuid={uuid} />
+          <div>
+            <StudentNameHeading label={label} studentUuid={uuid} />
+          </div>
           <Link href="/analyze" className={btnPrimaryClassName}>
             New analysis
           </Link>
@@ -120,12 +128,6 @@ export default async function StudentPage({ params }: StudentPageProps) {
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted">
                     ELPAC Level {Math.round(roundedAvgLevel!)}
                   </p>
-                  <p className="mt-1 text-2xl font-semibold leading-tight text-brand-dark">
-                    {getCaEldLevelLabel(Math.round(roundedAvgLevel!))}
-                  </p>
-                  <p className="mt-1 text-sm text-muted">
-                    {getElpacPerformanceLevelLabel(Math.round(roundedAvgLevel!))}
-                  </p>
                   <p className="mt-1 text-xs text-muted">
                     Based on {sessions.length}{" "}
                     {sessions.length === 1 ? "analysis" : "analyses"}
@@ -135,6 +137,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
             </div>
 
             <StudentLevelChart domainLevels={domainLevels} />
+            <StudentDomainMatrix rows={domainMatrixRows} />
           </>
         )}
 

@@ -6,20 +6,22 @@ import {
 } from "@/lib/claude/client";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import {
+  isStudentAccessResponse,
+  requireStudentAccess,
+} from "@/lib/auth/student-access";
+import {
   databaseWakingResponse,
   isDatabaseWakingError,
 } from "@/lib/db/errors";
 import { recordAudit } from "@/lib/audit/log";
-import {
-  getRosterGradeInfo,
-  insertSessionAndInsight,
-} from "@/lib/db/queries";
+import { insertSessionAndInsight } from "@/lib/db/queries";
 import {
   bufferToBase64Image,
   rasterizePdfFirstPage,
 } from "@/lib/pdf/rasterize";
 import { flushPendingTraces } from "@/lib/langsmith/client";
-import { GradeSpanSchema, type Insight } from "@/lib/types";
+import { DomainSchema } from "@/lib/elpac/domain";
+import type { Insight } from "@/lib/types";
 import {
   MAX_PAGES_PER_ANALYSIS,
   MAX_UPLOAD_BYTES,
@@ -94,6 +96,7 @@ async function postHandler(req: Request) {
     const studentUuid = formData.get("student_uuid");
     const gradeSpanRaw = formData.get("grade_span");
     const providedLevelRaw = formData.get("provided_elpac_level");
+    const domainRaw = formData.get("domain");
 
     if (files.length === 0) {
       return NextResponse.json({ error: "File is required" }, { status: 400 });
@@ -131,7 +134,6 @@ async function postHandler(req: Request) {
       );
     }
 
-    const gradeSpan = GradeSpanSchema.parse(gradeSpanRaw);
     const providedLevel =
       typeof providedLevelRaw === "string" && providedLevelRaw
         ? Number.parseInt(providedLevelRaw, 10)
@@ -147,13 +149,15 @@ async function postHandler(req: Request) {
       );
     }
 
-    const rosterInfo = await getRosterGradeInfo(teacher.id, studentUuid);
+    const domain = DomainSchema.parse(
+      typeof domainRaw === "string" && domainRaw ? domainRaw : "writing",
+    );
 
-    if (!rosterInfo) {
-      return NextResponse.json({ error: "Student not found" }, { status: 404 });
-    }
+    const access = await requireStudentAccess(teacher, studentUuid);
+    if (isStudentAccessResponse(access)) return access;
 
-    const exactGrade = rosterInfo.exact_grade;
+    const gradeSpan = access.gradeSpan;
+    const exactGrade = access.exactGrade;
 
     const images: ImagePayload[] = [];
     for (const file of files) {
@@ -183,6 +187,7 @@ async function postHandler(req: Request) {
                 imageBase64: image.base64,
                 mediaType: image.mediaType,
               })),
+              domain,
               gradeSpan,
               exactGrade,
               providedLevel,
@@ -197,6 +202,7 @@ async function postHandler(req: Request) {
           const { sessionId } = await insertSessionAndInsight({
             teacherId: teacher.id,
             studentUuid,
+            domain,
             gradeSpan,
             exactGrade,
             providedElpacLevel: providedLevel,

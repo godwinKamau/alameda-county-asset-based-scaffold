@@ -2,6 +2,7 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 import { traceable, getCurrentRunTree } from "langsmith/traceable";
+import type { ElpacDomain } from "@/lib/elpac/domain";
 import { buildSystemPrompt } from "@/lib/elpac/prompt";
 import {
   attachUsage,
@@ -146,6 +147,7 @@ export interface AnalyzeArtifactImage {
 
 export interface AnalyzeArtifactInput {
   images: AnalyzeArtifactImage[];
+  domain: ElpacDomain;
   gradeSpan: GradeSpan;
   exactGrade?: ExactGrade | null;
   providedLevel?: number | null;
@@ -161,11 +163,15 @@ function buildAnalyzeArtifactRequest(input: AnalyzeArtifactInput) {
   }
 
   const { systemPrompt, citableMoves } = buildSystemPrompt(
+    input.domain,
     input.gradeSpan,
     input.exactGrade,
   );
 
-  const contextParts: string[] = [`Grade span: ${input.gradeSpan}`];
+  const contextParts: string[] = [
+    `Domain: ${input.domain}`,
+    `Grade span: ${input.gradeSpan}`,
+  ];
   if (input.providedLevel != null) {
     contextParts.push(`Teacher-provided ELPAC level: ${input.providedLevel}`);
   }
@@ -343,6 +349,7 @@ export async function analyzeArtifact(
 }
 
 export interface RemixScaffoldInput {
+  domain?: ElpacDomain;
   gradeSpan: GradeSpan;
   exactGrade?: ExactGrade | null;
   estimatedLevel: number;
@@ -570,6 +577,7 @@ async function remixScaffoldImpl(
   const client = getClient();
   const originalAnchors = getScaffoldSourceAnchors(input.originalSources);
   const { systemPrompt, citableMoves } = buildSystemPrompt(
+    input.domain ?? "writing",
     input.gradeSpan,
     input.exactGrade,
     originalAnchors.size > 0 ? { excludeAnchors: originalAnchors } : undefined,
@@ -640,6 +648,7 @@ async function remixScaffoldItemImpl(
   const client = getClient();
   const originalAnchors = getScaffoldSourceAnchors(input.originalItemSources);
   const { systemPrompt, citableMoves } = buildSystemPrompt(
+    input.domain ?? "writing",
     input.gradeSpan,
     input.exactGrade,
     originalAnchors.size > 0 ? { excludeAnchors: originalAnchors } : undefined,

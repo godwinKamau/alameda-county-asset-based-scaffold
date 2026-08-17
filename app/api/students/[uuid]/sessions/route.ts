@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { withDbGuard } from "@/lib/api/with-db-guard";
+import {
+  isStudentAccessResponse,
+  requireStudentAccess,
+} from "@/lib/auth/student-access";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
-import { listSessionsForStudent, rosterEntryBelongsToTeacher } from "@/lib/db/queries";
+import { listSessionsForStudent } from "@/lib/db/queries";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,12 +21,10 @@ async function getHandler(req: Request, context: RouteContext) {
 
   const { uuid } = await context.params;
 
-  const ownsStudent = await rosterEntryBelongsToTeacher(teacher.id, uuid);
-  if (!ownsStudent) {
-    return NextResponse.json({ error: "Student not found" }, { status: 404 });
-  }
+  const access = await requireStudentAccess(teacher, uuid);
+  if (isStudentAccessResponse(access)) return access;
 
-  const sessions = await listSessionsForStudent(teacher.id, uuid);
+  const sessions = await listSessionsForStudent(uuid);
 
   await recordAudit({
     actorId: teacher.id,
@@ -30,6 +32,8 @@ async function getHandler(req: Request, context: RouteContext) {
     resourceType: "student",
     resourceId: uuid,
     req,
+    authorizedBy: access.grantId,
+    authorizedByType: "grade_grant",
   });
 
   return NextResponse.json({
@@ -40,6 +44,7 @@ async function getHandler(req: Request, context: RouteContext) {
       grade_span: session.grade_span,
       provided_elpac_level: session.provided_elpac_level,
       submitted_at: session.submitted_at,
+      teacher_id: session.teacher_id,
       insight: session.insight,
     })),
   });

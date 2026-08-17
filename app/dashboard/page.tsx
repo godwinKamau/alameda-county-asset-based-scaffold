@@ -16,7 +16,6 @@ import {
   findTeacherByEmailHash,
   listRosterEntriesWithStats,
 } from "@/lib/db/queries";
-import { collectExistingSubjects } from "@/lib/roster/subject";
 import { computeDashboardStats } from "@/lib/roster/stats";
 
 function serializeRosterEntries(
@@ -61,9 +60,6 @@ export default async function DashboardPage() {
     }
     throw err;
   }
-  const existingSubjects = collectExistingSubjects(
-    roster.map((entry) => entry.subject),
-  );
   const stats = computeDashboardStats(roster);
   const serializedEntries = serializeRosterEntries(roster);
 
@@ -151,10 +147,7 @@ export default async function DashboardPage() {
         </div>
 
         <Suspense fallback={null}>
-          <DashboardTabs
-            entries={serializedEntries}
-            existingSubjects={existingSubjects}
-          />
+          <DashboardTabs entries={serializedEntries} />
         </Suspense>
       </div>
     </DashboardShell>

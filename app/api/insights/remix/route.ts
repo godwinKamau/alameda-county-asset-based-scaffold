@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { withDbGuard } from "@/lib/api/with-db-guard";
+import {
+  isSessionAccessResponse,
+  requireSessionAccess,
+} from "@/lib/auth/student-access";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
 import { ClaudeParseError, remixScaffold, remixScaffoldItem } from "@/lib/claude/client";
@@ -8,10 +12,7 @@ import {
   databaseWakingResponse,
   isDatabaseWakingError,
 } from "@/lib/db/errors";
-import {
-  getRosterGradeInfo,
-  getSessionWithInsight,
-} from "@/lib/db/queries";
+import { getSessionWithInsight } from "@/lib/db/queries";
 import { distributeScaffoldSources } from "@/lib/framework/sources";
 import { flushPendingTraces } from "@/lib/langsmith/client";
 import { parseScaffoldItems } from "@/lib/scaffold/format";
@@ -31,19 +32,19 @@ async function postHandler(req: Request) {
 
   try {
     const body = RemixBodySchema.parse(await req.json());
-    const session = await getSessionWithInsight(teacher.id, body.sessionId);
+
+    const sessionAccess = await requireSessionAccess(teacher, body.sessionId);
+    if (isSessionAccessResponse(sessionAccess)) return sessionAccess;
+
+    const session = await getSessionWithInsight(body.sessionId);
     if (!session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
-    const rosterInfo = await getRosterGradeInfo(
-      teacher.id,
-      session.student_uuid,
-    );
-
     const remixInput = {
+      domain: session.domain as import("@/lib/elpac/domain").ElpacDomain,
       gradeSpan: session.grade_span,
-      exactGrade: rosterInfo?.exact_grade ?? null,
+      exactGrade: sessionAccess.access.exactGrade,
       estimatedLevel: session.insight.estimated_level,
       strengths: session.insight.strengths,
       levelReasoning: session.insight.level_reasoning,

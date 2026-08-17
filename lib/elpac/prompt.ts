@@ -1,9 +1,14 @@
 import "server-only";
 
-import { getWritingPldsForGradeSpan } from "./loader";
+import { getPldsForDomainAndSpan } from "./loader";
 import { getFrameworkMovesForGradeSpan } from "@/lib/framework/loader";
 import { buildFrameworkBlockFromMoves } from "@/lib/framework/prompt-block";
 import type { FrameworkMove } from "@/lib/framework/types";
+import type { ElpacDomain } from "./domain";
+import {
+  domainLabel,
+  domainRequiresAudioWarning,
+} from "./domain";
 import type { ExactGrade, GradeSpan } from "@/lib/types";
 
 function formatLevelBlock(
@@ -24,11 +29,12 @@ export interface BuildSystemPromptOptions {
 }
 
 export function buildSystemPrompt(
+  domain: ElpacDomain,
   gradeSpan: GradeSpan,
   exactGrade?: ExactGrade | null,
   options?: BuildSystemPromptOptions,
 ): SystemPromptResult {
-  const plds = getWritingPldsForGradeSpan(gradeSpan);
+  const plds = getPldsForDomainAndSpan(domain, gradeSpan);
 
   const injected = (["1", "2", "3", "4"] as const)
     .map((level) => formatLevelBlock(level, plds[level]))
@@ -38,6 +44,10 @@ export function buildSystemPrompt(
     exactGrade != null && gradeSpan === "3-12"
       ? `\nThe student is in grade ${exactGrade}. While the Range PLDs above apply across grades 3–12, calibrate your expectations for 'grade-appropriate' vocabulary, text complexity, sentence structure, and writing conventions specifically to grade ${exactGrade}. A grade 3 student and a grade 11 student share these descriptors but have very different grade-level benchmarks.\n`
       : "";
+
+  const audioCaveat = domainRequiresAudioWarning(domain)
+    ? `\nIMPORTANT: ${domainLabel(domain)} is normally assessed via audio on ELPAC. You are analyzing a written artifact only. Ground your analysis strictly in what the artifact evidences. If the artifact cannot support ${domainLabel(domain)} inferences, say so explicitly in level_reasoning.\n`
+    : "";
 
   const { block: frameworkBlock, citableMoves } = buildFrameworkBlockFromMoves(
     getFrameworkMovesForGradeSpan(gradeSpan),
@@ -56,14 +66,19 @@ export function buildSystemPrompt(
     ? "\n- In scaffold_source_ids, list the [F#] id(s) of the framework move(s) you\n  based the scaffold on. Use only ids shown in the suggested moves above."
     : "";
 
+  const artifactType =
+    domain === "writing" || domain === "reading"
+      ? "writing artifacts"
+      : "written artifacts (with limited evidence for this domain)";
+
   const systemPrompt = `You are an expert ELD (English Language Development) analyst trained in the
-California ELPAC assessment framework. You analyze student writing artifacts
+California ELPAC assessment framework. You analyze student ${artifactType}
 and produce proficiency insights grounded in official ELPAC Range Performance
 Level Descriptors (PLDs).
 
-OFFICIAL ELPAC WRITING RANGE PLDs FOR GRADE SPAN ${gradeSpan}:
+OFFICIAL ELPAC ${domainLabel(domain).toUpperCase()} RANGE PLDs FOR GRADE SPAN ${gradeSpan}:
 ${injected}
-${calibrationSentence}${frameworkBlock}
+${calibrationSentence}${audioCaveat}${frameworkBlock}
 ANALYSIS RULES:
 - Lead with what the student CAN do. Frame every observation as an asset
   before naming a gap. Never use deficit language.

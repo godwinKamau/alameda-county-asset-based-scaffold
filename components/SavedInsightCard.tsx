@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { SavedInsight } from "@/lib/types";
-import { getCaEldLevelLabel } from "@/lib/elpac/labels";
 import { parseInlineEmphasis, type TextSegment } from "@/lib/scaffold/format";
 import { getStudentDisplayName } from "@/lib/roster/display";
 import { cardClassName, linkClassName } from "@/lib/ui/styles";
@@ -36,7 +35,6 @@ export function SavedInsightCard({ insight }: SavedInsightCardProps) {
     label: insight.student_label,
     student_uuid: insight.student_uuid,
   });
-  const eldLevelLabel = getCaEldLevelLabel(insight.estimated_level);
   const submittedAt = toDate(insight.submitted_at);
   const createdAt = toDate(insight.created_at);
 
@@ -64,7 +62,7 @@ export function SavedInsightCard({ insight }: SavedInsightCardProps) {
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-brand-soft pt-4 text-sm text-muted">
             <span className="font-medium text-brand-dark">{studentName}</span>
             <span>
-              Level {insight.estimated_level} · {eldLevelLabel}
+              Level {insight.estimated_level}
             </span>
             <span>Grade span: {insight.grade_span}</span>
             <time dateTime={submittedAt.toISOString()}>

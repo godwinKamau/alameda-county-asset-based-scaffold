@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { withDbGuard } from "@/lib/api/with-db-guard";
-import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
+import { isTeacherResponse, requireAdmin } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
 import {
   databaseWakingResponse,
   isDatabaseWakingError,
 } from "@/lib/db/errors";
 import {
-  rosterEntryBelongsToTeacher,
-  updateRosterEntrySubject,
+  rosterEntryInSchool,
+  updateRosterEntrySubjectBySchool,
 } from "@/lib/db/queries";
 
 export const runtime = "nodejs";
@@ -23,21 +23,21 @@ async function patchHandler(
   req: Request,
   { params }: { params: Promise<{ uuid: string }> },
 ) {
-  const teacher = await requireTeacher();
-  if (isTeacherResponse(teacher)) return teacher;
+  const admin = await requireAdmin();
+  if (isTeacherResponse(admin)) return admin;
 
   const { uuid } = await params;
 
   try {
     const body = UpdateSubjectSchema.parse(await req.json());
 
-    const belongs = await rosterEntryBelongsToTeacher(teacher.id, uuid);
-    if (!belongs) {
+    const inSchool = await rosterEntryInSchool(admin.school_id, uuid);
+    if (!inSchool) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    const updated = await updateRosterEntrySubject(
-      teacher.id,
+    const updated = await updateRosterEntrySubjectBySchool(
+      admin.school_id,
       uuid,
       body.subject,
     );
@@ -50,11 +50,12 @@ async function patchHandler(
     }
 
     await recordAudit({
-      actorId: teacher.id,
+      actorId: admin.id,
       action: "roster.update_subject",
       resourceType: "roster",
       resourceId: uuid,
       req,
+      authorizedByType: "admin_role",
     });
 
     return NextResponse.json({ subject: body.subject });
@@ -68,7 +69,7 @@ async function patchHandler(
         { status: 400 },
       );
     }
-    console.error("[api/roster/[uuid]/subject]", error);
+    console.error("[api/admin/roster/[uuid]/subject]", error);
     return NextResponse.json(
       { error: "Failed to update subject" },
       { status: 400 },

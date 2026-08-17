@@ -1,8 +1,3 @@
-import {
-  getCaEldLevelLabel,
-  getElpacPerformanceLevelLabel,
-} from "@/lib/elpac/labels";
-
 export const ELPAC_DOMAINS = [
   "listening",
   "speaking",
@@ -78,7 +73,6 @@ export function StudentLevelChart({ domainLevels }: StudentLevelChartProps) {
           const label = DOMAIN_LABELS[domain];
           const hasData = level != null;
           const barHeight = hasData ? (level / maxScale) * 100 : 0;
-          const roundedLevel = hasData ? Math.round(level) : null;
 
           return (
             <div key={domain} className="flex flex-col items-center">
@@ -105,12 +99,6 @@ export function StudentLevelChart({ domainLevels }: StudentLevelChartProps) {
                 <>
                   <p className="mt-1 text-2xl font-bold tabular-nums text-brand-dark">
                     {level}
-                  </p>
-                  <p className="mt-0.5 text-center text-xs text-muted">
-                    {getCaEldLevelLabel(roundedLevel!)}
-                  </p>
-                  <p className="text-center text-xs text-muted">
-                    {getElpacPerformanceLevelLabel(roundedLevel!)}
                   </p>
                   <p className="mt-1 text-xs text-muted">
                     {sessionCount} {sessionCount === 1 ? "session" : "sessions"}

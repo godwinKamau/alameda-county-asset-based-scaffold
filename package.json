@@ -8,12 +8,16 @@
     "start": "next start",
     "lint": "next lint",
     "migrate": "tsx scripts/migrate.ts",
+    "backfill-labels": "tsx scripts/backfill-label-encryption.ts",
     "postinstall": "mkdir -p public && cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.mjs",
     "test": "node --import tsx --test lib/**/*.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@clerk/nextjs": "^6.12.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@napi-rs/canvas": "^0.1.67",
     "csv-parse": "^5.6.0",
     "csv-stringify": "^6.5.2",

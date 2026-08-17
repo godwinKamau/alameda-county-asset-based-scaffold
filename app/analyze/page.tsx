@@ -24,6 +24,12 @@ import { parseAnalyzePrefill } from "@/lib/analyze/url";
 import { setPendingAnalyzeRequest } from "@/lib/analyze/pending-request";
 import { getStudentDisplayName } from "@/lib/roster/display";
 import type { GradeSpan } from "@/lib/types";
+import {
+  ELPAC_DOMAINS,
+  domainLabel,
+  domainRequiresAudioWarning,
+  type ElpacDomain,
+} from "@/lib/elpac/domain";
 import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import {
   btnPrimaryClassName,
@@ -42,6 +48,7 @@ export default function AnalyzePage() {
   );
   const [subjectFilter, setSubjectFilter] = useState("All");
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
+  const [domain, setDomain] = useState<ElpacDomain>("writing");
   const [gradeSpan, setGradeSpan] = useState<GradeSpan>("3-12");
   const [providedLevel, setProvidedLevel] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
@@ -158,6 +165,7 @@ export default function AnalyzePage() {
       });
       formData.append("page_count", String(preparedFiles.length));
       formData.append("student_uuid", studentUuid);
+      formData.append("domain", domain);
       formData.append("grade_span", gradeSpan);
       if (providedLevel) {
         formData.append("provided_elpac_level", providedLevel);
@@ -246,6 +254,33 @@ export default function AnalyzePage() {
           />
 
           <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="domain" className={labelClassName}>
+                ELPAC domain
+              </label>
+              <select
+                id="domain"
+                value={domain}
+                onChange={(event) =>
+                  setDomain(event.target.value as ElpacDomain)
+                }
+                className={selectClassName}
+              >
+                {ELPAC_DOMAINS.map((value) => (
+                  <option key={value} value={value}>
+                    {domainLabel(value)}
+                  </option>
+                ))}
+              </select>
+              {domainRequiresAudioWarning(domain) ? (
+                <p className="mt-2 text-xs text-accent-orange" role="note">
+                  {domainLabel(domain)} is normally assessed from audio. This
+                  analysis uses a written artifact and is not evidence-based for
+                  this domain.
+                </p>
+              ) : null}
+            </div>
+
             <div>
               <label htmlFor="grade_span" className={labelClassName}>
                 Grade Span

@@ -12,7 +12,6 @@ import type {
   RosterEntry,
   RosterEntryWithStats,
   SavedInsight,
-  SchoolAccessRow,
   ScaffoldSource,
   TeacherAccount,
 } from "@/lib/types";
@@ -27,6 +26,28 @@ function parseScaffoldSources(value: unknown): ScaffoldSource[] | undefined {
     return undefined;
   }
   return value as ScaffoldSource[];
+}
+
+function decryptRosterLabel(row: {
+  label?: string | null;
+  label_encrypted?: string | null;
+  label_iv?: string | null;
+}): string {
+  if (row.label_encrypted && row.label_iv) {
+    return decrypt({
+      ciphertext: row.label_encrypted,
+      iv: row.label_iv,
+    });
+  }
+  return row.label?.trim() ?? "";
+}
+
+function encryptRosterLabel(label: string) {
+  const trimmed = label.trim();
+  return {
+    plaintext: trimmed,
+    encrypted: encrypt(trimmed),
+  };
 }
 
 export async function findTeacherByEmailHash(
@@ -79,18 +100,37 @@ export interface CreateRosterRowResult {
 export async function createRosterEntries(
   teacherId: string,
   rows: CreateRosterRowInput[],
+  schoolId?: string,
 ): Promise<CreateRosterRowResult[]> {
   const pool = getPool();
   const results: CreateRosterRowResult[] = [];
 
+  let resolvedSchoolId = schoolId;
+  if (!resolvedSchoolId) {
+    const teacherRow = await pool.query<{ school_id: string }>(
+      `SELECT school_id FROM teacher_accounts WHERE id = $1`,
+      [teacherId],
+    );
+    resolvedSchoolId = teacherRow.rows[0]?.school_id;
+    if (!resolvedSchoolId) {
+      throw new Error("Teacher school not found for roster creation");
+    }
+  }
+
   for (const row of rows) {
+    const labelPayload = encryptRosterLabel(row.label);
     const inserted = await pool.query<{ student_uuid: string }>(
-      `INSERT INTO student_roster_entries (teacher_id, label, subject, grade_span, exact_grade, known_elpac_level)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO student_roster_entries (
+         teacher_id, school_id, label_encrypted, label_iv,
+         subject, grade_span, exact_grade, known_elpac_level
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING student_uuid`,
       [
         teacherId,
-        row.label.trim(),
+        resolvedSchoolId,
+        labelPayload.encrypted.ciphertext,
+        labelPayload.encrypted.iv,
         (row.subject ?? "").trim(),
         row.grade_span,
         row.exact_grade ?? null,
@@ -103,29 +143,48 @@ export async function createRosterEntries(
   return results;
 }
 
-export async function listRosterEntries(teacherId: string): Promise<RosterEntry[]> {
+export async function listRosterEntries(viewerId: string): Promise<RosterEntry[]> {
   const pool = getPool();
-  const result = await pool.query<RosterEntry>(
-    `SELECT id, student_uuid, label, subject, grade_span, exact_grade, known_elpac_level, created_at, last_updated_at
-     FROM student_roster_entries
-     WHERE teacher_id = $1
-     ORDER BY created_at ASC`,
-    [teacherId],
+  const result = await pool.query<
+    RosterEntry & {
+      label_encrypted: string | null;
+      label_iv: string | null;
+    }
+  >(
+    `SELECT r.id, r.student_uuid, r.label_encrypted, r.label_iv, r.subject,
+            r.grade_span, r.exact_grade, r.known_elpac_level, r.created_at, r.last_updated_at
+     FROM student_roster_entries r
+     JOIN grade_grants g
+       ON  g.teacher_id = $1
+       AND g.school_id = r.school_id
+       AND g.revoked_at IS NULL
+       AND (g.expires_at IS NULL OR g.expires_at > NOW())
+       AND (g.exact_grade IS NULL OR g.exact_grade = r.exact_grade)
+     ORDER BY r.created_at ASC`,
+    [viewerId],
   );
-  return result.rows;
+  return result.rows.map((row) => ({
+    ...row,
+    label: decryptRosterLabel(row),
+  }));
 }
 
-export async function listRosterEntriesWithStats(
-  teacherId: string,
+export async function listAccessibleRosterEntriesWithStats(
+  viewerId: string,
 ): Promise<RosterEntryWithStats[]> {
   const pool = getPool();
   const result = await pool.query<
-    RosterEntryWithStats & { avg_level: string | null }
+    RosterEntryWithStats & {
+      avg_level: string | null;
+      label_encrypted: string | null;
+      label_iv: string | null;
+    }
   >(
     `SELECT
        r.id,
        r.student_uuid,
-       r.label,
+       r.label_encrypted,
+       r.label_iv,
        r.subject,
        r.grade_span,
        r.exact_grade,
@@ -136,34 +195,266 @@ export async function listRosterEntriesWithStats(
        AVG(i.estimated_level) AS avg_level,
        MAX(s.submitted_at) AS last_session_at
      FROM student_roster_entries r
+     JOIN grade_grants g
+       ON  g.teacher_id = $1
+       AND g.school_id = r.school_id
+       AND g.revoked_at IS NULL
+       AND (g.expires_at IS NULL OR g.expires_at > NOW())
+       AND (g.exact_grade IS NULL OR g.exact_grade = r.exact_grade)
      LEFT JOIN analysis_sessions s
-       ON s.student_uuid = r.student_uuid AND s.teacher_id = r.teacher_id
+       ON s.student_uuid = r.student_uuid
      LEFT JOIN insights i ON i.session_id = s.id
-     WHERE r.teacher_id = $1
      GROUP BY r.id
      ORDER BY r.created_at ASC`,
-    [teacherId],
+    [viewerId],
   );
 
   return result.rows.map((row) => ({
     ...row,
+    label: decryptRosterLabel(row),
     avg_level: row.avg_level != null ? Number(row.avg_level) : null,
   }));
 }
 
-export async function getRosterEntryLabel(
+export async function listRosterEntriesWithStats(
   teacherId: string,
+): Promise<RosterEntryWithStats[]> {
+  return listAccessibleRosterEntriesWithStats(teacherId);
+}
+
+export interface StudentMissingGrade {
+  id: string;
+  student_uuid: string;
+  label: string;
+  subject: string;
+  grade_span: GradeSpan;
+  known_elpac_level: number | null;
+  created_at: Date;
+}
+
+export async function listStudentsMissingGrade(
+  schoolId: string,
+): Promise<StudentMissingGrade[]> {
+  const pool = getPool();
+  const result = await pool.query<
+    StudentMissingGrade & {
+      label_encrypted: string | null;
+      label_iv: string | null;
+    }
+  >(
+    `SELECT id, student_uuid, label_encrypted, label_iv, subject, grade_span,
+            known_elpac_level, created_at
+     FROM student_roster_entries
+     WHERE school_id = $1 AND exact_grade IS NULL
+     ORDER BY created_at ASC`,
+    [schoolId],
+  );
+  return result.rows.map((row) => ({
+    ...row,
+    label: decryptRosterLabel(row),
+    grade_span: row.grade_span as GradeSpan,
+  }));
+}
+
+export async function setStudentGrade(
+  schoolId: string,
+  studentUuid: string,
+  exactGrade: ExactGrade,
+  gradeSpan: GradeSpan,
+): Promise<boolean> {
+  const pool = getPool();
+  const result = await pool.query(
+    `UPDATE student_roster_entries
+     SET exact_grade = $3, grade_span = $4, last_updated_at = NOW()
+     WHERE school_id = $1 AND student_uuid = $2 AND exact_grade IS NULL`,
+    [schoolId, studentUuid, exactGrade, gradeSpan],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function countStudentsMissingGrade(
+  schoolId: string,
+): Promise<number> {
+  const pool = getPool();
+  const result = await pool.query<{ count: string }>(
+    `SELECT COUNT(*)::text AS count
+     FROM student_roster_entries
+     WHERE school_id = $1 AND exact_grade IS NULL`,
+    [schoolId],
+  );
+  return Number(result.rows[0]?.count ?? 0);
+}
+
+export async function getRosterEntryLabel(
   studentUuid: string,
 ): Promise<string | null> {
   const pool = getPool();
-  const result = await pool.query<{ label: string }>(
-    `SELECT label
+  const result = await pool.query<{
+    label_encrypted: string | null;
+    label_iv: string | null;
+  }>(
+    `SELECT label_encrypted, label_iv
      FROM student_roster_entries
-     WHERE teacher_id = $1 AND student_uuid = $2`,
-    [teacherId, studentUuid],
+     WHERE student_uuid = $1`,
+    [studentUuid],
   );
-  const label = result.rows[0]?.label?.trim();
+  const row = result.rows[0];
+  if (!row) return null;
+  const label = decryptRosterLabel(row);
   return label || null;
+}
+
+export async function listSchoolRosterEntries(
+  schoolId: string,
+): Promise<RosterEntry[]> {
+  const pool = getPool();
+  const result = await pool.query<
+    RosterEntry & {
+      label_encrypted: string | null;
+      label_iv: string | null;
+    }
+  >(
+    `SELECT id, student_uuid, label_encrypted, label_iv, subject, grade_span,
+            exact_grade, known_elpac_level, created_at, last_updated_at
+     FROM student_roster_entries
+     WHERE school_id = $1
+     ORDER BY created_at ASC`,
+    [schoolId],
+  );
+  return result.rows.map((row) => ({
+    ...row,
+    label: decryptRosterLabel(row),
+  }));
+}
+
+export async function updateRosterEntryLabelBySchool(
+  schoolId: string,
+  studentUuid: string,
+  label: string,
+): Promise<boolean> {
+  const pool = getPool();
+  const labelPayload = encryptRosterLabel(label);
+  const result = await pool.query(
+    `UPDATE student_roster_entries
+     SET label_encrypted = $3, label_iv = $4, last_updated_at = NOW()
+     WHERE school_id = $1 AND student_uuid = $2`,
+    [
+      schoolId,
+      studentUuid,
+      labelPayload.encrypted.ciphertext,
+      labelPayload.encrypted.iv,
+    ],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function updateRosterEntrySubjectBySchool(
+  schoolId: string,
+  studentUuid: string,
+  subject: string,
+): Promise<boolean> {
+  const pool = getPool();
+  const result = await pool.query(
+    `UPDATE student_roster_entries
+     SET subject = $3, last_updated_at = NOW()
+     WHERE school_id = $1 AND student_uuid = $2`,
+    [schoolId, studentUuid, subject.trim()],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function updateRosterEntryGradeBySchool(
+  schoolId: string,
+  studentUuid: string,
+  gradeSpan: GradeSpan,
+  exactGrade: ExactGrade,
+): Promise<boolean> {
+  const pool = getPool();
+  const result = await pool.query(
+    `UPDATE student_roster_entries
+     SET grade_span = $3, exact_grade = $4, last_updated_at = NOW()
+     WHERE school_id = $1 AND student_uuid = $2`,
+    [schoolId, studentUuid, gradeSpan, exactGrade],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function countOtherTeachersSessionsForStudent(
+  schoolId: string,
+  studentUuid: string,
+  excludingTeacherId: string,
+): Promise<number> {
+  const pool = getPool();
+  const result = await pool.query<{ count: string }>(
+    `SELECT COUNT(*)::text AS count
+     FROM analysis_sessions s
+     JOIN student_roster_entries r ON r.student_uuid = s.student_uuid
+     WHERE r.school_id = $1 AND s.student_uuid = $2 AND s.teacher_id <> $3`,
+    [schoolId, studentUuid, excludingTeacherId],
+  );
+  return Number(result.rows[0]?.count ?? 0);
+}
+
+export async function deleteRosterEntryBySchool(
+  schoolId: string,
+  studentUuid: string,
+): Promise<boolean> {
+  return withTransaction(async (client) => {
+    await client.query(
+      `DELETE FROM insights
+       WHERE session_id IN (
+         SELECT id FROM analysis_sessions WHERE student_uuid = $2
+       )`,
+      [schoolId, studentUuid],
+    );
+
+    await client.query(
+      `DELETE FROM analysis_sessions WHERE student_uuid = $2`,
+      [schoolId, studentUuid],
+    );
+
+    const deleted = await client.query(
+      `DELETE FROM student_roster_entries
+       WHERE school_id = $1 AND student_uuid = $2`,
+      [schoolId, studentUuid],
+    );
+
+    return (deleted.rowCount ?? 0) > 0;
+  });
+}
+
+export async function rosterEntryInSchool(
+  schoolId: string,
+  studentUuid: string,
+): Promise<boolean> {
+  const pool = getPool();
+  const result = await pool.query(
+    `SELECT 1 FROM student_roster_entries
+     WHERE school_id = $1 AND student_uuid = $2`,
+    [schoolId, studentUuid],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function updateRosterEntryLabel(
+  teacherId: string,
+  studentUuid: string,
+  label: string,
+): Promise<boolean> {
+  const pool = getPool();
+  const labelPayload = encryptRosterLabel(label);
+  const result = await pool.query(
+    `UPDATE student_roster_entries
+     SET label_encrypted = $3, label_iv = $4, last_updated_at = NOW()
+     WHERE teacher_id = $1 AND student_uuid = $2`,
+    [
+      teacherId,
+      studentUuid,
+      labelPayload.encrypted.ciphertext,
+      labelPayload.encrypted.iv,
+    ],
+  );
+  return (result.rowCount ?? 0) > 0;
 }
 
 export async function updateRosterEntrySubject(
@@ -262,6 +553,7 @@ export async function deleteRosterEntry(
 export interface InsertSessionInput {
   teacherId: string;
   studentUuid: string;
+  domain: import("@/lib/elpac/domain").ElpacDomain;
   gradeSpan: GradeSpan;
   exactGrade?: ExactGrade | null;
   providedElpacLevel?: number | null;
@@ -280,11 +572,12 @@ export async function insertSessionAndInsight(
     const sessionResult = await client.query<{ id: string }>(
       `INSERT INTO analysis_sessions
          (teacher_id, student_uuid, domain, grade_span, exact_grade, provided_elpac_level)
-       VALUES ($1, $2, 'writing', $3, $4, $5)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
       [
         input.teacherId,
         input.studentUuid,
+        input.domain,
         input.gradeSpan,
         input.exactGrade ?? null,
         input.providedElpacLevel ?? null,
@@ -360,7 +653,6 @@ function decryptInsightRow(row: {
 }
 
 export async function listSessionsForStudent(
-  teacherId: string,
   studentUuid: string,
 ): Promise<AnalysisSessionWithInsight[]> {
   const pool = getPool();
@@ -384,6 +676,7 @@ export async function listSessionsForStudent(
        s.grade_span,
        s.provided_elpac_level,
        s.submitted_at,
+       s.teacher_id,
        i.estimated_level,
        i.strengths_encrypted,
        i.strengths_iv,
@@ -396,9 +689,9 @@ export async function listSessionsForStudent(
        i.scaffold_sources
      FROM analysis_sessions s
      JOIN insights i ON i.session_id = s.id
-     WHERE s.teacher_id = $1 AND s.student_uuid = $2
+     WHERE s.student_uuid = $1
      ORDER BY s.submitted_at ASC`,
-    [teacherId, studentUuid],
+    [studentUuid],
   );
 
   return result.rows.map((row) => ({
@@ -408,19 +701,20 @@ export async function listSessionsForStudent(
     grade_span: row.grade_span as GradeSpan,
     provided_elpac_level: row.provided_elpac_level,
     submitted_at: row.submitted_at,
+    teacher_id: (row as { teacher_id: string }).teacher_id,
     insight: decryptInsightRow(row),
   }));
 }
 
 export async function getSessionWithInsight(
-  teacherId: string,
   sessionId: string,
 ): Promise<AnalysisSessionDetail | null> {
   const pool = getPool();
   const result = await pool.query<
     AnalysisSessionWithInsight & {
       subject: string;
-      student_label: string;
+      label_encrypted: string | null;
+      label_iv: string | null;
       strengths_encrypted: string;
       strengths_iv: string;
       level_reasoning_encrypted: string;
@@ -440,7 +734,8 @@ export async function getSessionWithInsight(
        s.provided_elpac_level,
        s.submitted_at,
        COALESCE(r.subject, '') AS subject,
-       COALESCE(r.label, '') AS student_label,
+       r.label_encrypted,
+       r.label_iv,
        i.estimated_level,
        i.strengths_encrypted,
        i.strengths_iv,
@@ -453,10 +748,9 @@ export async function getSessionWithInsight(
        i.scaffold_sources
      FROM analysis_sessions s
      JOIN insights i ON i.session_id = s.id
-     LEFT JOIN student_roster_entries r
-       ON r.teacher_id = s.teacher_id AND r.student_uuid = s.student_uuid
-     WHERE s.teacher_id = $1 AND s.id = $2`,
-    [teacherId, sessionId],
+     LEFT JOIN student_roster_entries r ON r.student_uuid = s.student_uuid
+     WHERE s.id = $1`,
+    [sessionId],
   );
 
   const row = result.rows[0];
@@ -470,24 +764,131 @@ export async function getSessionWithInsight(
     provided_elpac_level: row.provided_elpac_level,
     submitted_at: row.submitted_at,
     subject: row.subject,
-    student_label: row.student_label,
+    student_label: decryptRosterLabel(row),
     insight: decryptInsightRow(row),
   };
 }
 
-export async function listSchoolAccessForTeacher(
-  teacherId: string,
-): Promise<SchoolAccessRow[]> {
+export async function listDomainLevelsByTeacherForStudent(
+  studentUuid: string,
+): Promise<
+  {
+    teacher_id: string;
+    domain: string;
+    avg_level: number;
+    session_count: number;
+  }[]
+> {
   const pool = getPool();
-  const result = await pool.query<SchoolAccessRow>(
-    `SELECT sa.id, sa.school_id, sc.name AS school_name, sa.access_level, sa.granted_at
-     FROM school_access sa
-     JOIN schools sc ON sc.id = sa.school_id
-     WHERE sa.teacher_id = $1
-     ORDER BY sa.granted_at DESC`,
+  const result = await pool.query<{
+    teacher_id: string;
+    domain: string;
+    avg_level: string;
+    session_count: string;
+  }>(
+    `SELECT s.teacher_id, s.domain,
+            AVG(i.estimated_level) AS avg_level,
+            COUNT(*)::int AS session_count
+     FROM analysis_sessions s
+     JOIN insights i ON i.session_id = s.id
+     WHERE s.student_uuid = $1
+     GROUP BY s.teacher_id, s.domain
+     ORDER BY s.teacher_id, s.domain`,
+    [studentUuid],
+  );
+  return result.rows.map((row) => ({
+    teacher_id: row.teacher_id,
+    domain: row.domain,
+    avg_level: Number(row.avg_level),
+    session_count: Number(row.session_count),
+  }));
+}
+
+export async function listDomainLevelsForTeacherStudents(
+  teacherId: string,
+): Promise<
+  {
+    student_uuid: string;
+    domain: string;
+    avg_level: number;
+  }[]
+> {
+  const pool = getPool();
+  const result = await pool.query<{
+    student_uuid: string;
+    domain: string;
+    avg_level: string;
+  }>(
+    `SELECT s.student_uuid, s.domain, AVG(i.estimated_level) AS avg_level
+     FROM analysis_sessions s
+     JOIN insights i ON i.session_id = s.id
+     WHERE EXISTS (
+       SELECT 1
+       FROM student_roster_entries r
+       JOIN grade_grants g
+         ON  g.teacher_id = $1
+         AND g.school_id = r.school_id
+         AND g.revoked_at IS NULL
+         AND (g.expires_at IS NULL OR g.expires_at > NOW())
+         AND (g.exact_grade IS NULL OR g.exact_grade = r.exact_grade)
+       WHERE r.student_uuid = s.student_uuid
+     )
+     GROUP BY s.student_uuid, s.domain
+     ORDER BY s.student_uuid, s.domain`,
     [teacherId],
   );
-  return result.rows;
+  return result.rows.map((row) => ({
+    student_uuid: row.student_uuid,
+    domain: row.domain,
+    avg_level: Number(row.avg_level),
+  }));
+}
+
+export async function listLatestAnalysisForAccessibleStudents(
+  teacherId: string,
+): Promise<
+  {
+    student_uuid: string;
+    domain: string;
+    estimated_level: number;
+    submitted_at: Date;
+  }[]
+> {
+  const pool = getPool();
+  const result = await pool.query<{
+    student_uuid: string;
+    domain: string;
+    estimated_level: number;
+    submitted_at: Date;
+  }>(
+    `SELECT DISTINCT ON (s.student_uuid)
+       s.student_uuid,
+       s.domain,
+       i.estimated_level,
+       s.submitted_at
+     FROM analysis_sessions s
+     JOIN insights i ON i.session_id = s.id
+     WHERE EXISTS (
+       SELECT 1
+       FROM student_roster_entries r
+       JOIN grade_grants g
+         ON  g.teacher_id = $1
+         AND g.school_id = r.school_id
+         AND g.revoked_at IS NULL
+         AND (g.expires_at IS NULL OR g.expires_at > NOW())
+         AND (g.exact_grade IS NULL OR g.exact_grade = r.exact_grade)
+       WHERE r.student_uuid = s.student_uuid
+     )
+     ORDER BY s.student_uuid, s.submitted_at DESC`,
+    [teacherId],
+  );
+
+  return result.rows.map((row) => ({
+    student_uuid: row.student_uuid,
+    domain: row.domain,
+    estimated_level: row.estimated_level,
+    submitted_at: row.submitted_at,
+  }));
 }
 
 function sha256Hex(text: string): string {
@@ -532,7 +933,7 @@ export async function saveScaffoldInsight(
     text = override.text;
     sources = override.sources ?? [];
   } else {
-    const session = await getSessionWithInsight(teacherId, sessionId);
+    const session = await getSessionWithInsight(sessionId);
     if (!session) {
       return false;
     }
@@ -594,7 +995,7 @@ export async function deleteScaffoldInsight(
   if (override) {
     text = override.text;
   } else {
-    const session = await getSessionWithInsight(teacherId, sessionId);
+    const session = await getSessionWithInsight(sessionId);
     if (!session) {
       return false;
     }
@@ -621,7 +1022,7 @@ export async function listSavedItemIndicesForSession(
   teacherId: string,
   sessionId: string,
 ): Promise<number[]> {
-  const session = await getSessionWithInsight(teacherId, sessionId);
+  const session = await getSessionWithInsight(sessionId);
   if (!session) {
     return [];
   }
@@ -655,6 +1056,8 @@ export async function listSavedInsights(
       scaffold_text_encrypted: string;
       scaffold_text_iv: string;
       scaffold_sources: unknown;
+      label_encrypted: string | null;
+      label_iv: string | null;
     }
   >(
     `SELECT
@@ -668,13 +1071,13 @@ export async function listSavedInsights(
        s.student_uuid,
        s.grade_span,
        s.submitted_at,
-       COALESCE(r.label, '') AS student_label,
+       r.label_encrypted,
+       r.label_iv,
        i.estimated_level
      FROM saved_insights si
      JOIN analysis_sessions s ON s.id = si.session_id
      JOIN insights i ON i.session_id = s.id
-     LEFT JOIN student_roster_entries r
-       ON r.teacher_id = s.teacher_id AND r.student_uuid = s.student_uuid
+     LEFT JOIN student_roster_entries r ON r.student_uuid = s.student_uuid
      WHERE si.teacher_id = $1
      ORDER BY si.created_at DESC`,
     [teacherId],
@@ -692,7 +1095,7 @@ export async function listSavedInsights(
       item_index: row.item_index,
       session_id: row.session_id,
       student_uuid: row.student_uuid,
-      student_label: row.student_label,
+      student_label: decryptRosterLabel(row),
       estimated_level: row.estimated_level,
       grade_span: row.grade_span as GradeSpan,
       submitted_at: row.submitted_at,

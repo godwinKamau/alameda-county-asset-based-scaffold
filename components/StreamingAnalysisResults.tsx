@@ -13,7 +13,6 @@ import {
   type PendingAnalyzeContext,
 } from "@/lib/analyze/pending-request";
 import { consumeAnalyzeStream } from "@/lib/analyze/stream";
-import { getCaEldLevelLabel } from "@/lib/elpac/labels";
 import type { Insight } from "@/lib/types";
 import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import { btnSecondaryClassName, cardClassName } from "@/lib/ui/styles";
@@ -124,8 +123,6 @@ export function StreamingAnalysisResults() {
   });
 
   const estimatedLevel = partialInsight.estimated_level;
-  const eldLevelLabel =
-    estimatedLevel != null ? getCaEldLevelLabel(estimatedLevel) : null;
 
   return (
     <DashboardShell title="Analysis Results">
@@ -166,9 +163,9 @@ export function StreamingAnalysisResults() {
               {context.studentLabel}
             </h2>
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              {estimatedLevel != null && eldLevelLabel ? (
+              {estimatedLevel != null ? (
                 <span className="inline-flex items-center rounded-full bg-brand-soft px-3 py-1 text-sm font-semibold text-brand-dark ring-1 ring-brand-soft">
-                  Level {estimatedLevel} · {eldLevelLabel}
+                  Level {estimatedLevel}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-sm font-semibold text-brand-dark ring-1 ring-brand-soft">

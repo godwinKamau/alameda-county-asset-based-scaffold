@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { AnalysisSessionWithInsight } from "@/lib/types";
-import { getCaEldLevelLabel } from "@/lib/elpac/labels";
 import { cardClassName } from "@/lib/ui/styles";
 import { InsightCard } from "./InsightCard";
 
@@ -13,7 +12,6 @@ interface AnalysisSessionArticleProps {
 export function AnalysisSessionArticle({ session }: AnalysisSessionArticleProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const estimatedLevel = session.insight.estimated_level;
-  const eldLevelLabel = getCaEldLevelLabel(estimatedLevel);
   const submittedAt = new Date(session.submitted_at);
 
   return (
@@ -50,7 +48,7 @@ export function AnalysisSessionArticle({ session }: AnalysisSessionArticleProps)
             )}
           </div>
           <p className="mt-1 text-sm font-medium text-brand-dark">
-            Level {estimatedLevel} · {eldLevelLabel}
+            Level {estimatedLevel}
           </p>
         </div>
       </button>

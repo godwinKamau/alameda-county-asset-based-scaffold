@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { LogoutButton } from "@/components/LogoutButton";
+import { apiFetch } from "@/lib/ui/api-fetch";
+import type { TeacherRole } from "@/lib/types";
 
 interface NavItem {
   href: string;
@@ -79,22 +82,53 @@ const navItems: NavItem[] = [
     icon: <NavIconSaved />,
     match: (p) => p.startsWith("/saved"),
   },
-  {
-    href: "/admin",
-    label: "Admin",
-    icon: <NavIconAdmin />,
-    match: (p) => p.startsWith("/admin"),
-  },
 ];
+
+const adminNavItem: NavItem = {
+  href: "/admin",
+  label: "Admin",
+  icon: <NavIconAdmin />,
+  match: (p) => p.startsWith("/admin"),
+};
 
 interface AppSidebarProps {
   mobileOpen?: boolean;
   onClose?: () => void;
 }
 
+function roleLabel(role: TeacherRole | null): string {
+  if (role === "admin" || role === "eld_coordinator") {
+    return "Administrator";
+  }
+  return "Teacher";
+}
+
 export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const { user, isLoaded } = useUser();
+  const [role, setRole] = useState<TeacherRole | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadRole() {
+      try {
+        const response = await apiFetch("/api/me");
+        if (!response.ok) return;
+        const data = (await response.json()) as { role?: TeacherRole };
+        if (!cancelled && data.role) {
+          setRole(data.role);
+        }
+      } catch {
+        // Keep the default Teacher label if the role cannot be loaded.
+      }
+    }
+
+    void loadRole();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const displayName =
     user?.fullName?.trim() ||
@@ -122,13 +156,15 @@ export function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
           )}
           <div className="min-w-0">
             <p className="truncate font-semibold text-white">{displayName}</p>
-            <p className="text-sm text-brand-soft/80">Teacher</p>
+            <p className="text-sm text-brand-soft/80">{roleLabel(role)}</p>
           </div>
         </div>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4" aria-label="Main">
-        {navItems.map((item) => {
+        {[...navItems, ...(role === "admin" || role === "eld_coordinator"
+          ? [adminNavItem]
+          : [])].map((item) => {
           const isActive = item.match
             ? item.match(pathname)
             : pathname === item.href;

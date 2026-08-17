@@ -3,13 +3,18 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { DashboardShell } from "@/components/DashboardShell";
 import { DbWakingBanner } from "@/components/DbWakingBanner";
+import { AccessRequestQueue } from "@/components/admin/AccessRequestQueue";
+import { GradeGrantManager } from "@/components/admin/GradeGrantManager";
+import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
+import { TeacherRoleManager } from "@/components/admin/TeacherRoleManager";
+import { MissingGradeQueue } from "@/components/admin/MissingGradeQueue";
+import { SchoolRosterManager } from "@/components/admin/SchoolRosterManager";
 import { recordAudit, hashEmail } from "@/lib/audit/log";
 import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
+  countStudentsMissingGrade,
   findTeacherByEmailHash,
-  listSchoolAccessForTeacher,
 } from "@/lib/db/queries";
-import { cardClassName, sectionTitleClassName } from "@/lib/ui/styles";
 
 export default async function AdminPage() {
   const { userId } = await auth();
@@ -20,14 +25,14 @@ export default async function AdminPage() {
   if (!email) redirect("/login");
 
   let teacher: Awaited<ReturnType<typeof findTeacherByEmailHash>>;
-  let accessRows: Awaited<ReturnType<typeof listSchoolAccessForTeacher>> = [];
+  let missingGradeCount = 0;
 
   try {
     teacher = await findTeacherByEmailHash(hashEmail(email));
     const isAdmin =
       teacher?.role === "eld_coordinator" || teacher?.role === "admin";
     if (teacher && isAdmin) {
-      accessRows = await listSchoolAccessForTeacher(teacher.id);
+      missingGradeCount = await countStudentsMissingGrade(teacher.school_id);
       const headerList = await headers();
       await recordAudit({
         actorId: teacher.id,
@@ -40,7 +45,7 @@ export default async function AdminPage() {
   } catch (err) {
     if (isDatabaseWakingError(err)) {
       return (
-        <DashboardShell title="Admin — School Access">
+        <DashboardShell title="Admin">
           <DbWakingBanner />
         </DashboardShell>
       );
@@ -54,42 +59,14 @@ export default async function AdminPage() {
   }
 
   return (
-    <DashboardShell title="Admin — School Access">
-      <div className="mx-auto max-w-5xl">
-        <section className={cardClassName}>
-          <h2 className={sectionTitleClassName}>Your School Access</h2>
-          {accessRows.length === 0 ? (
-            <p className="mt-4 text-sm text-muted">
-              No school access records assigned yet.
-            </p>
-          ) : (
-            <div className="mt-4 overflow-x-auto rounded-xl border border-brand-soft/80">
-              <table className="w-full min-w-[480px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-brand-soft bg-brand-soft/40 text-muted">
-                    <th className="px-4 py-3 font-medium">School</th>
-                    <th className="px-4 py-3 font-medium">Access</th>
-                    <th className="px-4 py-3 font-medium">Granted</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {accessRows.map((row) => (
-                    <tr
-                      key={row.id}
-                      className="border-b border-brand-soft/60 text-brand-dark last:border-0"
-                    >
-                      <td className="px-4 py-3">{row.school_name}</td>
-                      <td className="px-4 py-3 capitalize">{row.access_level}</td>
-                      <td className="px-4 py-3">
-                        {new Date(row.granted_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
+    <DashboardShell title="Admin">
+      <div className="mx-auto max-w-5xl space-y-6">
+        <MissingGradeQueue initialCount={missingGradeCount} />
+        <SchoolRosterManager />
+        <GradeGrantManager defaultSchoolId={teacher.school_id} />
+        <AccessRequestQueue />
+        <TeacherRoleManager currentTeacherId={teacher.id} />
+        <AuditLogViewer />
       </div>
     </DashboardShell>
   );

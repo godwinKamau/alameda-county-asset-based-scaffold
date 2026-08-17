@@ -1,15 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
-import { formatStudentGradeLabel } from "@/lib/roster/display";
-import {
-  getLabelMapping,
-  groupEntriesBySubject,
-  resolveDisplayName,
-} from "@/lib/roster/group";
-import { getCaEldLevelLabel } from "@/lib/elpac/labels";
+import { ELPAC_DOMAINS, domainLabel, type ElpacDomain } from "@/lib/elpac/domain";
+import type { LatestAnalysisSummary } from "@/lib/roster/export";
+import { formatExactGradeLabel } from "@/lib/roster/display";
+import { resolveDisplayName } from "@/lib/roster/group";
 import type { ExactGrade, GradeSpan } from "@/lib/types";
 import {
   btnDashboardActionClassName,
@@ -30,49 +27,66 @@ export interface StudentExplorerEntry {
   session_count: number;
   avg_level: number | null;
   last_session_at: string | null;
+  domain_levels: Record<ElpacDomain, number | null>;
+  latest_analysis: LatestAnalysisSummary | null;
+  owner_teacher_id?: string;
+  access_source?: string;
 }
 
-type OrganizeBy = "subject" | "grade_span" | "avg_level" | "flat";
+interface GroupData {
+  id: string;
+  name: string;
+  position: number;
+  members: { student_uuid: string; position: number }[];
+}
 
-const GRADE_SPANS: GradeSpan[] = ["K", "1-2", "3-12"];
-const GRADE_SPAN_LABELS: Record<GradeSpan, string> = {
-  K: "Kindergarten (K PLD)",
-  "1-2": "Grades 1–2 PLD",
-  "3-12": "Grades 3–12 PLD",
-};
+type OrganizeBy = "groups" | "avg_level" | "flat";
 
 interface StudentsExplorerProps {
   entries: StudentExplorerEntry[];
-  existingSubjects: string[];
+  groups: GroupData[];
+  readOnly?: boolean;
+  showOwner?: boolean;
+  onFilteredEntriesChange?: (entries: StudentExplorerEntry[]) => void;
 }
 
-function formatAvgLevel(avgLevel: number | null): string {
-  if (avgLevel == null) return "—";
-  const rounded = Math.round(avgLevel * 10) / 10;
-  return `${rounded} (${getCaEldLevelLabel(Math.round(avgLevel))})`;
-}
-
-function groupEntriesByGradeSpan(
+function groupEntriesByTeacherGroups(
   entries: StudentExplorerEntry[],
-): { subject: string; entries: StudentExplorerEntry[] }[] {
-  const groups = new Map<GradeSpan, StudentExplorerEntry[]>();
+  groups: GroupData[],
+): { label: string; entries: StudentExplorerEntry[] }[] {
+  const entryByUuid = new Map(
+    entries.map((entry) => [entry.student_uuid, entry]),
+  );
+  const assigned = new Set<string>();
+  const sections: { label: string; entries: StudentExplorerEntry[] }[] = [];
 
-  for (const entry of entries) {
-    const existing = groups.get(entry.grade_span) ?? [];
-    existing.push(entry);
-    groups.set(entry.grade_span, existing);
+  const sortedGroups = [...groups].sort((a, b) => a.position - b.position);
+
+  for (const group of sortedGroups) {
+    const members = group.members
+      .map((member) => entryByUuid.get(member.student_uuid))
+      .filter((entry): entry is StudentExplorerEntry => !!entry);
+    if (members.length === 0) continue;
+    members.forEach((entry) => assigned.add(entry.student_uuid));
+    sections.push({ label: group.name, entries: members });
   }
 
-  return GRADE_SPANS.filter((span) => groups.has(span)).map((span) => ({
-    subject: GRADE_SPAN_LABELS[span],
-    entries: groups.get(span) ?? [],
-  }));
+  const ungrouped = entries
+    .filter((entry) => !assigned.has(entry.student_uuid))
+    .sort((a, b) =>
+      resolveDisplayName(a).localeCompare(resolveDisplayName(b)),
+    );
+
+  if (ungrouped.length > 0) {
+    sections.push({ label: "Ungrouped", entries: ungrouped });
+  }
+
+  return sections;
 }
 
 function groupEntriesByAvgLevel(
   entries: StudentExplorerEntry[],
-  mapping: Record<string, string>,
-): { subject: string; entries: StudentExplorerEntry[] }[] {
+): { label: string; entries: StudentExplorerEntry[] }[] {
   const withData = entries
     .filter((entry) => entry.avg_level != null)
     .sort((a, b) => (b.avg_level ?? 0) - (a.avg_level ?? 0));
@@ -80,16 +94,16 @@ function groupEntriesByAvgLevel(
   const withoutData = entries
     .filter((entry) => entry.avg_level == null)
     .sort((a, b) =>
-      resolveDisplayName(a, mapping).localeCompare(resolveDisplayName(b, mapping)),
+      resolveDisplayName(a).localeCompare(resolveDisplayName(b)),
     );
 
-  const groups: { subject: string; entries: StudentExplorerEntry[] }[] = [];
+  const groups: { label: string; entries: StudentExplorerEntry[] }[] = [];
 
   if (withData.length > 0) {
-    groups.push({ subject: "By average level", entries: withData });
+    groups.push({ label: "By average level", entries: withData });
   }
   if (withoutData.length > 0) {
-    groups.push({ subject: "No analysis yet", entries: withoutData });
+    groups.push({ label: "No analysis yet", entries: withoutData });
   }
 
   return groups;
@@ -97,94 +111,147 @@ function groupEntriesByAvgLevel(
 
 function groupEntriesFlat(
   entries: StudentExplorerEntry[],
-  mapping: Record<string, string>,
-): { subject: string; entries: StudentExplorerEntry[] }[] {
+): { label: string; entries: StudentExplorerEntry[] }[] {
   const sorted = [...entries].sort((a, b) =>
-    resolveDisplayName(a, mapping).localeCompare(resolveDisplayName(b, mapping)),
+    resolveDisplayName(a).localeCompare(resolveDisplayName(b)),
   );
 
-  return [{ subject: "All students", entries: sorted }];
+  return [{ label: "All students", entries: sorted }];
+}
+
+function formatGrade(entry: StudentExplorerEntry): string {
+  if (entry.exact_grade) {
+    return formatExactGradeLabel(entry.exact_grade);
+  }
+  return "Grade not set";
+}
+
+function DomainScoreTable({
+  domainLevels,
+}: {
+  domainLevels: Record<ElpacDomain, number | null>;
+}) {
+  return (
+    <div className="min-w-0 flex-1 overflow-x-auto">
+      <table className="w-full table-fixed text-left text-xs">
+        <thead>
+          <tr className="text-muted">
+            {ELPAC_DOMAINS.map((domain) => (
+              <th
+                key={domain}
+                className="px-3 py-2 font-medium capitalize sm:px-4"
+              >
+                {domainLabel(domain)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="text-brand-dark">
+            {ELPAC_DOMAINS.map((domain) => {
+              const level = domainLevels[domain];
+              return (
+                <td
+                  key={domain}
+                  className="border-t border-brand-soft/60 px-3 py-3 align-top sm:px-4"
+                >
+                  {level != null ? (
+                    <span className="text-base font-semibold tabular-nums">
+                      {Math.round(level * 10) / 10}
+                    </span>
+                  ) : (
+                    <span className="text-base text-muted">—</span>
+                  )}
+                </td>
+              );
+            })}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 interface StudentRowProps {
   entry: StudentExplorerEntry;
   displayName: string;
+  readOnly?: boolean;
+  showOwner?: boolean;
 }
 
-function StudentRow({ entry, displayName }: StudentRowProps) {
+function StudentRow({
+  entry,
+  displayName,
+  readOnly = false,
+  showOwner = false,
+}: StudentRowProps) {
   return (
-    <li className="flex items-start justify-between gap-4 px-4 py-3 text-sm">
-      <div className="min-w-0 flex-1">
+    <li className="grid gap-4 px-4 py-4 text-sm sm:grid-cols-[minmax(9rem,11rem)_1fr] sm:items-start">
+      <div className="flex shrink-0 flex-col gap-2">
         <Link
           href={`/student/${entry.student_uuid}`}
-          className="text-lg font-medium text-brand-dark hover:text-brand"
+          className="text-lg font-medium leading-tight text-brand-dark hover:text-brand"
         >
           {displayName}
         </Link>
         <p className="text-muted">
-          {formatStudentGradeLabel(entry.grade_span, entry.exact_grade)}
+          {formatGrade(entry)}
           {entry.known_elpac_level != null &&
             ` · Known level: ${entry.known_elpac_level}`}
         </p>
-        <p className="mt-0.5 text-xs text-muted">
+        <p className="text-xs text-muted">
           {entry.session_count === 0
             ? "No analyses yet"
-            : `${entry.session_count} ${entry.session_count === 1 ? "analysis" : "analyses"} · Avg level ${formatAvgLevel(entry.avg_level)}`}
+            : `${entry.session_count} ${entry.session_count === 1 ? "analysis" : "analyses"}`}
+          {showOwner && entry.owner_teacher_id
+            ? ` · Shared by teacher ${entry.owner_teacher_id.slice(0, 8)}…`
+            : ""}
         </p>
+        <div className="mt-1 flex flex-wrap gap-2">
+          <Link
+            href={`/student/${entry.student_uuid}`}
+            className={`${btnSecondaryClassName} ${btnRowActionClassName}`}
+          >
+            View history
+          </Link>
+          {!readOnly && (
+            <Link
+              href={buildAnalyzeUrl(entry)}
+              className={`${btnDashboardActionClassName} ${btnRowActionClassName}`}
+            >
+              Analyze
+            </Link>
+          )}
+        </div>
       </div>
-      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-        <Link
-          href={`/student/${entry.student_uuid}`}
-          className={`${btnSecondaryClassName} ${btnRowActionClassName}`}
-        >
-          View history
-        </Link>
-        <Link
-          href={buildAnalyzeUrl(entry)}
-          className={`${btnDashboardActionClassName} ${btnRowActionClassName}`}
-        >
-          Analyze
-        </Link>
-      </div>
+      <DomainScoreTable domainLevels={entry.domain_levels} />
     </li>
   );
 }
 
 export function StudentsExplorer({
   entries,
-  existingSubjects,
+  groups,
+  readOnly = false,
+  showOwner = false,
+  onFilteredEntriesChange,
 }: StudentsExplorerProps) {
-  const [mapping, setMapping] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [subjectFilter, setSubjectFilter] = useState("");
-  const [gradeSpanFilter, setGradeSpanFilter] = useState("");
   const [minLevel, setMinLevel] = useState("");
   const [maxLevel, setMaxLevel] = useState("");
-  const [organizeBy, setOrganizeBy] = useState<OrganizeBy>("subject");
+  const [organizeBy, setOrganizeBy] = useState<OrganizeBy>("groups");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
   );
-
-  useEffect(() => {
-    setMapping(getLabelMapping());
-  }, [entries]);
 
   const filteredEntries = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
     return entries.filter((entry) => {
       if (query) {
-        const name = resolveDisplayName(entry, mapping).toLowerCase();
+        const name = resolveDisplayName(entry).toLowerCase();
         if (!name.includes(query)) return false;
-      }
-
-      if (subjectFilter && entry.subject.trim() !== subjectFilter) {
-        return false;
-      }
-
-      if (gradeSpanFilter && entry.grade_span !== gradeSpanFilter) {
-        return false;
       }
 
       if (minLevel && entry.avg_level != null) {
@@ -201,29 +268,31 @@ export function StudentsExplorer({
 
       return true;
     });
-  }, [
-    entries,
-    mapping,
-    searchQuery,
-    subjectFilter,
-    gradeSpanFilter,
-    minLevel,
-    maxLevel,
-  ]);
+  }, [entries, searchQuery, minLevel, maxLevel]);
 
   const groupedEntries = useMemo(() => {
     switch (organizeBy) {
-      case "grade_span":
-        return groupEntriesByGradeSpan(filteredEntries);
       case "avg_level":
-        return groupEntriesByAvgLevel(filteredEntries, mapping);
+        return groupEntriesByAvgLevel(filteredEntries);
       case "flat":
-        return groupEntriesFlat(filteredEntries, mapping);
-      case "subject":
+        return groupEntriesFlat(filteredEntries);
+      case "groups":
       default:
-        return groupEntriesBySubject(filteredEntries);
+        return groupEntriesByTeacherGroups(filteredEntries, groups);
     }
-  }, [filteredEntries, organizeBy, mapping]);
+  }, [filteredEntries, groups, organizeBy]);
+
+  const filteredKey = useMemo(
+    () => filteredEntries.map((entry) => entry.student_uuid).join("\0"),
+    [filteredEntries],
+  );
+
+  const filteredEntriesRef = useRef(filteredEntries);
+  filteredEntriesRef.current = filteredEntries;
+
+  useEffect(() => {
+    onFilteredEntriesChange?.(filteredEntriesRef.current);
+  }, [filteredKey, onFilteredEntriesChange]);
 
   function toggleGroup(groupKey: string) {
     setCollapsedGroups((prev) => {
@@ -249,7 +318,7 @@ export function StudentsExplorer({
     <div className="space-y-6">
       <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <label htmlFor="student-search" className="shrink-0 font-bold text-sm">
+          <label htmlFor="student-search" className="shrink-0 text-sm font-bold">
             Search:
           </label>
           <input
@@ -282,42 +351,6 @@ export function StudentsExplorer({
 
           {showAdvancedFilters && (
             <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <label htmlFor="subject-filter" className="sr-only">
-                  Filter by subject
-                </label>
-                <select
-                  id="subject-filter"
-                  value={subjectFilter}
-                  onChange={(event) => setSubjectFilter(event.target.value)}
-                  className={selectClassName}
-                >
-                  <option value="">All subjects</option>
-                  {existingSubjects.map((subject) => (
-                    <option key={subject} value={subject}>
-                      {subject}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="grade-span-filter" className="sr-only">
-                  Filter by grade span
-                </label>
-                <select
-                  id="grade-span-filter"
-                  value={gradeSpanFilter}
-                  onChange={(event) => setGradeSpanFilter(event.target.value)}
-                  className={selectClassName}
-                >
-                  <option value="">All grade spans</option>
-                  {GRADE_SPANS.map((span) => (
-                    <option key={span} value={span}>
-                      {GRADE_SPAN_LABELS[span]}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div>
                 <label htmlFor="min-level-filter" className="sr-only">
                   Minimum average level
@@ -366,9 +399,8 @@ export function StudentsExplorer({
                   }
                   className={selectClassName}
                 >
-                  <option value="subject">Organize by subject</option>
-                  <option value="grade_span">Organize by grade span</option>
-                  <option value="avg_level">Organize by average level</option>
+                  <option value="groups">My groups</option>
+                  <option value="avg_level">By average level</option>
                   <option value="flat">Flat list (A–Z)</option>
                 </select>
               </div>
@@ -385,17 +417,21 @@ export function StudentsExplorer({
         <p className="text-sm text-muted">
           No students match the current filters.
         </p>
+      ) : groupedEntries.length === 0 ? (
+        <p className="text-sm text-muted">
+          No groups yet. Switch to Organize to create groups and sort students.
+        </p>
       ) : (
         <div className="space-y-6">
           {groupedEntries.map((group) => {
-            const isCollapsed = collapsedGroups.has(group.subject);
-            const listId = `students-group-${group.subject.replace(/\s+/g, "-").toLowerCase()}`;
+            const isCollapsed = collapsedGroups.has(group.label);
+            const listId = `students-group-${group.label.replace(/\s+/g, "-").toLowerCase()}`;
 
             return (
-              <section key={group.subject}>
+              <section key={group.label}>
                 <button
                   type="button"
-                  onClick={() => toggleGroup(group.subject)}
+                  onClick={() => toggleGroup(group.label)}
                   aria-expanded={!isCollapsed}
                   aria-controls={listId}
                   className="flex w-full items-center gap-2 text-left text-lg font-semibold text-brand-dark hover:text-brand"
@@ -415,7 +451,7 @@ export function StudentsExplorer({
                     />
                   </svg>
                   <span>
-                    {group.subject}{" "}
+                    {group.label}{" "}
                     <span className="font-normal text-muted">
                       ({group.entries.length})
                     </span>
@@ -430,7 +466,9 @@ export function StudentsExplorer({
                       <StudentRow
                         key={entry.id}
                         entry={entry}
-                        displayName={resolveDisplayName(entry, mapping)}
+                        displayName={resolveDisplayName(entry)}
+                        readOnly={readOnly}
+                        showOwner={showOwner}
                       />
                     ))}
                   </ul>

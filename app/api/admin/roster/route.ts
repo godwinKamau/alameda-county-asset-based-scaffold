@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { parse } from "csv-parse/sync";
 import { withDbGuard } from "@/lib/api/with-db-guard";
-import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
+import { isTeacherResponse, requireAdmin } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
 import {
   databaseWakingResponse,
@@ -30,9 +30,18 @@ function parseExactGrade(raw: string | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
+async function getHandler() {
+  const admin = await requireAdmin();
+  if (isTeacherResponse(admin)) return admin;
+
+  const { listSchoolRosterEntries } = await import("@/lib/db/queries");
+  const entries = await listSchoolRosterEntries(admin.school_id);
+  return NextResponse.json({ entries });
+}
+
 async function postHandler(req: Request) {
-  const teacher = await requireTeacher();
-  if (isTeacherResponse(teacher)) return teacher;
+  const admin = await requireAdmin();
+  if (isTeacherResponse(admin)) return admin;
 
   try {
     const formData = await req.formData();
@@ -53,8 +62,6 @@ async function postHandler(req: Request) {
       return NextResponse.json({ error: "CSV is empty" }, { status: 400 });
     }
 
-    const mappingRows: { label: string; student_uuid: string }[] = [];
-
     const rosterInputs = records.map((row) => {
       if (!row.label) {
         throw new Error("Each row must include label");
@@ -74,7 +81,7 @@ async function postHandler(req: Request) {
         const parsed = ExactGradeSchema.safeParse(exactGradeRaw);
         if (!parsed.success) {
           throw new Error(
-            `Row "${row.label}": exact_grade must be one of K, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12`,
+            `Row "${row.label}": exact_grade must be one of K, 1-12`,
           );
         }
         exactGrade = parsed.data;
@@ -117,7 +124,7 @@ async function postHandler(req: Request) {
     });
 
     const created = await createRosterEntries(
-      teacher.id,
+      admin.id,
       rosterInputs.map(
         ({ label, subject, grade_span, exact_grade, known_elpac_level }) => ({
           label,
@@ -127,36 +134,29 @@ async function postHandler(req: Request) {
           known_elpac_level,
         }),
       ),
+      admin.school_id,
     );
 
-    created.forEach((entry, index) => {
-      mappingRows.push({
-        label: rosterInputs[index].label,
-        student_uuid: entry.student_uuid,
-      });
-    });
-
     await recordAudit({
-      actorId: teacher.id,
+      actorId: admin.id,
       action: "roster.upload",
       resourceType: "roster",
       resourceId: null,
       req,
+      authorizedByType: "admin_role",
     });
 
-    return NextResponse.json({
-      count: mappingRows.length,
-      entries: mappingRows,
-    });
+    return NextResponse.json({ count: created.length });
   } catch (error) {
     if (isDatabaseWakingError(error)) {
       return databaseWakingResponse();
     }
-    console.error("[api/roster]", error);
+    console.error("[api/admin/roster]", error);
     const message =
       error instanceof Error ? error.message : "Failed to process roster upload";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
 
+export const GET = withDbGuard(getHandler);
 export const POST = withDbGuard(postHandler);

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { withDbGuard } from "@/lib/api/with-db-guard";
+import {
+  isSessionAccessResponse,
+  requireSessionAccess,
+} from "@/lib/auth/student-access";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
 import {
@@ -29,6 +33,9 @@ async function postHandler(req: Request) {
 
   try {
     const body = SavedInsightBodySchema.parse(await req.json());
+
+    const sessionAccess = await requireSessionAccess(teacher, body.sessionId);
+    if (isSessionAccessResponse(sessionAccess)) return sessionAccess;
 
     const saved = await saveScaffoldInsight(
       teacher.id,
@@ -79,6 +86,9 @@ async function deleteHandler(req: Request) {
 
   try {
     const body = SavedInsightBodySchema.parse(await req.json());
+
+    const sessionAccess = await requireSessionAccess(teacher, body.sessionId);
+    if (isSessionAccessResponse(sessionAccess)) return sessionAccess;
 
     const deleted = await deleteScaffoldInsight(
       teacher.id,

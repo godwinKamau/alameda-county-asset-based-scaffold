@@ -6,6 +6,7 @@ import { DashboardShell } from "@/components/DashboardShell";
 import { DbWakingBanner } from "@/components/DbWakingBanner";
 import { InsightCard } from "@/components/InsightCard";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
+import { getStudentAccess } from "@/lib/auth/student-access";
 import { recordAudit, hashEmail } from "@/lib/audit/log";
 import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
@@ -13,7 +14,6 @@ import {
   getSessionWithInsight,
   listSavedItemIndicesForSession,
 } from "@/lib/db/queries";
-import { getCaEldLevelLabel } from "@/lib/elpac/labels";
 import { getStudentDisplayName } from "@/lib/roster/display";
 import { btnSecondaryClassName, cardClassName } from "@/lib/ui/styles";
 
@@ -39,20 +39,29 @@ export default async function AnalysisResultsPage({
   try {
     teacher = await findTeacherByEmailHash(hashEmail(email));
     if (teacher) {
-      session = await getSessionWithInsight(teacher.id, sessionId);
-      if (session) {
-        savedScaffoldIndices = await listSavedItemIndicesForSession(
+      const sessionRow = await getSessionWithInsight(sessionId);
+      if (sessionRow) {
+        const access = await getStudentAccess(
           teacher.id,
-          sessionId,
+          sessionRow.student_uuid,
         );
-        const headerList = await headers();
-        await recordAudit({
-          actorId: teacher.id,
-          action: "analysis.read",
-          resourceType: "analysis_session",
-          resourceId: sessionId,
-          req: new Request("http://localhost", { headers: headerList }),
-        });
+        if (access) {
+          session = sessionRow;
+          savedScaffoldIndices = await listSavedItemIndicesForSession(
+            teacher.id,
+            sessionId,
+          );
+          const headerList = await headers();
+          await recordAudit({
+            actorId: teacher.id,
+            action: "analysis.read",
+            resourceType: "analysis_session",
+            resourceId: sessionId,
+            req: new Request("http://localhost", { headers: headerList }),
+            authorizedBy: access.grantId,
+            authorizedByType: "grade_grant",
+          });
+        }
       }
     }
   } catch (err) {
@@ -81,7 +90,6 @@ export default async function AnalysisResultsPage({
     student_uuid: session.student_uuid,
   });
   const estimatedLevel = session.insight.estimated_level;
-  const eldLevelLabel = getCaEldLevelLabel(estimatedLevel);
 
   return (
     <DashboardShell title="Analysis Results">
@@ -122,7 +130,7 @@ export default async function AnalysisResultsPage({
             </h2>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-brand-soft px-3 py-1 text-sm font-semibold text-brand-dark ring-1 ring-brand-soft">
-                Level {estimatedLevel} · {eldLevelLabel}
+                Level {estimatedLevel}
               </span>
               <span className="text-sm text-muted">
                 Grade span: {session.grade_span}

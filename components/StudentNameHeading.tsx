@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getLabelMapping, resolveDisplayName } from "@/lib/roster/group";
+import { getStudentDisplayName } from "@/lib/roster/display";
 
 interface StudentNameHeadingProps {
   label: string | null;
@@ -14,20 +13,9 @@ export function StudentNameHeading({
   studentUuid,
   className = "text-2xl font-semibold text-brand-dark",
 }: StudentNameHeadingProps) {
-  const [displayName, setDisplayName] = useState<string>(() => {
-    const trimmed = label?.trim();
-    if (trimmed) return trimmed;
-    return `${studentUuid.slice(0, 8)}…`;
-  });
-
-  useEffect(() => {
-    const mapping = getLabelMapping();
-    const resolved = resolveDisplayName(
-      { label: label ?? "", student_uuid: studentUuid },
-      mapping,
-    );
-    setDisplayName(resolved);
-  }, [label, studentUuid]);
+  const displayName =
+    label?.trim() ||
+    getStudentDisplayName({ label: "", student_uuid: studentUuid });
 
   return <h2 className={className}>{displayName}</h2>;
 }

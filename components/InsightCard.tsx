@@ -2,10 +2,6 @@
 
 import { useState } from "react";
 import type { Insight } from "@/lib/types";
-import {
-  getCaEldLevelLabel,
-  getElpacPerformanceLevelLabel,
-} from "@/lib/elpac/labels";
 import { LevelSkeleton, SectionSkeleton } from "./InsightSkeletons";
 import { Panel } from "./Panel";
 import { RichSentenceList } from "./RichSentenceList";
@@ -184,12 +180,6 @@ export function InsightCard({
                 <div className="min-w-0 pt-1">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted">
                     ELPAC Level {insight.estimated_level}
-                  </p>
-                  <p className="mt-1 text-2xl font-semibold leading-tight text-brand-dark">
-                    {getCaEldLevelLabel(insight.estimated_level!)}
-                  </p>
-                  <p className="mt-1 text-sm text-muted">
-                    {getElpacPerformanceLevelLabel(insight.estimated_level!)}
                   </p>
                 </div>
               </div>

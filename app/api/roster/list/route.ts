@@ -2,19 +2,30 @@ import { NextResponse } from "next/server";
 import { withDbGuard } from "@/lib/api/with-db-guard";
 import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
 import { listRosterEntries } from "@/lib/db/queries";
+import { listHiddenStudentUuids } from "@/lib/db/teacher-groups";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getHandler(_req: Request) {
+async function getHandler(req: Request) {
   const teacher = await requireTeacher();
   if (isTeacherResponse(teacher)) return teacher;
 
-  const entries = await listRosterEntries(teacher.id);
+  const url = new URL(req.url);
+  const includeHidden = url.searchParams.get("include_hidden") === "1";
+
+  const [entries, hidden] = await Promise.all([
+    listRosterEntries(teacher.id),
+    includeHidden ? Promise.resolve([]) : listHiddenStudentUuids(teacher.id),
+  ]);
+
+  const hiddenSet = new Set(hidden);
+  const filtered = includeHidden
+    ? entries
+    : entries.filter((entry) => !hiddenSet.has(entry.student_uuid));
 
   return NextResponse.json({
-    entries: entries.map((entry) => ({
+    entries: filtered.map((entry) => ({
       student_uuid: entry.student_uuid,
       label: entry.label,
       subject: entry.subject,

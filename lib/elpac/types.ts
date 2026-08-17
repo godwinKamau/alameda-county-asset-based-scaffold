@@ -13,16 +13,25 @@ export const PldGradeSpanSchema = z.object({
   "4": PldLevelSchema,
 });
 
+const DomainPldBlockSchema = z
+  .object({
+    _notes: z.string().optional(),
+    K: PldGradeSpanSchema.optional(),
+    "1-2": PldGradeSpanSchema.optional(),
+    "3-12": PldGradeSpanSchema.optional(),
+    "K-2": PldGradeSpanSchema.optional(),
+  })
+  .passthrough();
+
 export const ElPacPldsSchema = z.object({
   range_plds: z.object({
-    writing: z.object({
-      K: PldGradeSpanSchema,
-      "1-2": PldGradeSpanSchema,
-      "3-12": PldGradeSpanSchema,
-    }),
+    writing: DomainPldBlockSchema,
+    reading: DomainPldBlockSchema,
+    listening: DomainPldBlockSchema,
+    speaking: DomainPldBlockSchema,
   }),
 });
 
 export type ElPacPlds = z.infer<typeof ElPacPldsSchema>;
 export type PldLevel = z.infer<typeof PldLevelSchema>;
-export type GradeSpanKey = keyof ElPacPlds["range_plds"]["writing"];
+export type GradeSpanKey = "K" | "1-2" | "3-12" | "K-2";

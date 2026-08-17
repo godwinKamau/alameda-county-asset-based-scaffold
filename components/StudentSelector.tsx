@@ -25,29 +25,6 @@ interface StudentSelectorProps {
   subjectFilter?: string;
 }
 
-function getLabelMapping(): Record<string, string> {
-  if (typeof window === "undefined") return {};
-  try {
-    return JSON.parse(localStorage.getItem("student_label_mapping") ?? "{}");
-  } catch {
-    return {};
-  }
-}
-
-function resolveLabel(
-  entry: { student_uuid: string; label?: string },
-  mapping: Record<string, string>,
-): string {
-  const fromDb = entry.label?.trim();
-  if (fromDb) return fromDb;
-  const fromLocal = mapping[entry.student_uuid]?.trim();
-  if (fromLocal) return fromLocal;
-  return getStudentDisplayName({
-    label: "",
-    student_uuid: entry.student_uuid,
-  });
-}
-
 export function StudentSelector({
   value,
   onChange,
@@ -73,7 +50,6 @@ export function StudentSelector({
         }
 
         const data = await response.json();
-        const mapping = getLabelMapping();
 
         setOptions(
           data.entries.map(
@@ -88,7 +64,12 @@ export function StudentSelector({
               ...entry,
               subject: entry.subject ?? "",
               exact_grade: entry.exact_grade ?? null,
-              label: resolveLabel(entry, mapping),
+              label:
+                entry.label?.trim() ||
+                getStudentDisplayName({
+                  label: "",
+                  student_uuid: entry.student_uuid,
+                }),
             }),
           ),
         );

@@ -112,6 +112,7 @@ export interface AnalysisSessionWithInsight {
   grade_span: GradeSpan;
   provided_elpac_level: number | null;
   submitted_at: Date;
+  teacher_id?: string;
   insight: Insight;
 }
 
@@ -125,7 +126,67 @@ export interface SchoolAccessRow {
   school_id: string;
   school_name: string;
   access_level: "read" | "write";
+  grade_span: GradeSpan | null;
+  exact_grade: ExactGrade | null;
   granted_at: Date;
+  expires_at: Date | null;
+  revoked_at: Date | null;
+  note: string | null;
+  teacher_id?: string;
+}
+
+export interface GradeTeam {
+  id: string;
+  school_id: string;
+  school_name?: string;
+  name: string;
+  grade_span: GradeSpan | null;
+  exact_grade: ExactGrade | null;
+  created_by: string | null;
+  created_at: Date;
+}
+
+export interface GradeTeamMember {
+  id: string;
+  team_id: string;
+  teacher_id: string;
+  added_by: string | null;
+  added_at: Date;
+  revoked_at: Date | null;
+}
+
+export type ViewAuthorizationType = "owner" | "grade_team" | "school_access";
+
+export interface ViewAuthorizationSource {
+  type: ViewAuthorizationType;
+  id: string | null;
+}
+
+export interface ViewAuthorization {
+  ownerTeacherId: string;
+  source: ViewAuthorizationSource;
+}
+
+export interface SharedRosterEntryWithStats extends RosterEntryWithStats {
+  owner_teacher_id: string;
+  access_source: ViewAuthorizationType;
+  authorization_id: string | null;
+}
+
+export interface GradeTeamGrant {
+  member_id: string;
+  team_id: string;
+  school_id: string;
+  grade_span: GradeSpan;
+  exact_grade: ExactGrade | null;
+}
+
+export interface SchoolGrant {
+  id: string;
+  school_id: string;
+  grade_span: GradeSpan | null;
+  exact_grade: ExactGrade | null;
+  access_level: "read" | "write";
 }
 
 export interface SavedInsight {
@@ -140,4 +201,35 @@ export interface SavedInsight {
   grade_span: GradeSpan;
   submitted_at: Date;
   created_at: Date;
+}
+
+export type GrantOrigin = "admin" | "request" | "migrated";
+export type RequestStatus = "pending" | "approved" | "denied" | "withdrawn";
+
+export interface GradeGrant {
+  id: string;
+  teacher_id: string;
+  school_id: string;
+  exact_grade: ExactGrade | null;
+  granted_by: string | null;
+  granted_at: Date;
+  expires_at: Date | null;
+  revoked_at: Date | null;
+  revoked_by: string | null;
+  origin: GrantOrigin;
+  request_id: string | null;
+  note: string | null;
+}
+
+export interface GradeAccessRequest {
+  id: string;
+  teacher_id: string;
+  school_id: string;
+  exact_grade: ExactGrade | null;
+  reason: string | null;
+  status: RequestStatus;
+  requested_at: Date;
+  decided_at: Date | null;
+  decided_by: string | null;
+  decision_note: string | null;
 }

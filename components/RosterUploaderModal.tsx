@@ -16,8 +16,12 @@ import { ErrorBanner } from "./ErrorBanner";
 
 export function RosterUploaderModal({
   buttonClassName = btnUploadCsvClassName,
+  apiBase = "/api/roster",
+  onSuccess,
 }: {
   buttonClassName?: string;
+  apiBase?: string;
+  onSuccess?: () => void;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -64,7 +68,7 @@ export function RosterUploaderModal({
       const body = new FormData();
       body.append("file", file);
 
-      const response = await apiFetch("/api/roster", {
+      const response = await apiFetch(apiBase, {
         method: "POST",
         body,
       });
@@ -76,23 +80,14 @@ export function RosterUploaderModal({
 
       const payload = (await response.json()) as {
         count: number;
-        entries: { label: string; student_uuid: string }[];
       };
 
-      const mapping: Record<string, string> = {};
-      for (const entry of payload.entries ?? []) {
-        if (entry.label && entry.student_uuid) {
-          mapping[entry.student_uuid] = entry.label;
-        }
-      }
-
-      localStorage.setItem("student_label_mapping", JSON.stringify(mapping));
       setSuccess(
-        `Uploaded ${payload.count} student${payload.count === 1 ? "" : "s"} to your roster.`,
+        `Uploaded ${payload.count} student${payload.count === 1 ? "" : "s"}.`,
       );
 
       form.reset();
-      router.refresh();
+      onSuccess?.() ?? router.refresh();
     } catch (uploadError) {
       if (isDatabaseWakingError(uploadError)) return;
       setError(

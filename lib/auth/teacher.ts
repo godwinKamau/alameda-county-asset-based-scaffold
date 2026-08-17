@@ -45,3 +45,18 @@ export function isTeacherResponse(
 ): value is NextResponse {
   return value instanceof NextResponse;
 }
+
+export async function requireAdmin(): Promise<TeacherAccount | NextResponse> {
+  const teacher = await requireTeacher();
+  if (isTeacherResponse(teacher)) return teacher;
+
+  if (teacher.role !== "eld_coordinator" && teacher.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return teacher;
+}
+
+export function isAdminRole(role: TeacherAccount["role"]): boolean {
+  return role === "eld_coordinator" || role === "admin";
+}

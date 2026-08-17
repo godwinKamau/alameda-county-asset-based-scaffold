@@ -1,54 +1,48 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { withDbGuard } from "@/lib/api/with-db-guard";
-import { isTeacherResponse, requireTeacher } from "@/lib/auth/teacher";
+import { isTeacherResponse, requireAdmin } from "@/lib/auth/teacher";
 import { recordAudit } from "@/lib/audit/log";
 import {
   databaseWakingResponse,
   isDatabaseWakingError,
 } from "@/lib/db/errors";
 import {
-  rosterEntryBelongsToTeacher,
-  updateRosterEntryGrade,
+  rosterEntryInSchool,
+  updateRosterEntryGradeBySchool,
 } from "@/lib/db/queries";
-import { resolveRosterGradeFields } from "@/lib/roster/grade";
 import { ExactGradeSchema, GradeSpanSchema } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const UpdateGradeSchema = z.object({
-  grade_span: GradeSpanSchema.optional(),
-  exact_grade: ExactGradeSchema.nullable().optional(),
+  grade_span: GradeSpanSchema,
+  exact_grade: ExactGradeSchema,
 });
 
 async function patchHandler(
   req: Request,
   { params }: { params: Promise<{ uuid: string }> },
 ) {
-  const teacher = await requireTeacher();
-  if (isTeacherResponse(teacher)) return teacher;
+  const admin = await requireAdmin();
+  if (isTeacherResponse(admin)) return admin;
 
   const { uuid } = await params;
 
   try {
     const body = UpdateGradeSchema.parse(await req.json());
 
-    const belongs = await rosterEntryBelongsToTeacher(teacher.id, uuid);
-    if (!belongs) {
+    const inSchool = await rosterEntryInSchool(admin.school_id, uuid);
+    if (!inSchool) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    const resolved = resolveRosterGradeFields({
-      grade_span: body.grade_span,
-      exact_grade: body.exact_grade ?? "",
-    });
-
-    const updated = await updateRosterEntryGrade(
-      teacher.id,
+    const updated = await updateRosterEntryGradeBySchool(
+      admin.school_id,
       uuid,
-      resolved.grade_span,
-      resolved.exact_grade,
+      body.grade_span,
+      body.exact_grade,
     );
 
     if (!updated) {
@@ -59,16 +53,17 @@ async function patchHandler(
     }
 
     await recordAudit({
-      actorId: teacher.id,
+      actorId: admin.id,
       action: "roster.update_grade",
       resourceType: "roster",
       resourceId: uuid,
       req,
+      authorizedByType: "admin_role",
     });
 
     return NextResponse.json({
-      grade_span: resolved.grade_span,
-      exact_grade: resolved.exact_grade,
+      grade_span: body.grade_span,
+      exact_grade: body.exact_grade,
     });
   } catch (error) {
     if (isDatabaseWakingError(error)) {
@@ -80,10 +75,7 @@ async function patchHandler(
         { status: 400 },
       );
     }
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    console.error("[api/roster/[uuid]/grade]", error);
+    console.error("[api/admin/roster/[uuid]/grade]", error);
     return NextResponse.json(
       { error: "Failed to update grade" },
       { status: 400 },

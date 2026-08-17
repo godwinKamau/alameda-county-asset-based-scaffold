@@ -2,7 +2,10 @@ import "server-only";
 
 import fs from "fs";
 import path from "path";
-import { ElPacPldsSchema, type ElPacPlds } from "./types";
+import type { ElpacDomain } from "./domain";
+import { mapGradeSpanToPldSpan } from "./domain";
+import { ElPacPldsSchema, type ElPacPlds, type PldLevel } from "./types";
+import type { GradeSpan } from "@/lib/types";
 
 let cachedPlds: ElPacPlds | null = null;
 
@@ -33,8 +36,24 @@ export function loadElPacPlds(): ElPacPlds {
 }
 
 export function getWritingPldsForGradeSpan(
-  gradeSpan: "K" | "1-2" | "3-12",
-): ElPacPlds["range_plds"]["writing"][typeof gradeSpan] {
+  gradeSpan: GradeSpan,
+): Record<"1" | "2" | "3" | "4", PldLevel> {
+  return getPldsForDomainAndSpan("writing", gradeSpan);
+}
+
+export function getPldsForDomainAndSpan(
+  domain: ElpacDomain,
+  gradeSpan: GradeSpan,
+): Record<"1" | "2" | "3" | "4", PldLevel> {
   const plds = loadElPacPlds();
-  return plds.range_plds.writing[gradeSpan];
+  const spanKey = mapGradeSpanToPldSpan(domain, gradeSpan);
+  const domainBlock = plds.range_plds[domain] as Record<
+    string,
+    Record<"1" | "2" | "3" | "4", PldLevel>
+  >;
+  const spanPlds = domainBlock[spanKey];
+  if (!spanPlds) {
+    throw new Error(`No PLDs for domain ${domain} span ${spanKey}`);
+  }
+  return spanPlds;
 }

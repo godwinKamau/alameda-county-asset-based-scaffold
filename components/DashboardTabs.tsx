@@ -1,12 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { AddStudentForm } from "@/components/AddStudentForm";
-import { RosterList, type RosterListEntry } from "@/components/RosterList";
+import { useMemo } from "react";
 import { buildAnalyzeUrl } from "@/lib/analyze/url";
-import { getCaEldLevelLabel } from "@/lib/elpac/labels";
 import {
   formatRelativeTime,
   formatStudentGradeLabel,
@@ -17,25 +13,25 @@ import {
 import {
   badgeLevelClassName,
   badgeNeverAnalyzedClassName,
-  btnDashboardActionClassName,
   btnRowActionClassName,
   btnSecondaryClassName,
-  tabButtonActiveClassName,
-  tabButtonInactiveClassName,
-  tabListClassName,
 } from "@/lib/ui/styles";
 
-export interface DashboardRosterEntry extends RosterListEntry {
+export interface DashboardRosterEntry {
+  id: string;
+  student_uuid: string;
+  label: string;
+  subject: string;
+  grade_span: import("@/lib/types").GradeSpan;
+  exact_grade: import("@/lib/types").ExactGrade | null;
+  known_elpac_level: number | null;
   session_count: number;
   avg_level: number | null;
   last_session_at: string | null;
 }
 
-type TabId = "today" | "manage";
-
 interface DashboardTabsProps {
   entries: DashboardRosterEntry[];
-  existingSubjects: string[];
 }
 
 function StudentAvatar({ label }: { label: string }) {
@@ -83,9 +79,6 @@ function WorkStudentCard({
               {level != null && (
                 <span className={badgeLevelClassName(level)}>
                   Level {level}
-                  {getCaEldLevelLabel(level) !== `Level ${level}`
-                    ? ` · ${getCaEldLevelLabel(level)}`
-                    : ""}
                 </span>
               )}
               {entry.last_session_at && (
@@ -98,17 +91,20 @@ function WorkStudentCard({
         </div>
       </div>
       <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-        {variant === "recent" && (
-          <Link
-            href={`/student/${entry.student_uuid}`}
-            className={`${btnSecondaryClassName} ${btnRowActionClassName}`}
-          >
-            History
-          </Link>
-        )}
         <Link
-          href={buildAnalyzeUrl(entry)}
-          className={`${btnDashboardActionClassName} ${btnRowActionClassName}`}
+          href={`/student/${entry.student_uuid}`}
+          className={btnSecondaryClassName}
+        >
+          History
+        </Link>
+        <Link
+          href={buildAnalyzeUrl({
+            student_uuid: entry.student_uuid,
+            subject: entry.subject,
+            grade_span: entry.grade_span,
+            known_elpac_level: entry.known_elpac_level,
+          })}
+          className={btnRowActionClassName}
         >
           Analyze
         </Link>
@@ -117,53 +113,7 @@ function WorkStudentCard({
   );
 }
 
-export function DashboardTabs({
-  entries,
-  existingSubjects,
-}: DashboardTabsProps) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab");
-  const [activeTab, setActiveTab] = useState<TabId>(
-    tabParam === "manage" ? "manage" : "today",
-  );
-  const formRef = useRef<HTMLDivElement>(null);
-
-  function navigateToTab(tab: TabId) {
-    const params = new URLSearchParams(searchParams.toString());
-    if (tab === "manage") {
-      params.set("tab", "manage");
-    } else {
-      params.delete("tab");
-    }
-    const qs = params.toString();
-    window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
-  }
-
-  function handleTabClick(tab: TabId) {
-    setActiveTab(tab);
-    navigateToTab(tab);
-  }
-
-  useEffect(() => {
-    function handleTabChange(event: Event) {
-      const tab = (event as CustomEvent<{ tab: TabId }>).detail.tab;
-      setActiveTab(tab);
-      if (tab === "manage") {
-        formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-
-    window.addEventListener("dashboardTabChange", handleTabChange);
-    return () => window.removeEventListener("dashboardTabChange", handleTabChange);
-  }, []);
-
-  useEffect(() => {
-    if (activeTab === "manage") {
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [activeTab]);
-
+export function DashboardTabs({ entries }: DashboardTabsProps) {
   const neverAnalyzed = useMemo(
     () => entries.filter((entry) => entry.session_count === 0),
     [entries],
@@ -185,112 +135,49 @@ export function DashboardTabs({
     [entries],
   );
 
-  const rosterEntries: RosterListEntry[] = entries;
-
   return (
-    <div className="space-y-6">
-      <div role="tablist" aria-label="Dashboard views" className={tabListClassName}>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "today"}
-          id="tab-today"
-          aria-controls="panel-today"
-          onClick={() => handleTabClick("today")}
-          className={
-            activeTab === "today"
-              ? tabButtonActiveClassName
-              : tabButtonInactiveClassName
-          }
-        >
-          Today&apos;s work
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "manage"}
-          id="tab-manage"
-          aria-controls="panel-manage"
-          onClick={() => handleTabClick("manage")}
-          className={
-            activeTab === "manage"
-              ? tabButtonActiveClassName
-              : tabButtonInactiveClassName
-          }
-        >
-          Manage roster
-        </button>
-      </div>
+    <div className="space-y-8">
+      <section>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          Needs attention — never analyzed
+        </h2>
+        {neverAnalyzed.length === 0 ? (
+          <p className="mt-3 text-sm text-muted">
+            All accessible students have at least one analysis.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-3">
+            {neverAnalyzed.map((entry) => (
+              <WorkStudentCard
+                key={entry.id}
+                entry={entry}
+                variant="attention"
+              />
+            ))}
+          </ul>
+        )}
+      </section>
 
-      {activeTab === "today" ? (
-        <div
-          id="panel-today"
-          role="tabpanel"
-          aria-labelledby="tab-today"
-          className="space-y-8"
-        >
-          <section>
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
-              Needs attention — never analyzed
-            </h2>
-            {neverAnalyzed.length === 0 ? (
-              <p className="mt-3 text-sm text-muted">
-                All students in your roster have at least one analysis.
-              </p>
-            ) : (
-              <ul className="mt-3 space-y-3">
-                {neverAnalyzed.map((entry) => (
-                  <WorkStudentCard
-                    key={entry.id}
-                    entry={entry}
-                    variant="attention"
-                  />
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section>
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
-              Recently analyzed
-            </h2>
-            {recentlyAnalyzed.length === 0 ? (
-              <p className="mt-3 text-sm text-muted">
-                No analyses yet. Start with a student who needs attention above.
-              </p>
-            ) : (
-              <ul className="mt-3 space-y-3">
-                {recentlyAnalyzed.map((entry) => (
-                  <WorkStudentCard
-                    key={entry.id}
-                    entry={entry}
-                    variant="recent"
-                  />
-                ))}
-              </ul>
-            )}
-          </section>
-        </div>
-      ) : (
-        <div
-          id="panel-manage"
-          role="tabpanel"
-          aria-labelledby="tab-manage"
-          className="space-y-8"
-        >
-          <div ref={formRef}>
-            <AddStudentForm existingSubjects={existingSubjects} />
-          </div>
-          <section className="ui-card p-6">
-            <h2 className="text-lg font-semibold text-brand-dark">Your Roster</h2>
-            <RosterList
-              entries={rosterEntries}
-              existingSubjects={existingSubjects}
-              manageMode
-            />
-          </section>
-        </div>
-      )}
+      <section>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          Recently analyzed
+        </h2>
+        {recentlyAnalyzed.length === 0 ? (
+          <p className="mt-3 text-sm text-muted">
+            No analyses yet. Start with a student who needs attention above.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-3">
+            {recentlyAnalyzed.map((entry) => (
+              <WorkStudentCard
+                key={entry.id}
+                entry={entry}
+                variant="recent"
+              />
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

@@ -15,6 +15,8 @@ import {
   listSavedItemIndicesForSession,
 } from "@/lib/db/queries";
 import { getStudentDisplayName } from "@/lib/roster/display";
+import { INSTRUCTIONAL_ESTIMATE_DISCLAIMER } from "@/lib/elpac/copy";
+import { domainLabel } from "@/lib/elpac/domain";
 import { btnSecondaryClassName, cardClassName } from "@/lib/ui/styles";
 
 interface AnalysisResultsPageProps {
@@ -133,6 +135,14 @@ export default async function AnalysisResultsPage({
                 Level {estimatedLevel}
               </span>
               <span className="text-sm text-muted">
+                Domain: {domainLabel(session.domain as import("@/lib/elpac/domain").ElpacDomain)}
+              </span>
+              {"evidence_kind" in session ? (
+                <span className="text-sm text-muted">
+                  Evidence: {session.evidence_kind.replaceAll("_", " ")}
+                </span>
+              ) : null}
+              <span className="text-sm text-muted">
                 Grade span: {session.grade_span}
               </span>
               {session.provided_elpac_level != null && (
@@ -141,6 +151,9 @@ export default async function AnalysisResultsPage({
                 </span>
               )}
             </div>
+            <p className="mt-3 text-xs text-muted">
+              {INSTRUCTIONAL_ESTIMATE_DISCLAIMER}
+            </p>
           </header>
           <InsightCard
             insight={session.insight}

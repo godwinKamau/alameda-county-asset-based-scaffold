@@ -1,6 +1,7 @@
 import type { Insight } from "@/lib/types";
 
 export type AnalyzeStreamEvent =
+  | { type: "stage"; stage: "preparing" | "transcribing" | "analyzing" }
   | { type: "snapshot"; insight: Partial<Insight> }
   | { type: "complete"; sessionId: string; insight: Insight }
   | { type: "error"; message: string };
@@ -8,6 +9,7 @@ export type AnalyzeStreamEvent =
 export async function consumeAnalyzeStream(
   body: ReadableStream<Uint8Array>,
   handlers: {
+    onStage?: (stage: AnalyzeStreamEvent & { type: "stage" }) => void;
     onSnapshot?: (insight: Partial<Insight>) => void;
     onComplete?: (sessionId: string, insight: Insight) => void;
     onError?: (message: string) => void;
@@ -20,6 +22,9 @@ export async function consumeAnalyzeStream(
 
   const dispatch = (event: AnalyzeStreamEvent) => {
     switch (event.type) {
+      case "stage":
+        handlers.onStage?.(event);
+        break;
       case "snapshot":
         handlers.onSnapshot?.(event.insight);
         break;

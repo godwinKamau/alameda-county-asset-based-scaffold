@@ -3,12 +3,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { DashboardShell } from "@/components/DashboardShell";
 import { DbWakingBanner } from "@/components/DbWakingBanner";
-import { AccessRequestQueue } from "@/components/admin/AccessRequestQueue";
-import { GradeGrantManager } from "@/components/admin/GradeGrantManager";
-import { AuditLogViewer } from "@/components/admin/AuditLogViewer";
-import { TeacherRoleManager } from "@/components/admin/TeacherRoleManager";
-import { MissingGradeQueue } from "@/components/admin/MissingGradeQueue";
-import { SchoolRosterManager } from "@/components/admin/SchoolRosterManager";
+import { AdminPanel } from "@/components/admin/AdminPanel";
 import { recordAudit, hashEmail } from "@/lib/audit/log";
 import { isDatabaseWakingError } from "@/lib/db/errors";
 import {
@@ -60,13 +55,12 @@ export default async function AdminPage() {
 
   return (
     <DashboardShell title="Admin">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <MissingGradeQueue initialCount={missingGradeCount} />
-        <SchoolRosterManager />
-        <GradeGrantManager defaultSchoolId={teacher.school_id} />
-        <AccessRequestQueue />
-        <TeacherRoleManager currentTeacherId={teacher.id} />
-        <AuditLogViewer />
+      <div className="mx-auto max-w-5xl">
+        <AdminPanel
+          missingGradeCount={missingGradeCount}
+          schoolId={teacher.school_id}
+          currentTeacherId={teacher.id}
+        />
       </div>
     </DashboardShell>
   );

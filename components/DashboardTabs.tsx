@@ -13,6 +13,7 @@ import {
 import {
   badgeLevelClassName,
   badgeNeverAnalyzedClassName,
+  btnDashboardActionClassName,
   btnRowActionClassName,
   btnSecondaryClassName,
 } from "@/lib/ui/styles";
@@ -93,7 +94,7 @@ function WorkStudentCard({
       <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
         <Link
           href={`/student/${entry.student_uuid}`}
-          className={btnSecondaryClassName}
+          className={`${btnSecondaryClassName} ${btnRowActionClassName}`}
         >
           History
         </Link>
@@ -104,7 +105,7 @@ function WorkStudentCard({
             grade_span: entry.grade_span,
             known_elpac_level: entry.known_elpac_level,
           })}
-          className={btnRowActionClassName}
+          className={`${btnDashboardActionClassName} ${btnRowActionClassName}`}
         >
           Analyze
         </Link>

@@ -23,7 +23,26 @@ const DomainPldBlockSchema = z
   })
   .passthrough();
 
+const GeneralPldLevelSchema = z.object({
+  label: z.string(),
+  ca_eld_equivalent: z.string(),
+  summary: z.string(),
+  support_familiar_contexts: z.string(),
+  support_unfamiliar_contexts: z.string(),
+});
+
+const GeneralPldsSchema = z.object({
+  description: z.string(),
+  levels: z.object({
+    "1": GeneralPldLevelSchema,
+    "2": GeneralPldLevelSchema,
+    "3": GeneralPldLevelSchema,
+    "4": GeneralPldLevelSchema,
+  }),
+});
+
 export const ElPacPldsSchema = z.object({
+  general_plds: GeneralPldsSchema.optional(),
   range_plds: z.object({
     writing: DomainPldBlockSchema,
     reading: DomainPldBlockSchema,
@@ -33,5 +52,6 @@ export const ElPacPldsSchema = z.object({
 });
 
 export type ElPacPlds = z.infer<typeof ElPacPldsSchema>;
+export type GeneralPlds = z.infer<typeof GeneralPldsSchema>;
 export type PldLevel = z.infer<typeof PldLevelSchema>;
 export type GradeSpanKey = "K" | "1-2" | "3-12" | "K-2";

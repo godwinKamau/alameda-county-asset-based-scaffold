@@ -48,6 +48,14 @@ function NavIconSaved() {
   );
 }
 
+function NavIconFeedback() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h8M8 14h5M21 12c0 3.866-3.582 7-8 7a8.96 8.96 0 01-4.126-.984L3 21l1.984-5.874A8.96 8.96 0 013 12c0-3.866 3.582-7 8-7s8 3.134 8 7z" />
+    </svg>
+  );
+}
+
 function NavIconAdmin() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.75}>
@@ -81,6 +89,12 @@ const navItems: NavItem[] = [
     label: "Saved Insights",
     icon: <NavIconSaved />,
     match: (p) => p.startsWith("/saved"),
+  },
+  {
+    href: "/feedback",
+    label: "Feedback",
+    icon: <NavIconFeedback />,
+    match: (p) => p.startsWith("/feedback"),
   },
 ];
 

@@ -1,8 +1,12 @@
+import type { ElpacDomain } from "@/lib/elpac/domain";
+import type { EvidenceKind } from "@/lib/elpac/evidence";
 import type { GradeSpan } from "@/lib/types";
 
 export interface PendingAnalyzeContext {
   studentUuid: string;
   studentLabel: string;
+  domain: ElpacDomain;
+  evidenceKind: EvidenceKind;
   gradeSpan: GradeSpan;
   providedLevel: string | null;
   subject: string;

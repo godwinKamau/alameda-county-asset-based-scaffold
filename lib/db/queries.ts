@@ -554,6 +554,7 @@ export interface InsertSessionInput {
   teacherId: string;
   studentUuid: string;
   domain: import("@/lib/elpac/domain").ElpacDomain;
+  evidenceKind: import("@/lib/elpac/evidence").EvidenceKind;
   gradeSpan: GradeSpan;
   exactGrade?: ExactGrade | null;
   providedElpacLevel?: number | null;
@@ -571,13 +572,14 @@ export async function insertSessionAndInsight(
   return withTransaction(async (client: PoolClient) => {
     const sessionResult = await client.query<{ id: string }>(
       `INSERT INTO analysis_sessions
-         (teacher_id, student_uuid, domain, grade_span, exact_grade, provided_elpac_level)
-       VALUES ($1, $2, $3, $4, $5, $6)
+         (teacher_id, student_uuid, domain, evidence_kind, grade_span, exact_grade, provided_elpac_level)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
       [
         input.teacherId,
         input.studentUuid,
         input.domain,
+        input.evidenceKind,
         input.gradeSpan,
         input.exactGrade ?? null,
         input.providedElpacLevel ?? null,
@@ -673,6 +675,7 @@ export async function listSessionsForStudent(
        s.id,
        s.student_uuid,
        s.domain,
+       s.evidence_kind,
        s.grade_span,
        s.provided_elpac_level,
        s.submitted_at,
@@ -698,6 +701,7 @@ export async function listSessionsForStudent(
     id: row.id,
     student_uuid: row.student_uuid,
     domain: row.domain,
+    evidence_kind: row.evidence_kind as import("@/lib/elpac/evidence").EvidenceKind,
     grade_span: row.grade_span as GradeSpan,
     provided_elpac_level: row.provided_elpac_level,
     submitted_at: row.submitted_at,
@@ -730,6 +734,7 @@ export async function getSessionWithInsight(
        s.id,
        s.student_uuid,
        s.domain,
+       s.evidence_kind,
        s.grade_span,
        s.provided_elpac_level,
        s.submitted_at,
@@ -760,6 +765,7 @@ export async function getSessionWithInsight(
     id: row.id,
     student_uuid: row.student_uuid,
     domain: row.domain,
+    evidence_kind: row.evidence_kind as import("@/lib/elpac/evidence").EvidenceKind,
     grade_span: row.grade_span as GradeSpan,
     provided_elpac_level: row.provided_elpac_level,
     submitted_at: row.submitted_at,
@@ -775,7 +781,8 @@ export async function listDomainLevelsByTeacherForStudent(
   {
     teacher_id: string;
     domain: string;
-    avg_level: number;
+    evidence_kind: string;
+    level_sum: number;
     session_count: number;
   }[]
 > {
@@ -783,23 +790,25 @@ export async function listDomainLevelsByTeacherForStudent(
   const result = await pool.query<{
     teacher_id: string;
     domain: string;
-    avg_level: string;
+    evidence_kind: string;
+    level_sum: string;
     session_count: string;
   }>(
-    `SELECT s.teacher_id, s.domain,
-            AVG(i.estimated_level) AS avg_level,
+    `SELECT s.teacher_id, s.domain, s.evidence_kind,
+            SUM(i.estimated_level)::float AS level_sum,
             COUNT(*)::int AS session_count
      FROM analysis_sessions s
      JOIN insights i ON i.session_id = s.id
      WHERE s.student_uuid = $1
-     GROUP BY s.teacher_id, s.domain
-     ORDER BY s.teacher_id, s.domain`,
+     GROUP BY s.teacher_id, s.domain, s.evidence_kind
+     ORDER BY s.teacher_id, s.domain, s.evidence_kind`,
     [studentUuid],
   );
   return result.rows.map((row) => ({
     teacher_id: row.teacher_id,
     domain: row.domain,
-    avg_level: Number(row.avg_level),
+    evidence_kind: row.evidence_kind,
+    level_sum: Number(row.level_sum),
     session_count: Number(row.session_count),
   }));
 }
@@ -810,16 +819,22 @@ export async function listDomainLevelsForTeacherStudents(
   {
     student_uuid: string;
     domain: string;
-    avg_level: number;
+    evidence_kind: string;
+    level_sum: number;
+    session_count: number;
   }[]
 > {
   const pool = getPool();
   const result = await pool.query<{
     student_uuid: string;
     domain: string;
-    avg_level: string;
+    evidence_kind: string;
+    level_sum: string;
+    session_count: string;
   }>(
-    `SELECT s.student_uuid, s.domain, AVG(i.estimated_level) AS avg_level
+    `SELECT s.student_uuid, s.domain, s.evidence_kind,
+            SUM(i.estimated_level)::float AS level_sum,
+            COUNT(*)::int AS session_count
      FROM analysis_sessions s
      JOIN insights i ON i.session_id = s.id
      WHERE EXISTS (
@@ -833,14 +848,16 @@ export async function listDomainLevelsForTeacherStudents(
          AND (g.exact_grade IS NULL OR g.exact_grade = r.exact_grade)
        WHERE r.student_uuid = s.student_uuid
      )
-     GROUP BY s.student_uuid, s.domain
-     ORDER BY s.student_uuid, s.domain`,
+     GROUP BY s.student_uuid, s.domain, s.evidence_kind
+     ORDER BY s.student_uuid, s.domain, s.evidence_kind`,
     [teacherId],
   );
   return result.rows.map((row) => ({
     student_uuid: row.student_uuid,
     domain: row.domain,
-    avg_level: Number(row.avg_level),
+    evidence_kind: row.evidence_kind,
+    level_sum: Number(row.level_sum),
+    session_count: Number(row.session_count),
   }));
 }
 
@@ -1102,4 +1119,218 @@ export async function listSavedInsights(
       created_at: row.created_at,
     };
   });
+}
+
+export async function isDistrictAudioRecordingEnabled(
+  teacherId: string,
+): Promise<boolean> {
+  const pool = getPool();
+  const result = await pool.query<{ enabled: boolean }>(
+    `SELECT d.audio_recording_enabled AS enabled
+     FROM teacher_accounts t
+     JOIN schools s ON s.id = t.school_id
+     JOIN districts d ON d.id = s.district_id
+     WHERE t.id = $1`,
+    [teacherId],
+  );
+  return result.rows[0]?.enabled ?? false;
+}
+
+export async function hasActiveRecordingConsent(
+  studentUuid: string,
+): Promise<boolean> {
+  const pool = getPool();
+  const result = await pool.query(
+    `SELECT 1
+     FROM student_recording_consent
+     WHERE student_uuid = $1
+       AND status = 'granted'
+       AND revoked_at IS NULL
+     LIMIT 1`,
+    [studentUuid],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function getRecordingConsentStatus(
+  studentUuid: string,
+): Promise<{
+  consented: boolean;
+  status: "granted" | "denied" | null;
+  source: string | null;
+  recordedAt: string | null;
+}> {
+  const pool = getPool();
+  const result = await pool.query<{
+    status: "granted" | "denied";
+    source: string;
+    recorded_at: string;
+  }>(
+    `SELECT status, source, recorded_at
+     FROM student_recording_consent
+     WHERE student_uuid = $1
+       AND revoked_at IS NULL
+     ORDER BY recorded_at DESC
+     LIMIT 1`,
+    [studentUuid],
+  );
+  const row = result.rows[0];
+  if (!row) {
+    return {
+      consented: false,
+      status: null,
+      source: null,
+      recordedAt: null,
+    };
+  }
+  return {
+    consented: row.status === "granted",
+    status: row.status,
+    source: row.source,
+    recordedAt: row.recorded_at,
+  };
+}
+
+export type RecordingConsentSource =
+  | "district_agreement"
+  | "signed_form_on_file"
+  | "other";
+
+export async function insertRecordingConsent(input: {
+  studentUuid: string;
+  teacherId: string;
+  status: "granted" | "denied";
+  source: RecordingConsentSource;
+  note?: string;
+}): Promise<void> {
+  const pool = getPool();
+  let noteEncrypted: string | null = null;
+  let noteIv: string | null = null;
+  if (input.note?.trim()) {
+    const encrypted = encrypt(input.note.trim());
+    noteEncrypted = encrypted.ciphertext;
+    noteIv = encrypted.iv;
+  }
+
+  await pool.query(
+    `UPDATE student_recording_consent
+     SET revoked_at = NOW()
+     WHERE student_uuid = $1
+       AND revoked_at IS NULL`,
+    [input.studentUuid],
+  );
+
+  await pool.query(
+    `INSERT INTO student_recording_consent (
+       student_uuid,
+       status,
+       source,
+       note_encrypted,
+       note_iv,
+       recorded_by
+     ) VALUES ($1, $2, $3, $4, $5, $6)`,
+    [
+      input.studentUuid,
+      input.status,
+      input.source,
+      noteEncrypted,
+      noteIv,
+      input.teacherId,
+    ],
+  );
+}
+
+export async function revokeRecordingConsent(studentUuid: string): Promise<void> {
+  const pool = getPool();
+  await pool.query(
+    `UPDATE student_recording_consent
+     SET revoked_at = NOW()
+     WHERE student_uuid = $1
+       AND revoked_at IS NULL`,
+    [studentUuid],
+  );
+}
+
+export async function insertSessionTranscript(input: {
+  sessionId: string;
+  transcript: string;
+  editedByTeacher: boolean;
+  fluencyMetrics: unknown;
+  asrProvider: string;
+  asrMeanConfidence: number | null;
+  durationSeconds: number;
+  retentionDays?: number;
+}): Promise<void> {
+  const encrypted = encrypt(input.transcript);
+  const retentionDays = input.retentionDays ?? Number.parseInt(
+    process.env.TRANSCRIPT_RETENTION_DAYS ?? "180",
+    10,
+  );
+  const pool = getPool();
+  await pool.query(
+    `INSERT INTO session_transcripts (
+       session_id,
+       transcript_encrypted,
+       transcript_iv,
+       edited_by_teacher,
+       fluency_metrics,
+       asr_provider,
+       asr_mean_confidence,
+       duration_seconds,
+       purge_after
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW() + ($9 || ' days')::interval)`,
+    [
+      input.sessionId,
+      encrypted.ciphertext,
+      encrypted.iv,
+      input.editedByTeacher,
+      JSON.stringify(input.fluencyMetrics),
+      input.asrProvider,
+      input.asrMeanConfidence,
+      input.durationSeconds,
+      String(Number.isFinite(retentionDays) ? retentionDays : 180),
+    ],
+  );
+}
+
+export async function insertObservationRecord(input: {
+  sessionId: string;
+  protocolVersion: string;
+  observations: unknown;
+  derivedLevel: number;
+  coverageRatio: number;
+  confidence: string;
+  contextNote?: string;
+}): Promise<void> {
+  const pool = getPool();
+  let noteEncrypted: string | null = null;
+  let noteIv: string | null = null;
+  if (input.contextNote?.trim()) {
+    const encrypted = encrypt(input.contextNote.trim());
+    noteEncrypted = encrypted.ciphertext;
+    noteIv = encrypted.iv;
+  }
+
+  await pool.query(
+    `INSERT INTO observation_records (
+       session_id,
+       protocol_version,
+       observations,
+       derived_level,
+       coverage_ratio,
+       confidence,
+       context_note_encrypted,
+       context_note_iv
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [
+      input.sessionId,
+      input.protocolVersion,
+      JSON.stringify(input.observations),
+      input.derivedLevel,
+      input.coverageRatio,
+      input.confidence,
+      noteEncrypted,
+      noteIv,
+    ],
+  );
 }

@@ -9,6 +9,7 @@
     "lint": "next lint",
     "migrate": "tsx scripts/migrate.ts",
     "backfill-labels": "tsx scripts/backfill-label-encryption.ts",
+    "purge-transcripts": "tsx scripts/purge-transcripts.ts",
     "postinstall": "mkdir -p public && cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.mjs",
     "test": "node --import tsx --test lib/**/*.test.ts"
   },

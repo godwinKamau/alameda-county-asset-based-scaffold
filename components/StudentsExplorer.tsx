@@ -10,7 +10,6 @@ import { resolveDisplayName } from "@/lib/roster/group";
 import type { ExactGrade, GradeSpan } from "@/lib/types";
 import {
   btnDashboardActionClassName,
-  btnRowActionClassName,
   btnSecondaryClassName,
   inputClassName,
   selectClassName,
@@ -133,13 +132,13 @@ function DomainScoreTable({
 }) {
   return (
     <div className="min-w-0 flex-1 overflow-x-auto">
-      <table className="w-full table-fixed text-left text-xs">
+      <table className="w-full table-fixed border-collapse text-center">
         <thead>
-          <tr className="text-muted">
+          <tr>
             {ELPAC_DOMAINS.map((domain) => (
               <th
                 key={domain}
-                className="px-3 py-2 font-medium capitalize sm:px-4"
+                className="border border-slate-200 bg-brand-soft/50 px-2 py-2.5 text-xs font-bold uppercase tracking-wide text-brand-dark sm:px-3 sm:text-sm"
               >
                 {domainLabel(domain)}
               </th>
@@ -147,20 +146,20 @@ function DomainScoreTable({
           </tr>
         </thead>
         <tbody>
-          <tr className="text-brand-dark">
+          <tr>
             {ELPAC_DOMAINS.map((domain) => {
               const level = domainLevels[domain];
               return (
                 <td
                   key={domain}
-                  className="border-t border-brand-soft/60 px-3 py-3 align-top sm:px-4"
+                  className="border border-slate-200 bg-white px-2 py-3 sm:px-3"
                 >
                   {level != null ? (
-                    <span className="text-base font-semibold tabular-nums">
+                    <span className="text-xl font-bold tabular-nums text-brand-dark sm:text-2xl">
                       {Math.round(level * 10) / 10}
                     </span>
                   ) : (
-                    <span className="text-base text-muted">—</span>
+                    <span className="text-lg font-semibold text-muted">—</span>
                   )}
                 </td>
               );
@@ -171,6 +170,9 @@ function DomainScoreTable({
     </div>
   );
 }
+
+const studentRowBtnClassName =
+  "inline-flex h-8 min-w-[7rem] items-center justify-center !px-3 !py-0 text-xs font-semibold";
 
 interface StudentRowProps {
   entry: StudentExplorerEntry;
@@ -210,14 +212,14 @@ function StudentRow({
         <div className="mt-1 flex flex-wrap gap-2">
           <Link
             href={`/student/${entry.student_uuid}`}
-            className={`${btnSecondaryClassName} ${btnRowActionClassName}`}
+            className={`${btnSecondaryClassName} ${studentRowBtnClassName}`}
           >
             View history
           </Link>
           {!readOnly && (
             <Link
               href={buildAnalyzeUrl(entry)}
-              className={`${btnDashboardActionClassName} ${btnRowActionClassName}`}
+              className={`${btnDashboardActionClassName} ${studentRowBtnClassName}`}
             >
               Analyze
             </Link>

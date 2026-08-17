@@ -3,6 +3,8 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { traceable, getCurrentRunTree } from "langsmith/traceable";
 import type { ElpacDomain } from "@/lib/elpac/domain";
+import { domainLabel } from "@/lib/elpac/domain";
+import type { EvidenceKind } from "@/lib/elpac/evidence";
 import { buildSystemPrompt } from "@/lib/elpac/prompt";
 import {
   attachUsage,
@@ -29,26 +31,29 @@ import {
 
 const MODEL = CLAUDE_MODEL;
 const INSIGHT_TOOL_NAME = "submit_insight";
+const OBSERVATION_TOOL_NAME = "submit_observation_insight";
 const REMIX_TOOL_NAME = "submit_scaffold";
 const REMIX_ITEM_TOOL_NAME = "submit_scaffold_item";
 
-const INSIGHT_TOOL: Anthropic.Tool = {
-  name: INSIGHT_TOOL_NAME,
-  description: "Submit the ELPAC writing analysis insight.",
-  input_schema: {
-    type: "object",
-    properties: {
-      strengths: {
-        type: "string",
-        description:
-          "2-4 sentences, asset-based, PLD-grounded strengths the student demonstrates.",
-      },
-      estimated_level: {
-        type: "integer",
-        minimum: 1,
-        maximum: 4,
-        description: "Estimated ELPAC writing level (1-4).",
-      },
+function buildInsightTool(domain: ElpacDomain): Anthropic.Tool {
+  const label = domainLabel(domain);
+  return {
+    name: INSIGHT_TOOL_NAME,
+    description: `Submit the ELPAC ${label.toLowerCase()} analysis insight.`,
+    input_schema: {
+      type: "object",
+      properties: {
+        strengths: {
+          type: "string",
+          description:
+            "2-4 sentences, asset-based, PLD-grounded strengths the student demonstrates.",
+        },
+        estimated_level: {
+          type: "integer",
+          minimum: 1,
+          maximum: 4,
+          description: `Estimated ELPAC ${label.toLowerCase()} level (1-4).`,
+        },
       level_reasoning: {
         type: "string",
         description:
@@ -71,15 +76,61 @@ const INSIGHT_TOOL: Anthropic.Tool = {
           "The [F#] id(s) of framework move(s) the scaffold is based on, from the suggested moves list.",
       },
     },
-    required: [
-      "strengths",
-      "estimated_level",
-      "level_reasoning",
-      "gap_to_next",
-      "scaffold",
-    ],
-  },
-};
+      required: [
+        "strengths",
+        "estimated_level",
+        "level_reasoning",
+        "gap_to_next",
+        "scaffold",
+      ],
+    },
+  };
+}
+
+function buildObservationTool(domain: ElpacDomain): Anthropic.Tool {
+  const label = domainLabel(domain);
+  return {
+    name: OBSERVATION_TOOL_NAME,
+    description: `Submit scaffold and explanation for a ${label.toLowerCase()} observation protocol analysis. Do not assign a level.`,
+    input_schema: {
+      type: "object",
+      properties: {
+        strengths: {
+          type: "string",
+          description:
+            "2-4 sentences, asset-based, PLD-grounded strengths the student demonstrates.",
+        },
+        level_reasoning: {
+          type: "string",
+          description:
+            "2-3 sentences explaining the derived level from checked descriptors.",
+        },
+        gap_to_next: {
+          type: "string",
+          description:
+            "2-3 sentences naming specific next-level descriptors not yet demonstrated.",
+        },
+        scaffold: {
+          type: "string",
+          description:
+            "2 numbered scaffold moves. Start each with a bold key teaching move, then supporting detail.",
+        },
+        scaffold_source_ids: {
+          type: "array",
+          items: { type: "integer", minimum: 1 },
+          description:
+            "The [F#] id(s) of framework move(s) the scaffold is based on, from the suggested moves list.",
+        },
+      },
+      required: [
+        "strengths",
+        "level_reasoning",
+        "gap_to_next",
+        "scaffold",
+      ],
+    },
+  };
+}
 
 const REMIX_TOOL: Anthropic.Tool = {
   name: REMIX_TOOL_NAME,
@@ -148,9 +199,14 @@ export interface AnalyzeArtifactImage {
 export interface AnalyzeArtifactInput {
   images: AnalyzeArtifactImage[];
   domain: ElpacDomain;
+  evidenceKind?: EvidenceKind;
   gradeSpan: GradeSpan;
   exactGrade?: ExactGrade | null;
   providedLevel?: number | null;
+  transcript?: string;
+  deliveryEvidence?: string;
+  derivedLevel?: number;
+  observationSummary?: string;
 }
 
 export interface AnalyzeArtifactStreamOptions {
@@ -158,28 +214,102 @@ export interface AnalyzeArtifactStreamOptions {
 }
 
 function buildAnalyzeArtifactRequest(input: AnalyzeArtifactInput) {
-  if (input.images.length === 0) {
+  const evidenceKind = input.evidenceKind ?? "written_artifact";
+
+  if (evidenceKind === "written_artifact" && input.images.length === 0) {
     throw new ClaudeParseError("At least one image is required");
+  }
+
+  if (evidenceKind === "audio_recording" && !input.transcript?.trim()) {
+    throw new ClaudeParseError("Transcript is required for audio analysis");
   }
 
   const { systemPrompt, citableMoves } = buildSystemPrompt(
     input.domain,
+    evidenceKind,
     input.gradeSpan,
     input.exactGrade,
+    input.derivedLevel != null
+      ? { derivedLevel: input.derivedLevel }
+      : undefined,
   );
+
+  const insightTool = buildInsightTool(input.domain);
+  const observationTool = buildObservationTool(input.domain);
+  const activeTool =
+    evidenceKind === "observation_protocol" ? observationTool : insightTool;
+  const activeToolName =
+    evidenceKind === "observation_protocol"
+      ? OBSERVATION_TOOL_NAME
+      : INSIGHT_TOOL_NAME;
 
   const contextParts: string[] = [
     `Domain: ${input.domain}`,
+    `Evidence: ${evidenceKind}`,
     `Grade span: ${input.gradeSpan}`,
   ];
   if (input.providedLevel != null) {
-    contextParts.push(`Teacher-provided ELPAC level: ${input.providedLevel}`);
+    contextParts.push(
+      `Teacher-provided overall ELPAC level: ${input.providedLevel}`,
+    );
   }
 
-  if (input.images.length > 1) {
+  if (input.derivedLevel != null) {
+    contextParts.push(`Derived level from observation protocol: ${input.derivedLevel}`);
+  }
+
+  if (input.observationSummary) {
+    contextParts.unshift(input.observationSummary);
+  }
+
+  if (evidenceKind === "written_artifact" && input.images.length > 1) {
     contextParts.unshift(
       `The following ${input.images.length} images are pages of one student artifact, in order. Some pages may be unrelated (prompts, photos, cover art). Analyze ONLY the page(s) containing student handwriting.`,
     );
+  }
+
+  const userContent: Anthropic.MessageParam["content"] = [];
+
+  if (evidenceKind === "written_artifact") {
+    userContent.push(
+      ...input.images.map((image) => ({
+        type: "image" as const,
+        source: {
+          type: "base64" as const,
+          media_type: image.mediaType,
+          data: image.imageBase64,
+        },
+      })),
+    );
+  } else if (evidenceKind === "audio_recording") {
+    const parts = [
+      contextParts.join("\n"),
+      "",
+      input.deliveryEvidence ?? "",
+      "",
+      "TEACHER-REVIEWED TRANSCRIPT:",
+      input.transcript ?? "",
+    ];
+    userContent.push({ type: "text" as const, text: parts.join("\n") });
+  } else if (evidenceKind === "observation_protocol") {
+    userContent.push({
+      type: "text" as const,
+      text: [input.observationSummary ?? "", contextParts.join("\n")]
+        .filter(Boolean)
+        .join("\n\n"),
+    });
+  } else {
+    userContent.push({
+      type: "text" as const,
+      text: contextParts.join("\n"),
+    });
+  }
+
+  if (evidenceKind === "written_artifact") {
+    userContent.push({
+      type: "text" as const,
+      text: contextParts.join("\n"),
+    });
   }
 
   return {
@@ -189,25 +319,12 @@ function buildAnalyzeArtifactRequest(input: AnalyzeArtifactInput) {
       max_tokens: 1500,
       temperature: 0.2,
       system: systemPrompt,
-      tools: [INSIGHT_TOOL],
-      tool_choice: { type: "tool" as const, name: INSIGHT_TOOL_NAME },
+      tools: [activeTool],
+      tool_choice: { type: "tool" as const, name: activeToolName },
       messages: [
         {
           role: "user" as const,
-          content: [
-            ...input.images.map((image) => ({
-              type: "image" as const,
-              source: {
-                type: "base64" as const,
-                media_type: image.mediaType,
-                data: image.imageBase64,
-              },
-            })),
-            {
-              type: "text" as const,
-              text: contextParts.join("\n"),
-            },
-          ],
+          content: userContent,
         },
       ],
     },
@@ -217,6 +334,7 @@ function buildAnalyzeArtifactRequest(input: AnalyzeArtifactInput) {
 function parseInsightToolResponse(
   response: Anthropic.Message,
   citableMoves: ReturnType<typeof buildSystemPrompt>["citableMoves"],
+  derivedLevel?: number,
 ): Insight {
   const toolBlock = response.content.find((block) => block.type === "tool_use");
 
@@ -225,12 +343,49 @@ function parseInsightToolResponse(
     throw new ClaudeParseError("Analysis response was empty");
   }
 
-  if (toolBlock.name !== INSIGHT_TOOL_NAME) {
+  const allowedTools = new Set([INSIGHT_TOOL_NAME, OBSERVATION_TOOL_NAME]);
+  if (!allowedTools.has(toolBlock.name)) {
     console.error("[claude] Unexpected tool name in response");
     throw new ClaudeParseError("Analysis response used an unexpected tool");
   }
 
   const parsed: unknown = toolBlock.input;
+
+  if (toolBlock.name === OBSERVATION_TOOL_NAME) {
+    if (derivedLevel == null) {
+      throw new ClaudeParseError("Derived level is required for observation analysis");
+    }
+
+    const observationSchema = InsightToolSchema.omit({ estimated_level: true });
+    const validated = observationSchema.safeParse(parsed);
+    if (!validated.success) {
+      console.error("[claude] Observation insight schema validation failed");
+      throw new ClaudeParseError("Analysis response did not match expected format");
+    }
+
+    const { scaffold_source_ids, ...insightFields } = validated.data;
+    const scaffoldSources = resolveScaffoldSourcesFromIds(
+      scaffold_source_ids,
+      citableMoves,
+    );
+
+    const insightPayload = {
+      ...insightFields,
+      estimated_level: derivedLevel,
+      ...(scaffoldSources.length > 0 ? { scaffold_sources: scaffoldSources } : {}),
+    };
+
+    const insightValidated = InsightSchema.safeParse(insightPayload);
+    if (!insightValidated.success) {
+      throw new ClaudeParseError("Analysis response did not match expected format");
+    }
+
+    return insightValidated.data;
+  }
+
+  if (toolBlock.name !== INSIGHT_TOOL_NAME) {
+    throw new ClaudeParseError("Analysis response used an unexpected tool");
+  }
 
   const validated = InsightToolSchema.safeParse(parsed);
   if (!validated.success) {
@@ -312,7 +467,7 @@ async function analyzeArtifactStreamImpl(
 
   const response = await stream.finalMessage();
   attachUsage(response);
-  return parseInsightToolResponse(response, citableMoves);
+  return parseInsightToolResponse(response, citableMoves, input.derivedLevel ?? undefined);
 }
 
 export const analyzeArtifactStream = traceable(analyzeArtifactStreamImpl, {
@@ -578,6 +733,7 @@ async function remixScaffoldImpl(
   const originalAnchors = getScaffoldSourceAnchors(input.originalSources);
   const { systemPrompt, citableMoves } = buildSystemPrompt(
     input.domain ?? "writing",
+    "written_artifact",
     input.gradeSpan,
     input.exactGrade,
     originalAnchors.size > 0 ? { excludeAnchors: originalAnchors } : undefined,
@@ -649,6 +805,7 @@ async function remixScaffoldItemImpl(
   const originalAnchors = getScaffoldSourceAnchors(input.originalItemSources);
   const { systemPrompt, citableMoves } = buildSystemPrompt(
     input.domain ?? "writing",
+    "written_artifact",
     input.gradeSpan,
     input.exactGrade,
     originalAnchors.size > 0 ? { excludeAnchors: originalAnchors } : undefined,

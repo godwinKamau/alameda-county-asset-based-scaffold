@@ -109,6 +109,7 @@ export interface AnalysisSessionWithInsight {
   id: string;
   student_uuid: string;
   domain: string;
+  evidence_kind: import("@/lib/elpac/evidence").EvidenceKind;
   grade_span: GradeSpan;
   provided_elpac_level: number | null;
   submitted_at: Date;

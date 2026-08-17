@@ -1,19 +1,19 @@
-# ELPAC Writing Analysis Tool
+# ELPAC Teacher Analysis Tool
 
-Teacher-facing English Learner proficiency analysis tool grounded in official ELPAC Writing Range Performance Level Descriptors (PLDs).
+Teacher-facing English Learner proficiency analysis tool grounded in official ELPAC Range Performance Level Descriptors (PLDs) across all four domains: Listening, Speaking, Reading, and Writing.
 
 ## Stack
 
 - **Next.js 15** (App Router, TypeScript, Tailwind CSS)
 - **PostgreSQL** with least-privilege roles (`app_user`, `migrations_user`)
 - **Clerk** for teacher authentication
-- **Anthropic Claude** (`claude-sonnet-4-20250514`) for vision-based artifact analysis
+- **Anthropic Claude** (`claude-sonnet-4-20250514`) for artifact analysis
 - **AES-256-GCM** field-level encryption for insight text
 
 ## Privacy / FERPA
 
 - Student labels are encrypted at rest (AES-256-GCM, per-field IV); the app never stores plaintext names
-- Artifact images/PDFs are never persisted — only encrypted insight output
+- Artifact images/PDFs and audio recordings are never persisted — only encrypted insight output (and optionally encrypted transcripts)
 - All insight text columns encrypted at rest with per-field IVs
 - Append-only audit log with SHA-256 hashed IPs
 - TLS required for database connections
@@ -47,7 +47,7 @@ Teacher-facing English Learner proficiency analysis tool grounded in official EL
 
 3. **Supply ELPAC PLD reference**
 
-   Replace `data/elpac_plds.json` with the official ELPAC Writing Range PLDs. The file must match the schema in `lib/elpac/types.ts`.
+   Ensure `data/elpac_plds.json` contains the official ELPAC Range PLDs for all four domains. The file must match the schema in `lib/elpac/types.ts`.
 
 4. **Run migrations** (as `migrations_user`)
 
@@ -82,7 +82,8 @@ Teacher-facing English Learner proficiency analysis tool grounded in official EL
 | `npm run dev` | Start dev server |
 | `npm run build` | Production build |
 | `npm run migrate` | Apply database migrations |
-| `npm test` | Run encryption unit tests |
+| `npm test` | Run unit tests |
+| `npm run purge-transcripts` | Delete expired encrypted transcripts |
 
 ## Project structure
 

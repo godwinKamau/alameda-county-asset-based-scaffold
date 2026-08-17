@@ -19,6 +19,7 @@ interface ArtifactDropzoneProps {
   selectedPages: number[];
   onSelectedPagesChange: (pages: number[]) => void;
   onPreviewLoadingChange?: (loading: boolean) => void;
+  hidden?: boolean;
 }
 
 export function ArtifactDropzone({
@@ -27,6 +28,7 @@ export function ArtifactDropzone({
   selectedPages,
   onSelectedPagesChange,
   onPreviewLoadingChange,
+  hidden = false,
 }: ArtifactDropzoneProps) {
   const [totalPages, setTotalPages] = useState(0);
   const [thumbnails, setThumbnails] = useState<PdfPageThumbnail[]>([]);
@@ -38,6 +40,7 @@ export function ArtifactDropzone({
   }, [loadingThumbnails, onPreviewLoadingChange]);
 
   useEffect(() => {
+    if (hidden) return;
     if (!file || !isPdfFile(file)) {
       setTotalPages(0);
       setThumbnails([]);
@@ -76,7 +79,7 @@ export function ArtifactDropzone({
     return () => {
       cancelled = true;
     };
-  }, [file, onSelectedPagesChange]);
+  }, [file, hidden, onSelectedPagesChange]);
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     onFileSelect(event.target.files?.[0] ?? null);
@@ -101,6 +104,10 @@ export function ArtifactDropzone({
   }
 
   const showPagePicker = file && isPdfFile(file) && totalPages > 1;
+
+  if (hidden) {
+    return null;
+  }
 
   return (
     <div>

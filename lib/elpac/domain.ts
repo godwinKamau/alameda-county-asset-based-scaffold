@@ -23,14 +23,6 @@ export function mapGradeSpanToPldSpan(
   return gradeSpan;
 }
 
-export function domainSupportsWrittenArtifact(domain: ElpacDomain): boolean {
-  return domain === "writing" || domain === "reading";
-}
-
-export function domainRequiresAudioWarning(domain: ElpacDomain): boolean {
-  return domain === "listening" || domain === "speaking";
-}
-
 export function domainLabel(domain: ElpacDomain): string {
   return domain.charAt(0).toUpperCase() + domain.slice(1);
 }

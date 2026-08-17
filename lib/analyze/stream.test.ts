@@ -15,6 +15,27 @@ function streamFromLines(lines: string[]): ReadableStream<Uint8Array> {
 }
 
 describe("consumeAnalyzeStream", () => {
+  it("dispatches stage events", async () => {
+    const stages: string[] = [];
+
+    await consumeAnalyzeStream(
+      streamFromLines([
+        `${JSON.stringify({ type: "stage", stage: "preparing" })}\n`,
+        `${JSON.stringify({ type: "stage", stage: "analyzing" })}\n`,
+        `${JSON.stringify({
+          type: "complete",
+          sessionId: "session-stage",
+          insight: { estimated_level: 2 },
+        })}\n`,
+      ]),
+      {
+        onStage: (event) => stages.push(event.stage),
+      },
+    );
+
+    assert.deepEqual(stages, ["preparing", "analyzing"]);
+  });
+
   it("dispatches snapshot, complete, and error events", async () => {
     const snapshots: unknown[] = [];
     let sessionId = "";

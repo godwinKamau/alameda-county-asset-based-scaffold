@@ -27,9 +27,22 @@ import type { GradeSpan } from "@/lib/types";
 import {
   ELPAC_DOMAINS,
   domainLabel,
-  domainRequiresAudioWarning,
   type ElpacDomain,
 } from "@/lib/elpac/domain";
+import {
+  evidenceKindLabel,
+  evidenceValidity,
+  isValidEvidence,
+  recommendedEvidenceKind,
+  selectableEvidenceKinds,
+  type EvidenceKind,
+} from "@/lib/elpac/evidence";
+import { AudioRecorder, type RecordedAudio } from "@/components/AudioRecorder";
+import { ObservationProtocol } from "@/components/ObservationProtocol";
+import { RecordingConsentPanel } from "@/components/RecordingConsentPanel";
+import type { ObservationInput } from "@/lib/elpac/observation";
+import { TranscriptReview } from "@/components/TranscriptReview";
+import type { PldLevel } from "@/lib/elpac/types";
 import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import {
   btnPrimaryClassName,
@@ -49,6 +62,7 @@ export default function AnalyzePage() {
   const [subjectFilter, setSubjectFilter] = useState("All");
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
   const [domain, setDomain] = useState<ElpacDomain>("writing");
+  const [evidenceKind, setEvidenceKind] = useState<EvidenceKind>("written_artifact");
   const [gradeSpan, setGradeSpan] = useState<GradeSpan>("3-12");
   const [providedLevel, setProvidedLevel] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
@@ -57,6 +71,38 @@ export default function AnalyzePage() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Analyzing artifact…");
   const [error, setError] = useState<string | null>(null);
+  const [recording, setRecording] = useState<RecordedAudio | null>(null);
+  const [transcribing, setTranscribing] = useState(false);
+  const [transcriptWords, setTranscriptWords] = useState<
+    import("@/lib/asr/types").AsrWord[]
+  >([]);
+  const [transcriptText, setTranscriptText] = useState("");
+  const [transcriptConfirmed, setTranscriptConfirmed] = useState(false);
+  const [transcriptEdited, setTranscriptEdited] = useState(false);
+  const [asrMeta, setAsrMeta] = useState<{
+    token: string;
+    deliveryEvidence: string;
+    metrics: import("@/lib/asr/types").FluencyMetrics;
+    durationSeconds: number;
+    meanConfidence: number;
+    provider: string;
+    wordCount: number;
+  } | null>(null);
+  const [listeningPlds, setListeningPlds] = useState<Record<
+    "1" | "2" | "3" | "4",
+    PldLevel
+  > | null>(null);
+  const [observationPayload, setObservationPayload] = useState<{
+    observations: ObservationInput[];
+    derivedLevel: number | null;
+    coverageRatio: number;
+    confidence: string;
+    ready: boolean;
+  } | null>(null);
+  const [consentState, setConsentState] = useState<
+    import("@/components/RecordingConsentPanel").RecordingConsentState | null
+  >(null);
+  const [consentLoading, setConsentLoading] = useState(false);
 
   const handleSelectedPagesChange = useCallback((pages: number[]) => {
     setSelectedPages(pages);
@@ -119,33 +165,194 @@ export default function AnalyzePage() {
     setPreviewLoading(isLoading);
   }, []);
 
+  useEffect(() => {
+    setEvidenceKind(recommendedEvidenceKind(domain, gradeSpan));
+    setRecording(null);
+    setTranscriptWords([]);
+    setTranscriptText("");
+    setTranscriptConfirmed(false);
+    setAsrMeta(null);
+    setObservationPayload(null);
+  }, [domain, gradeSpan]);
+
+  useEffect(() => {
+    if (domain !== "listening" || evidenceKind !== "observation_protocol") {
+      setListeningPlds(null);
+      return;
+    }
+
+    async function loadPlds() {
+      try {
+        const response = await apiFetch(
+          `/api/elpac/plds?domain=listening&grade_span=${encodeURIComponent(gradeSpan)}`,
+        );
+        if (!response.ok) return;
+        const data = await response.json();
+        setListeningPlds(data.plds);
+      } catch {
+        setListeningPlds(null);
+      }
+    }
+
+    void loadPlds();
+  }, [domain, evidenceKind, gradeSpan]);
+
+  useEffect(() => {
+    if (!studentUuid || evidenceKind !== "audio_recording") {
+      setConsentState(null);
+      setConsentLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setConsentLoading(true);
+
+    async function loadConsent() {
+      try {
+        const response = await apiFetch(
+          `/api/students/${encodeURIComponent(studentUuid)}/recording-consent`,
+        );
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!cancelled) {
+          setConsentState(data);
+        }
+      } catch {
+        if (!cancelled) {
+          setConsentState(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setConsentLoading(false);
+        }
+      }
+    }
+
+    void loadConsent();
+    return () => {
+      cancelled = true;
+    };
+  }, [studentUuid, evidenceKind]);
+
+  const selectableKinds = selectableEvidenceKinds(domain);
+  const requiresWrittenArtifact = evidenceKind === "written_artifact";
+  const requiresAudio = evidenceKind === "audio_recording";
+  const requiresObservation = evidenceKind === "observation_protocol";
+  const evidenceBlocked =
+    !isValidEvidence(domain, evidenceKind) ||
+    (requiresAudio &&
+      (!consentState?.consented || !consentState?.districtEnabled)) ||
+    (requiresAudio && !transcriptConfirmed) ||
+    (requiresObservation && !observationPayload?.ready);
+  const audioCaptureDisabled =
+    !studentUuid ||
+    loading ||
+    transcribing ||
+    consentLoading ||
+    !consentState?.districtEnabled ||
+    !consentState?.consented;
+
+  async function transcribeRecording() {
+    if (!recording || !studentUuid) {
+      setError("Select a student and record audio first.");
+      return;
+    }
+
+    setTranscribing(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("audio", recording.blob, recording.fileName);
+      formData.append("student_uuid", studentUuid);
+      formData.append("grade_span", gradeSpan);
+
+      const response = await apiFetch("/api/analyze/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          typeof data.error === "string"
+            ? data.error
+            : "Transcription failed.",
+        );
+      }
+
+      setTranscriptWords(data.words ?? []);
+      setTranscriptText(data.transcript ?? "");
+      setTranscriptConfirmed(false);
+      setAsrMeta({
+        token: data.asr_token,
+        deliveryEvidence: data.delivery_evidence,
+        metrics: data.metrics,
+        durationSeconds: data.duration_seconds,
+        meanConfidence: data.mean_confidence,
+        provider: data.provider,
+        wordCount: Array.isArray(data.words) ? data.words.length : 0,
+      });
+    } catch (transcribeError) {
+      if (isDatabaseWakingError(transcribeError)) return;
+      setError(
+        transcribeError instanceof Error
+          ? transcribeError.message
+          : "Transcription failed.",
+      );
+    } finally {
+      setTranscribing(false);
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (evidenceBlocked) {
+      if (requiresAudio && !consentState?.consented) {
+        setError("Record student consent before analyzing audio.");
+      } else if (requiresAudio && !transcriptConfirmed) {
+        setError("Confirm the transcript before analyzing.");
+      } else if (requiresObservation) {
+        setError("Complete the observation protocol before analyzing.");
+      } else {
+        setError("This domain and evidence combination is not supported.");
+      }
+      return;
+    }
 
     if (!studentUuid) {
       setError("Please select a student.");
       return;
     }
 
-    if (!file) {
+    if (requiresWrittenArtifact && !file) {
       setError("Please upload an artifact.");
       return;
     }
 
-    if (file.size > MAX_SOURCE_ARTIFACT_BYTES) {
+    if (requiresAudio && !asrMeta) {
+      setError("Transcribe and confirm the recording first.");
+      return;
+    }
+
+    if (requiresObservation && !observationPayload?.ready) {
+      setError("Complete the observation checklist first.");
+      return;
+    }
+
+    if (file && file.size > MAX_SOURCE_ARTIFACT_BYTES) {
       setError(
         `File must be ${formatMegabytes(MAX_SOURCE_ARTIFACT_BYTES)} or smaller.`,
       );
       return;
     }
 
-    if (isPdfFile(file) && selectedPages.length === 0) {
+    if (requiresWrittenArtifact && file && isPdfFile(file) && selectedPages.length === 0) {
       setError("Select at least one PDF page containing student writing.");
       return;
     }
 
-    if (selectedPages.length > MAX_PAGES_PER_ANALYSIS) {
+    if (requiresWrittenArtifact && file && selectedPages.length > MAX_PAGES_PER_ANALYSIS) {
       setError(`Select at most ${MAX_PAGES_PER_ANALYSIS} pages.`);
       return;
     }
@@ -154,18 +361,40 @@ export default function AnalyzePage() {
     setLoadingMessage("Preparing artifact…");
 
     try {
-      const preparedFiles = await prepareArtifactForUpload(
-        file,
-        isPdfFile(file) ? { pdfPages: selectedPages } : undefined,
-      );
-
       const formData = new FormData();
-      preparedFiles.forEach((preparedFile) => {
-        formData.append("file", preparedFile);
-      });
-      formData.append("page_count", String(preparedFiles.length));
+      if (requiresWrittenArtifact && file) {
+        const preparedFiles = await prepareArtifactForUpload(
+          file,
+          isPdfFile(file) ? { pdfPages: selectedPages } : undefined,
+        );
+        preparedFiles.forEach((preparedFile) => {
+          formData.append("file", preparedFile);
+        });
+        formData.append("page_count", String(preparedFiles.length));
+      }
+
+      if (requiresAudio && asrMeta) {
+        formData.append("transcript", transcriptText);
+        formData.append("delivery_evidence", asrMeta.deliveryEvidence);
+        formData.append("asr_token", asrMeta.token);
+        formData.append("word_count", String(asrMeta.wordCount));
+        formData.append("duration_seconds", String(asrMeta.durationSeconds));
+        formData.append("mean_confidence", String(asrMeta.meanConfidence));
+        formData.append("asr_provider", asrMeta.provider);
+        formData.append("metrics", JSON.stringify(asrMeta.metrics));
+        formData.append("transcript_edited", transcriptEdited ? "true" : "false");
+      }
+
+      if (requiresObservation && observationPayload?.ready) {
+        formData.append(
+          "observations",
+          JSON.stringify(observationPayload.observations),
+        );
+      }
+
       formData.append("student_uuid", studentUuid);
       formData.append("domain", domain);
+      formData.append("evidence_kind", evidenceKind);
       formData.append("grade_span", gradeSpan);
       if (providedLevel) {
         formData.append("provided_elpac_level", providedLevel);
@@ -179,6 +408,8 @@ export default function AnalyzePage() {
             label: "",
             student_uuid: studentUuid,
           }),
+        domain,
+        evidenceKind,
         gradeSpan,
         providedLevel: providedLevel || null,
         subject: selectedStudent?.subject ?? "",
@@ -251,6 +482,7 @@ export default function AnalyzePage() {
             selectedPages={selectedPages}
             onSelectedPagesChange={handleSelectedPagesChange}
             onPreviewLoadingChange={handlePreviewLoadingChange}
+            hidden={!requiresWrittenArtifact}
           />
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -272,11 +504,35 @@ export default function AnalyzePage() {
                   </option>
                 ))}
               </select>
-              {domainRequiresAudioWarning(domain) ? (
-                <p className="mt-2 text-xs text-accent-orange" role="note">
-                  {domainLabel(domain)} is normally assessed from audio. This
-                  analysis uses a written artifact and is not evidence-based for
-                  this domain.
+            </div>
+
+            <div>
+              <label htmlFor="evidence_kind" className={labelClassName}>
+                Evidence type
+              </label>
+              <select
+                id="evidence_kind"
+                value={evidenceKind}
+                onChange={(event) =>
+                  setEvidenceKind(event.target.value as EvidenceKind)
+                }
+                className={selectClassName}
+              >
+                {selectableKinds.map((kind) => (
+                  <option key={kind} value={kind}>
+                    {evidenceKindLabel(kind)}
+                    {evidenceValidity(domain, kind) === "supporting"
+                      ? " (supporting)"
+                      : ""}
+                  </option>
+                ))}
+              </select>
+              {!isValidEvidence(domain, evidenceKind) ? (
+                <p
+                  className="mt-2 rounded-lg border border-accent-orange/30 bg-accent-orange/5 px-3 py-2 text-xs text-accent-orange"
+                  role="note"
+                >
+                  This evidence type is not valid for the selected domain.
                 </p>
               ) : null}
             </div>
@@ -318,10 +574,63 @@ export default function AnalyzePage() {
             </div>
           </div>
 
+          {requiresAudio ? (
+            <div className="space-y-4">
+              {studentUuid ? (
+                <RecordingConsentPanel
+                  studentUuid={studentUuid}
+                  state={consentState}
+                  loading={consentLoading}
+                  onUpdated={setConsentState}
+                />
+              ) : (
+                <p className="text-sm text-muted">
+                  Select a student to check recording consent.
+                </p>
+              )}
+              <AudioRecorder
+                recording={recording}
+                onRecordingReady={setRecording}
+                disabled={audioCaptureDisabled}
+              />
+              <button
+                type="button"
+                className={btnSecondaryClassName}
+                disabled={
+                  !recording ||
+                  transcribing ||
+                  !studentUuid ||
+                  audioCaptureDisabled
+                }
+                onClick={() => void transcribeRecording()}
+              >
+                {transcribing ? "Transcribing…" : "Transcribe recording"}
+              </button>
+              {transcriptText ? (
+                <TranscriptReview
+                  words={transcriptWords}
+                  initialTranscript={transcriptText}
+                  onConfirm={(text, edited) => {
+                    setTranscriptText(text);
+                    setTranscriptEdited(edited);
+                    setTranscriptConfirmed(true);
+                  }}
+                />
+              ) : null}
+            </div>
+          ) : null}
+
+          {requiresObservation && listeningPlds ? (
+            <ObservationProtocol
+              plds={listeningPlds}
+              onChange={setObservationPayload}
+            />
+          ) : null}
+
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="submit"
-              disabled={loading || previewLoading}
+              disabled={loading || previewLoading || evidenceBlocked}
               aria-busy={loading || previewLoading}
               className={`${btnPrimaryClassName} inline-flex items-center gap-2`}
             >

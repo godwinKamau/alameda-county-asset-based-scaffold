@@ -327,7 +327,7 @@
     },
 
     "speaking": {
-      "_notes": "Speaking is assessed via constructed response. Artifacts for speaking would be audio recordings. Not in v1 scope.",
+      "_notes": "Speaking is assessed from student audio. Primary evidence is an audio recording with teacher-reviewed transcript and computed delivery metrics. K-2 may use the observation protocol when ASR reliability is insufficient.",
       "K-2": {
         "1": {
           "label": "Minimally Developed",
@@ -426,7 +426,7 @@
     },
 
     "listening": {
-      "_notes": "Listening artifacts would require audio. Not analyzable from written artifacts in v1.",
+      "_notes": "Listening is assessed via teacher observation of comprehension during classroom activities. Primary evidence is a structured observation protocol aligned to these PLDs. Listen-and-retell (oral retell scored against listening descriptors) is planned as a phase-two extension.",
       "K-2": {
         "1": {
           "label": "Minimally Developed",

@@ -13,6 +13,8 @@ import {
   type PendingAnalyzeContext,
 } from "@/lib/analyze/pending-request";
 import { consumeAnalyzeStream } from "@/lib/analyze/stream";
+import { INSTRUCTIONAL_ESTIMATE_DISCLAIMER } from "@/lib/elpac/copy";
+import { domainLabel } from "@/lib/elpac/domain";
 import type { Insight } from "@/lib/types";
 import { apiFetch, isDatabaseWakingError } from "@/lib/ui/api-fetch";
 import { btnSecondaryClassName, cardClassName } from "@/lib/ui/styles";
@@ -23,6 +25,7 @@ export function StreamingAnalysisResults() {
   const [partialInsight, setPartialInsight] = useState<Partial<Insight>>({});
   const [error, setError] = useState<string | null>(null);
   const [started, setStarted] = useState(false);
+  const [stageMessage, setStageMessage] = useState("Analysis in progress…");
 
   useEffect(() => {
     const pending = getPendingAnalyzeRequest();
@@ -57,6 +60,16 @@ export function StreamingAnalysisResults() {
         }
 
         const completed = await consumeAnalyzeStream(response.body, {
+          onStage: (event) => {
+            if (cancelled) return;
+            setStageMessage(
+              event.stage === "preparing"
+                ? "Preparing analysis…"
+                : event.stage === "transcribing"
+                  ? "Transcribing…"
+                  : "Analyzing…",
+            );
+          },
           onSnapshot: (insight) => {
             if (cancelled) return;
             setPartialInsight((current) => ({ ...current, ...insight }));
@@ -147,7 +160,7 @@ export function StreamingAnalysisResults() {
           </Link>
           {started && !error && (
             <p className="text-sm font-medium text-muted" role="status">
-              Analysis in progress…
+              {stageMessage}
             </p>
           )}
         </div>
@@ -177,6 +190,12 @@ export function StreamingAnalysisResults() {
                 </span>
               )}
               <span className="text-sm text-muted">
+                Domain: {domainLabel(context.domain)}
+              </span>
+              <span className="text-sm text-muted">
+                Evidence: {context.evidenceKind.replaceAll("_", " ")}
+              </span>
+              <span className="text-sm text-muted">
                 Grade span: {context.gradeSpan}
               </span>
               {context.providedLevel && (
@@ -185,6 +204,9 @@ export function StreamingAnalysisResults() {
                 </span>
               )}
             </div>
+            <p className="mt-3 text-xs text-muted">
+              {INSTRUCTIONAL_ESTIMATE_DISCLAIMER}
+            </p>
           </header>
           <InsightCard insight={partialInsight} streaming />
         </article>

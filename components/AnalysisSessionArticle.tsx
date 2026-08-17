@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { domainLabel } from "@/lib/elpac/domain";
 import type { AnalysisSessionWithInsight } from "@/lib/types";
 import { cardClassName } from "@/lib/ui/styles";
 import { InsightCard } from "./InsightCard";
@@ -41,7 +42,7 @@ export function AnalysisSessionArticle({ session }: AnalysisSessionArticleProps)
             <time dateTime={submittedAt.toISOString()}>
               {submittedAt.toLocaleString()}
             </time>
-            <span>Domain: {session.domain}</span>
+            <span>Domain: {domainLabel(session.domain as import("@/lib/elpac/domain").ElpacDomain)}</span>
             <span>Grade span: {session.grade_span}</span>
             {session.provided_elpac_level != null && (
               <span>Provided level: {session.provided_elpac_level}</span>

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { mapGradeSpanToPldSpan } from "./domain.ts";
+import { domainLabel, mapGradeSpanToPldSpan } from "./domain.ts";
 
 describe("mapGradeSpanToPldSpan", () => {
   it("maps listening K to K-2 span", () => {
@@ -17,5 +17,14 @@ describe("mapGradeSpanToPldSpan", () => {
 
   it("maps reading K directly", () => {
     assert.equal(mapGradeSpanToPldSpan("reading", "K"), "K");
+  });
+});
+
+describe("domainLabel", () => {
+  it("capitalizes domain names", () => {
+    assert.equal(domainLabel("writing"), "Writing");
+    assert.equal(domainLabel("listening"), "Listening");
+    assert.equal(domainLabel("speaking"), "Speaking");
+    assert.equal(domainLabel("reading"), "Reading");
   });
 });

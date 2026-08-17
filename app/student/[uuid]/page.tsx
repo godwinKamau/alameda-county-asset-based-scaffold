@@ -15,7 +15,9 @@ import {
   listDomainLevelsByTeacherForStudent,
   listSessionsForStudent,
 } from "@/lib/db/queries";
-import { StudentLevelChart, computeDomainLevels } from "@/components/StudentLevelChart";
+import { StudentLevelChart } from "@/components/StudentLevelChart";
+import { computeDomainLevels } from "@/lib/elpac/aggregate";
+import { evidenceValidity } from "@/lib/elpac/evidence";
 import { headers } from "next/headers";
 import { cardClassName, btnPrimaryClassName } from "@/lib/ui/styles";
 
@@ -79,13 +81,23 @@ export default async function StudentPage({ params }: StudentPageProps) {
   if (!teacher) redirect("/dashboard");
   if (!access) redirect("/dashboard");
 
+  const validSessions = sessions.filter(
+    (session) =>
+      evidenceValidity(
+        session.domain as import("@/lib/elpac/domain").ElpacDomain,
+        session.evidence_kind,
+      ) === "primary",
+  );
+
   const avgLevel =
-    sessions.length > 0
-      ? sessions.reduce(
+    validSessions.length > 0
+      ? validSessions.reduce(
           (sum, session) => sum + session.insight.estimated_level,
           0,
-        ) / sessions.length
+        ) / validSessions.length
       : null;
+
+  const validSessionCount = validSessions.length;
 
   const roundedAvgLevel =
     avgLevel != null ? Math.round(avgLevel * 10) / 10 : null;
@@ -94,6 +106,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
     sessions.map((session) => ({
       domain: session.domain,
       estimated_level: session.insight.estimated_level,
+      evidence_kind: session.evidence_kind,
     })),
   );
 
@@ -129,8 +142,8 @@ export default async function StudentPage({ params }: StudentPageProps) {
                     ELPAC Level {Math.round(roundedAvgLevel!)}
                   </p>
                   <p className="mt-1 text-xs text-muted">
-                    Based on {sessions.length}{" "}
-                    {sessions.length === 1 ? "analysis" : "analyses"}
+                    Based on {validSessionCount}{" "}
+                    {validSessionCount === 1 ? "analysis" : "analyses"}
                   </p>
                 </div>
               </div>

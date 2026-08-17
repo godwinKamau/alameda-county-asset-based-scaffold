@@ -15,7 +15,9 @@ import {
   listGroupsWithMembers,
   listHiddenStudentUuids,
 } from "@/lib/db/teacher-groups";
-import { emptyDomainLevels, ELPAC_DOMAINS, type ElpacDomain } from "@/lib/elpac/domain";
+import { computeDomainLevelsFromAggregates } from "@/lib/elpac/aggregate";
+import { emptyDomainLevels } from "@/lib/elpac/domain";
+import type { EvidenceKind } from "@/lib/elpac/evidence";
 
 export default async function StudentsPage() {
   const { userId } = await auth();
@@ -62,7 +64,7 @@ export default async function StudentsPage() {
 
   const domainLevelsByStudent = new Map<
     string,
-    Record<ElpacDomain, number | null>
+    ReturnType<typeof emptyDomainLevels>
   >();
 
   for (const row of domainRows) {
@@ -71,10 +73,29 @@ export default async function StudentsPage() {
       levels = emptyDomainLevels();
       domainLevelsByStudent.set(row.student_uuid, levels);
     }
-    if (ELPAC_DOMAINS.includes(row.domain as ElpacDomain)) {
-      levels[row.domain as ElpacDomain] =
-        Math.round(row.avg_level * 10) / 10;
+  }
+
+  const rowsByStudent = new Map<string, typeof domainRows>();
+  for (const row of domainRows) {
+    const list = rowsByStudent.get(row.student_uuid) ?? [];
+    list.push(row);
+    rowsByStudent.set(row.student_uuid, list);
+  }
+
+  for (const [studentUuid, rows] of rowsByStudent) {
+    const aggregates = computeDomainLevelsFromAggregates(
+      rows.map((row) => ({
+        domain: row.domain,
+        evidence_kind: row.evidence_kind as EvidenceKind,
+        level_sum: row.level_sum,
+        session_count: row.session_count,
+      })),
+    );
+    const levels = emptyDomainLevels();
+    for (const aggregate of aggregates) {
+      levels[aggregate.domain] = aggregate.level;
     }
+    domainLevelsByStudent.set(studentUuid, levels);
   }
 
   const latestAnalysisByStudent = new Map(
